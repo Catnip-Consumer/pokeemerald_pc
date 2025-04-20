@@ -48,7 +48,7 @@ void CpuSet(const void *src, void *dst, u32 cnt)
         puts("Attempted to CpuSet to NULL\n");
         return;
     }
-    
+
     int count = cnt & 0x1FFFFF;
 
     const u8 *source = src;
@@ -56,10 +56,10 @@ void CpuSet(const void *src, void *dst, u32 cnt)
 
     // 32-bit ?
     if ((cnt >> 26) & 1) {
-        
+
         //assert(((uintptr_t)src & ~3) == (uintptr_t)src);
         //assert(((uintptr_t)dst & ~3) == (uintptr_t)dst);
-        
+
         // needed for 32-bit mode!
         //source = (u8 *)((uint32_t )source & ~3);
         //dest = (u8 *)((uint32_t )dest & ~3);
@@ -113,12 +113,12 @@ void CpuFastSet(const void *src, void *dst, u32 cnt)
         puts("Attempted to CpuFastSet to NULL\n");
         return;
     }
-    
+
     int count = cnt & 0x1FFFFF;
 
     const u8 *source = src;
     u8 *dest = dst;
-    
+
     //source = (u8 *)((uint32_t )source & ~3);
     //dest = (u8 *)((uint32_t )dest & ~3);
 
@@ -150,7 +150,7 @@ void CpuFastSet(const void *src, void *dst, u32 cnt)
 
 void LZ77UnCompVram(const u32 *src_, void *dest_)
 {
-    const u8 *src = src_;
+    const u8 *src = (const u8 *) src_;
     u8 *dest = dest_;
     int destSize = (src[3] << 16) | (src[2] << 8) | src[1];
     int srcPos = 4;
@@ -200,7 +200,7 @@ fail:
 
 void LZ77UnCompWram(const u32 *src, void *dst)
 {
-    const uint8_t *source = src;
+    const uint8_t *source = (const uint8_t *) src;
     uint8_t *dest = dst;
 
     uint32_t header = CPUReadMemory(source);
