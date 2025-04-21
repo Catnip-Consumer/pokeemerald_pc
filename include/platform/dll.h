@@ -4,6 +4,7 @@
 #include "global.h"
 
 struct DLL_Platform {
+	bool8 HasAudio;
 	void (*VBlankIntrWait)(void);
 	void (*SoftReset)(u32);
 	u16 (*GetKeyInput)(void);

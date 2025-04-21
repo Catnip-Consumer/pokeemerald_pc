@@ -18,6 +18,15 @@ _DLL_ void Platform_Set(struct DLL_Platform *platform) {
 	gPlatform = platform;
 }
 
+bool8 Platform_HasAudio(void)
+{
+	if(gPlatform != NULL) {
+		return gPlatform->HasAudio;
+	}
+
+	return FALSE;
+}
+
 void Platform_StoreSaveFile(void)
 {
 	if(gPlatform != NULL) {

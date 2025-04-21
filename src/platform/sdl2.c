@@ -428,6 +428,7 @@ void SoftReset(u32 resetFlags)
 }
 
 static struct DLL_Platform dll_platform = {
+	.HasAudio = TRUE,
 	.VBlankIntrWait = VBlankIntrWait,
 	.SoftReset = SoftReset,
 	.GetKeyInput = Platform_GetKeyInput,

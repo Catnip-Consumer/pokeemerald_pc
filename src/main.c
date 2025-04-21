@@ -102,7 +102,11 @@ _DLL_ void AgbMain()
     REG_WAITCNT = WAITCNT_PREFETCH_ENABLE | WAITCNT_WS0_S_1 | WAITCNT_WS0_N_3;
     InitKeys();
     InitIntrHandlers();
-    m4aSoundInit();
+
+//	if(Platform_HasAudio()) {
+		m4aSoundInit();
+//	}
+
     EnableVCountIntrAtLine150();
 #ifndef PORTABLE
     InitRFU();
@@ -371,7 +375,10 @@ static void VBlankIntr(void)
 
     gPcmDmaCounter = gSoundInfo.pcmDmaCounter;
 
-    m4aSoundMain();
+	if(Platform_HasAudio()) {
+  		m4aSoundMain();
+	}
+
     TryReceiveLinkBattleData();
 
     if (!gMain.inBattle || !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_RECORDED)))
@@ -402,7 +409,9 @@ static void VCountIntr(void)
     if (gMain.vcountCallback)
         gMain.vcountCallback();
 
-    m4aSoundVSync();
+	if(Platform_HasAudio()) {
+		m4aSoundVSync();
+	}
     INTR_CHECK |= INTR_FLAG_VCOUNT;
     gMain.intrCheck |= INTR_FLAG_VCOUNT;
 }
@@ -444,7 +453,11 @@ void ClearTrainerHillVBlankCounter(void)
 _DLL_ void DoSoftReset(void)
 {
     REG_IME = 0;
-    m4aSoundVSyncOff();
+
+	if(Platform_HasAudio()) {
+		m4aSoundVSyncOff();
+	}
+
     ScanlineEffect_Stop();
     DmaStop(1);
     DmaStop(2);
