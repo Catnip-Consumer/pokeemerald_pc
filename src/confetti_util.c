@@ -1,6 +1,6 @@
 #include "global.h"
 #include "confetti_util.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "main.h"
 #include "digit_obj_util.h"
 

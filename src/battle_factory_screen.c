@@ -11,7 +11,7 @@
 #include "palette.h"
 #include "task.h"
 #include "main.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "bg.h"
 #include "gpu_regs.h"
 #include "string_util.h"

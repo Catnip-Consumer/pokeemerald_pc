@@ -1,5 +1,5 @@
 #include "global.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "bg.h"
 #include "event_data.h"
 #include "event_object_movement.h"

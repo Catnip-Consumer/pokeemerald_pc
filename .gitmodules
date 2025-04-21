@@ -1,0 +1,7 @@
+[submodule "extern/SDL2"]
+	path = extern/SDL2
+	url = https://github.com/libsdl-org/SDL
+	branch = release-2.32.x
+[submodule "extern/json"]
+	path = extern/json
+	url = https://github.com/nlohmann/json

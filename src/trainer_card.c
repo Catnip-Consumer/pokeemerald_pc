@@ -4,7 +4,7 @@
 #include "task.h"
 #include "main.h"
 #include "window.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "link.h"
 #include "bg.h"
 #include "sound.h"

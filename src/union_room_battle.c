@@ -6,7 +6,7 @@
 #include "bg.h"
 #include "palette.h"
 #include "gpu_regs.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "menu.h"
 #include "window.h"
 #include "text_window.h"

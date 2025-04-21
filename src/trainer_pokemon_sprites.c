@@ -1,7 +1,7 @@
 #include "global.h"
 #include "sprite.h"
 #include "window.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "palette.h"
 #include "decompress.h"
 #include "trainer_pokemon_sprites.h"

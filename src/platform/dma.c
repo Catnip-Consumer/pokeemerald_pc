@@ -16,7 +16,7 @@ struct DMATransfer {
     u16 control;
 } DMAList[DMA_COUNT];
 
-void RunDMAs(u32 type)
+_DLL_ void RunDMAs(u32 type)
 {
     for (int dmaNum = 0; dmaNum < DMA_COUNT; dmaNum++)
     {
@@ -26,7 +26,7 @@ void RunDMAs(u32 type)
         {
             dma->control &= ~DMA_ENABLE;
         }
-        
+
         if ( (dma->control & DMA_ENABLE) &&
            (((dma->control & DMA_START_MASK) >> 12) == type))
         {

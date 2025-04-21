@@ -1,5 +1,5 @@
 #include "global.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "berry_powder.h"
 #include "item.h"
 #include "load_save.h"

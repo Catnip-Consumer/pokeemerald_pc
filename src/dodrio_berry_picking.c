@@ -1,5 +1,5 @@
 #include "global.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "bg.h"
 #include "dodrio_berry_picking.h"
 #include "dynamic_placeholder_text_util.h"

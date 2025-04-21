@@ -14,7 +14,7 @@
 #include "link.h"
 #include "link_rfu.h"
 #include "main.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "math_util.h"
 #include "menu.h"
 #include "overworld.h"

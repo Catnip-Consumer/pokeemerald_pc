@@ -1,4 +1,3 @@
-#ifdef PLATFORM_SDL2
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -20,6 +19,7 @@
 #include "gba/flash_internal.h"
 #include "platform/dma.h"
 #include "platform/framedraw.h"
+#include "platform/dll.h"
 
 extern void (*const gIntrTable[])(void);
 
@@ -53,144 +53,7 @@ void VDraw(SDL_Texture *texture);
 static void ReadSaveFile(char *path);
 static void StoreSaveFile(void);
 static void CloseSaveFile(void);
-
 static void UpdateInternalClock(void);
-
-int main(int argc, char **argv)
-{
-    // Open an output console on Windows
-#ifdef _WIN32
-    AllocConsole() ;
-    AttachConsole( GetCurrentProcessId() ) ;
-    freopen( "CON", "w", stdout ) ;
-#endif
-
-    ReadSaveFile("pokeemerald.sav");
-
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
-    {
-        DBGPRINTF("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    sdlWindow = SDL_CreateWindow("pokeemerald", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DISPLAY_WIDTH * videoScale, DISPLAY_HEIGHT * videoScale, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    if (sdlWindow == NULL)
-    {
-        DBGPRINTF("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC);
-    if (sdlRenderer == NULL)
-    {
-        DBGPRINTF("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    SDL_SetRenderDrawColor(sdlRenderer, 255, 255, 255, 255);
-    SDL_RenderClear(sdlRenderer);
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-    SDL_RenderSetLogicalSize(sdlRenderer, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-
-    sdlTexture = SDL_CreateTexture(sdlRenderer,
-                                   SDL_PIXELFORMAT_ABGR1555,
-                                   SDL_TEXTUREACCESS_STREAMING,
-                                   DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    if (sdlTexture == NULL)
-    {
-        DBGPRINTF("Texture could not be created! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    simTime = curGameTime = lastGameTime = SDL_GetPerformanceCounter();
-
-    isFrameAvailable.value = 0;
-    vBlankSemaphore = SDL_CreateSemaphore(0);
-
-    SDL_AudioSpec want;
-
-    SDL_memset(&want, 0, sizeof(want)); /* or SDL_zero(want) */
-    want.freq = 42048;
-    want.format = AUDIO_F32;
-    want.channels = 2;
-    want.samples = 1024;
-    cgb_audio_init(want.freq);
-
-
-    if (SDL_OpenAudio(&want, 0) < 0)
-        SDL_Log("Failed to open audio: %s", SDL_GetError());
-    else
-    {
-        if (want.format != AUDIO_F32) /* we let this one thing change. */
-            SDL_Log("We didn't get Float32 audio format.");
-        SDL_PauseAudio(0);
-    }
-    
-    VDraw(sdlTexture);
-    mainLoopThread = SDL_CreateThread(DoMain, "AgbMain", NULL);
-
-    double accumulator = 0.0;
-
-    memset(&internalClock, 0, sizeof(internalClock));
-    internalClock.status = SIIRTCINFO_24HOUR;
-    UpdateInternalClock();
-
-    while (isRunning)
-    {
-        ProcessEvents();
-
-        if (!paused)
-        {
-            double dt = fixedTimestep / timeScale; // TODO: Fix speedup
-
-            curGameTime = SDL_GetPerformanceCounter();
-            double deltaTime = (double)((curGameTime - lastGameTime) / (double)SDL_GetPerformanceFrequency());
-            if (deltaTime > (dt * 5))
-                deltaTime = dt;
-            lastGameTime = curGameTime;
-
-            accumulator += deltaTime;
-
-            while (accumulator >= dt)
-            {
-                if (SDL_AtomicGet(&isFrameAvailable))
-                {
-                    VDraw(sdlTexture);
-                    SDL_RenderClear(sdlRenderer);
-                    SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
-                    SDL_AtomicSet(&isFrameAvailable, 0);
-
-                    REG_DISPSTAT |= INTR_FLAG_VBLANK;
-
-                    RunDMAs(DMA_HBLANK);
-
-                    if (REG_DISPSTAT & DISPSTAT_VBLANK_INTR)
-                        gIntrTable[4]();
-                    REG_DISPSTAT &= ~INTR_FLAG_VBLANK;
-
-                    SDL_SemPost(vBlankSemaphore);
-
-                    accumulator -= dt;
-                }
-            }
-        }
-
-        if (videoScaleChanged)
-        {
-            SDL_SetWindowSize(sdlWindow, DISPLAY_WIDTH * videoScale, DISPLAY_HEIGHT * videoScale);
-            videoScaleChanged = false;
-        }
-
-        SDL_RenderPresent(sdlRenderer);
-    }
-
-    //StoreSaveFile();
-    CloseSaveFile();
-
-    SDL_DestroyWindow(sdlWindow);
-    SDL_Quit();
-    return 0;
-}
 
 static void ReadSaveFile(char *path)
 {
@@ -363,7 +226,7 @@ void ProcessEvents(void)
             {
                 unsigned int w = event.window.data1;
                 unsigned int h = event.window.data2;
-                
+
                 videoScale = 0;
                 if (w / DISPLAY_WIDTH > videoScale)
                     videoScale = w / DISPLAY_WIDTH;
@@ -564,4 +427,156 @@ void SoftReset(u32 resetFlags)
     exit(0);
 }
 
+static struct DLL_Platform dll_platform = {
+	.VBlankIntrWait = VBlankIntrWait,
+	.SoftReset = SoftReset,
+	.GetKeyInput = Platform_GetKeyInput,
+	.StoreSaveFile = StoreSaveFile,
+	.ReadFlash = Platform_ReadFlash,
+	.QueueAudio = Platform_QueueAudio,
+	.GetStatus = Platform_GetStatus,
+	.SetStatus = Platform_SetStatus,
+	.GetDateTime = Platform_GetDateTime,
+	.SetDateTime = Platform_SetDateTime,
+	.GetTime = Platform_GetTime,
+	.SetTime = Platform_SetTime,
+	.SetAlarm = Platform_SetAlarm
+};
+
+int main(int argc, char **argv)
+{
+	Platform_Set(&dll_platform);
+
+    // Open an output console on Windows
+#ifdef _WIN32
+    AllocConsole() ;
+    AttachConsole( GetCurrentProcessId() ) ;
+    freopen( "CON", "w", stdout ) ;
 #endif
+
+    ReadSaveFile("pokeemerald.sav");
+
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+    {
+        DBGPRINTF("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    sdlWindow = SDL_CreateWindow("pokeemerald", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DISPLAY_WIDTH * videoScale, DISPLAY_HEIGHT * videoScale, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    if (sdlWindow == NULL)
+    {
+        DBGPRINTF("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC);
+    if (sdlRenderer == NULL)
+    {
+        DBGPRINTF("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    SDL_SetRenderDrawColor(sdlRenderer, 255, 255, 255, 255);
+    SDL_RenderClear(sdlRenderer);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+    SDL_RenderSetLogicalSize(sdlRenderer, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
+    sdlTexture = SDL_CreateTexture(sdlRenderer,
+                                   SDL_PIXELFORMAT_ABGR1555,
+                                   SDL_TEXTUREACCESS_STREAMING,
+                                   DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    if (sdlTexture == NULL)
+    {
+        DBGPRINTF("Texture could not be created! SDL_Error: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    simTime = curGameTime = lastGameTime = SDL_GetPerformanceCounter();
+
+    isFrameAvailable.value = 0;
+    vBlankSemaphore = SDL_CreateSemaphore(0);
+
+    SDL_AudioSpec want;
+
+    SDL_memset(&want, 0, sizeof(want)); /* or SDL_zero(want) */
+    want.freq = 42048;
+    want.format = AUDIO_F32;
+    want.channels = 2;
+    want.samples = 1024;
+    cgb_audio_init(want.freq);
+
+
+    if (SDL_OpenAudio(&want, 0) < 0)
+        SDL_Log("Failed to open audio: %s", SDL_GetError());
+    else
+    {
+        if (want.format != AUDIO_F32) /* we let this one thing change. */
+            SDL_Log("We didn't get Float32 audio format.");
+        SDL_PauseAudio(0);
+    }
+
+    VDraw(sdlTexture);
+    mainLoopThread = SDL_CreateThread(DoMain, "AgbMain", NULL);
+
+    double accumulator = 0.0;
+
+    memset(&internalClock, 0, sizeof(internalClock));
+    internalClock.status = SIIRTCINFO_24HOUR;
+    UpdateInternalClock();
+
+    while (isRunning)
+    {
+        ProcessEvents();
+
+        if (!paused)
+        {
+            double dt = fixedTimestep / timeScale; // TODO: Fix speedup
+
+            curGameTime = SDL_GetPerformanceCounter();
+            double deltaTime = (double)((curGameTime - lastGameTime) / (double)SDL_GetPerformanceFrequency());
+            if (deltaTime > (dt * 5))
+                deltaTime = dt;
+            lastGameTime = curGameTime;
+
+            accumulator += deltaTime;
+
+            while (accumulator >= dt)
+            {
+                if (SDL_AtomicGet(&isFrameAvailable))
+                {
+                    VDraw(sdlTexture);
+                    SDL_RenderClear(sdlRenderer);
+                    SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
+                    SDL_AtomicSet(&isFrameAvailable, 0);
+
+                    REG_DISPSTAT |= INTR_FLAG_VBLANK;
+
+                    RunDMAs(DMA_HBLANK);
+
+                    if (REG_DISPSTAT & DISPSTAT_VBLANK_INTR)
+                        gIntrTable[4]();
+                    REG_DISPSTAT &= ~INTR_FLAG_VBLANK;
+
+                    SDL_SemPost(vBlankSemaphore);
+
+                    accumulator -= dt;
+                }
+            }
+        }
+
+        if (videoScaleChanged)
+        {
+            SDL_SetWindowSize(sdlWindow, DISPLAY_WIDTH * videoScale, DISPLAY_HEIGHT * videoScale);
+            videoScaleChanged = false;
+        }
+
+        SDL_RenderPresent(sdlRenderer);
+    }
+
+    //StoreSaveFile();
+    CloseSaveFile();
+
+    SDL_DestroyWindow(sdlWindow);
+    SDL_Quit();
+    return 0;
+}

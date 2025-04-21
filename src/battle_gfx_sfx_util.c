@@ -7,7 +7,7 @@
 #include "battle_interface.h"
 #include "main.h"
 #include "dma3.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "graphics.h"
 #include "random.h"
 #include "util.h"

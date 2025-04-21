@@ -5,7 +5,7 @@
 #include "task.h"
 #include "title_screen.h"
 #include "libgcnmultiboot.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "gpu_regs.h"
 #include "link.h"
 #include "multiboot_pokemon_colosseum.h"

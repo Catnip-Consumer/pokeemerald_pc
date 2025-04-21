@@ -9,7 +9,7 @@
 #include "event_data.h"
 #include "overworld.h"
 #include "util.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "string_util.h"
 #include "random.h"
 #include "task.h"

@@ -1,4 +1,3 @@
-#ifdef PLATFORM_WIN32
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -23,7 +22,7 @@
 #include "platform/dma.h"
 #include "platform/framedraw.h"
 
-extern void (*const gIntrTable[])(void);
+_DLL_ extern void (*const gIntrTable[])(void);
 
 HANDLE vBlankSemaphore;
 bool isFrameAvailable;
@@ -45,8 +44,8 @@ bool bitBltEnabled = true;
 
 static HANDLE sSaveFile = NULL;
 
-extern void AgbMain(void);
-extern void DoSoftReset(void);
+extern _DLL_ void AgbMain(void);
+extern _DLL_ void DoSoftReset(void);
 
 DWORD WINAPI DoMain(LPVOID lpParam);
 void VDraw();
@@ -118,7 +117,7 @@ void AddMenus(HWND hwnd) {
     AppendMenuA(hMenu, MF_STRING, IDM_RESETGAME, IDM_RESETGAMETEXT);
     AppendMenuA(hMenu, MF_STRING, IDM_PAUSEGAME, IDM_PAUSEGAMETEXT);
     AppendMenuA(hMenu, MF_STRING, IDM_TOGGLEBITBLT, IDM_TOGGLEBITBLTTEXT);
-    
+
     AppendMenuA(hMenuFps, MF_STRING, IDM_60FPS, IDM_60FPSTEXT);
     AppendMenuA(hMenuFps, MF_STRING, IDM_30FPS, IDM_30FPSTEXT);
     AppendMenuA(hMenuFps, MF_STRING, IDM_20FPS, IDM_20FPSTEXT);
@@ -185,7 +184,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case VK_SHIFT:
                 keys |= SELECT_BUTTON;
                 break;
-            
+
         }
         break;
     case WM_KEYUP:
@@ -224,8 +223,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
         case WM_COMMAND:
-        
-        switch(LOWORD(wParam)) 
+
+        switch(LOWORD(wParam))
         {
         case IDM_SPEEDUPTOGGLE:
             if (!speedUp)
@@ -285,7 +284,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
-        
+
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
@@ -295,7 +294,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASS wcex;
-    
+
     memset(&wcex, 0, sizeof(WNDCLASS));
 
     wcex.style          = CS_HREDRAW | CS_VREDRAW;
@@ -316,7 +315,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     RECT winSize = {0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT};
 
     hInst = hInstance; // Store instance handle in our global variable
-    
+
     AdjustWindowRectEx(&winSize, WS_OVERLAPPEDWINDOW, TRUE, WS_EX_OVERLAPPEDWINDOW);
 
     ghwnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW, szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
@@ -350,7 +349,7 @@ void win32CreateBitmap()
     bmi.bmiHeader.biCompression = BI_RGB;
 
     HBITMAP hbm = CreateDIBSection(hdc_bmp, &bmi, DIB_RGB_COLORS, (void**)&lpBitmapBits, NULL, NULL);
-    HGDIOBJ oldbmp = SelectObject(hdc_bmp, hbm); 
+    HGDIOBJ oldbmp = SelectObject(hdc_bmp, hbm);
 }
 
 //for fps counter, does not handle negative numbers
@@ -404,26 +403,26 @@ int main(int argc, char **argv)
     window_hdc = GetDC(ghwnd);
     win32CreateBitmap();
     DBGPRINTF("Bitmap Init done!\n");
-    
+
     //todo: convert these to int64
     QueryPerformanceCounter(&largeint);
     simTime = curGameTime = lastGameTime = largeint.QuadPart;
 
     isFrameAvailable = 0;
-    vBlankSemaphore = CreateEvent(NULL, TRUE, FALSE, TEXT("vBlankEvent")); 
-    if (vBlankSemaphore == NULL) 
+    vBlankSemaphore = CreateEvent(NULL, TRUE, FALSE, TEXT("vBlankEvent"));
+    if (vBlankSemaphore == NULL)
     {
         DBGPRINTF("Could not create a event!\n");
         return 1;
     }
-    
+
     DBGPRINTF("Event Init done!\n");
 
     cgb_audio_init(42048);
     DBGPRINTF("cgb_audio_init Init done!\n");
-    
+
     VDraw();
-    int ThreadID;
+    DWORD ThreadID;
     CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)DoMain, (LPVOID)&nCmdShow, 0, &ThreadID);
     DBGPRINTF("Thread Init done!\n");
 
@@ -432,9 +431,9 @@ int main(int argc, char **argv)
     memset(&internalClock, 0, sizeof(internalClock));
     internalClock.status = SIIRTCINFO_24HOUR;
     UpdateInternalClock();
-    
+
     DBGPRINTF("Clock init done!\n");
-    
+
     unsigned int fpsseconds = GetTickCount()+1000;
     while (isRunning)
     {
@@ -508,7 +507,7 @@ int main(int argc, char **argv)
 
 static void ReadSaveFile(char *path)
 {
-    int bytesRead;
+    DWORD bytesRead;
     // Check whether the saveFile exists, and create it if not
     sSaveFile = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (sSaveFile == INVALID_HANDLE_VALUE)
@@ -525,10 +524,10 @@ static void ReadSaveFile(char *path)
     int bytesToRead = (fileSize < sizeof(FLASH_BASE)) ? fileSize : sizeof(FLASH_BASE);
 
     ReadFile(sSaveFile, &FLASH_BASE, bytesToRead, &bytesRead, NULL);
-    
+
 
     // Fill the buffer if the savefile was just created or smaller than the buffer itself
-    for (int i = bytesRead; i < sizeof(FLASH_BASE); i++)
+    for (DWORD i = bytesRead; i < sizeof(FLASH_BASE); i++)
     {
         FLASH_BASE[i] = 0xFF;
     }
@@ -538,7 +537,7 @@ static void ReadSaveFile(char *path)
 static void StoreSaveFile()
 {
     DWORD bytesRead;
-    sSaveFile = CreateFileA(savePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); 
+    sSaveFile = CreateFileA(savePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (sSaveFile != NULL || sSaveFile != INVALID_HANDLE_VALUE)
     {
         SetFilePointer(sSaveFile, 0, 0, FILE_BEGIN);
@@ -554,23 +553,23 @@ void Platform_StoreSaveFile(void)
 
 void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
 {
-    int bytesRead;
+    DWORD bytesRead;
     DBGPRINTF("ReadFlash(sectorNum=0x%04X,offset=0x%08X,size=0x%02X)\n",sectorNum,offset,size);
-    HANDLE savefile = CreateFileA(savePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); 
+    HANDLE savefile = CreateFileA(savePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (savefile == INVALID_HANDLE_VALUE)
     {
-        DBGPRINTF("Error opening save file (GetLastError %u).\n", GetLastError());
+        DBGPRINTF("Error opening save file (GetLastError %lu).\n", GetLastError());
         return;
     }
     if (SetFilePointer(savefile, (sectorNum << gFlash->sector.shift) + offset, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
     {
-        DBGPRINTF("SetFilePointer failed! (offset=%x) (GetLastError %u)\n", (sectorNum << gFlash->sector.shift), GetLastError());
+        DBGPRINTF("SetFilePointer failed! (offset=%x) (GetLastError %lu)\n", (sectorNum << gFlash->sector.shift), GetLastError());
         CloseHandle(savefile);
         return;
     }
     if (!ReadFile(savefile, dest, size, &bytesRead, NULL))
     {
-        DBGPRINTF("ReadFile failed! (GetLastError %u)\n", GetLastError());
+        DBGPRINTF("ReadFile failed! (GetLastError %lu)\n", GetLastError());
         CloseHandle(savefile);
         return;
     }
@@ -671,7 +670,7 @@ void VDraw()
             *bitmap32 = ((color32 & 0x1F001F) << 10) | (color32 & 0x83E083E0) | ((color32 & 0x7C007C00) >> 10);
             bitmap32++;
         }
-        
+
         if (bitBltEnabled)
         {
             BitBlt(window_hdc, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, hdc_bmp, 0, 0, SRCCOPY);
@@ -682,7 +681,7 @@ void VDraw()
     frameskipCounter++;
     if (frameskipCounter == frameSkipSet)
         frameskipCounter = 0;
-    
+
     REG_VCOUNT = 161; // prep for being in VBlank period
 }
 
@@ -795,5 +794,3 @@ void SoftReset(u32 resetFlags)
     puts("Soft Reset called. Exiting.");
     ExitProcess(0);
 }
-
-#endif

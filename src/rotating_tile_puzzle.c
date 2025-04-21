@@ -1,7 +1,7 @@
 #include "global.h"
 #include "event_object_movement.h"
 #include "fieldmap.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "rotating_tile_puzzle.h"
 #include "script_movement.h"
 #include "constants/event_object_movement.h"

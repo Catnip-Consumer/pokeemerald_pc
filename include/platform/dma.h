@@ -12,5 +12,5 @@ enum {
     DMA_SPECIAL
 };
 
-void RunDMAs(u32 type);
+_DLL_ void RunDMAs(u32 type);
 #endif

@@ -1,6 +1,6 @@
 #include "global.h"
 #include "m4a.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "reload_save.h"
 #include "save.h"
 #include "bg.h"

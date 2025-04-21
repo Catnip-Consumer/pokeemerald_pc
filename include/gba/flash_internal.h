@@ -4,7 +4,7 @@
 #ifndef PORTABLE
 #define FLASH_BASE ((u8 *)0xE000000)
 #else
-extern unsigned char FLASH_BASE[131072];
+_DLL_ extern unsigned char FLASH_BASE[131072];
 #endif
 
 #define FLASH_WRITE(addr, data) ((*(vu8 *)(FLASH_BASE + (addr))) = (data))
@@ -57,7 +57,7 @@ extern u16 (*EraseFlashChip)(void);
 extern u16 (*EraseFlashSector)(u16);
 extern u16 (*WaitForFlashWrite)(u8, u8 *, u8);
 extern const u16 *gFlashMaxTime;
-extern const struct FlashType *gFlash;
+_DLL_ extern const struct FlashType *gFlash;
 
 extern u8 (*PollFlashStatus)(u8 *);
 extern u8 gFlashTimeoutFlag;

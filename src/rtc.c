@@ -43,7 +43,7 @@ void RtcRestoreInterrupts(void)
     REG_IME = sSavedIme;
 }
 
-u32 ConvertBcdToBinary(u8 bcd)
+_DLL_ u32 ConvertBcdToBinary(u8 bcd)
 {
     if (bcd > 0x9F)
         return 0xFF;

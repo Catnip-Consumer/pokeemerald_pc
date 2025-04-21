@@ -9,7 +9,7 @@
 #include "gpu_regs.h"
 #include "move_relearner.h"
 #include "list_menu.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "menu.h"
 #include "menu_helpers.h"
 #include "menu_specialized.h"

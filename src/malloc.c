@@ -1,5 +1,5 @@
 #include "global.h"
-#include "malloc.h"
+#include "malloc_.h"
 
 static void *sHeapStart;
 static u32 sHeapSize;

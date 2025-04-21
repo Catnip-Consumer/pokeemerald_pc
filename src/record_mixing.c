@@ -1,5 +1,5 @@
 #include "global.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "random.h"
 #include "constants/items.h"
 #include "text.h"

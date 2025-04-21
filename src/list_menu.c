@@ -8,7 +8,7 @@
 #include "trig.h"
 #include "decompress.h"
 #include "palette.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "strings.h"
 #include "sound.h"
 #include "constants/songs.h"

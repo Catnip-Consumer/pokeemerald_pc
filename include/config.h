@@ -55,4 +55,15 @@
 #endif
 #endif
 
+// DLL support
+#ifdef _WIN32
+	#ifdef IS_DLL
+		#define _DLL_ __declspec(dllexport)
+	#else
+		#define _DLL_ __declspec(dllimport)
+	#endif
+#else
+	#define _DLL_
+#endif
+
 #endif // GUARD_CONFIG_H

@@ -1,5 +1,5 @@
 #include "global.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "decompress.h"
 #include "bg.h"
 #include "palette.h"

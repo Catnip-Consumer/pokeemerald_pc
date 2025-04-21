@@ -1,5 +1,5 @@
 // jsonproc.cpp
-// jsonproc converts JSON data to an output file based on an Inja template. 
+// jsonproc converts JSON data to an output file based on an Inja template.
 // https://github.com/pantor/inja
 
 #include "jsonproc.h"
@@ -12,7 +12,7 @@ using std::string; using std::to_string;
 #include <algorithm>
 using std::replace_if;
 
-#include <inja.hpp>
+#include "inja.hpp"
 using namespace inja;
 using json = nlohmann::json;
 

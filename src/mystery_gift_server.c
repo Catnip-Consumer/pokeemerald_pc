@@ -1,5 +1,5 @@
 #include "global.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "script.h"
 #include "mystery_gift.h"
 #include "mystery_gift_server.h"

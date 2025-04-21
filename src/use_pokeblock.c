@@ -2,7 +2,7 @@
 #include "main.h"
 #include "dma3.h"
 #include "pokeblock.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "decompress.h"
 #include "graphics.h"
 #include "palette.h"

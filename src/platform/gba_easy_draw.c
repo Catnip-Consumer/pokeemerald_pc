@@ -1,4 +1,3 @@
-#ifdef RENDERER_EASY_DRAW
 #include "global.h"
 #include <stdbool.h>
 #include "platform/dma.h"
@@ -64,7 +63,7 @@ static void RenderBGScanline(int bgNum, uint16_t control, uint16_t hoffs, uint16
 
     uint8_t *bgtiles = (uint8_t *)BG_CHAR_ADDR(charBaseBlock);
     uint16_t *pal = (uint16_t *)PLTT;
-     
+
     if (control & BGCNT_MOSAIC)
         lineNum = applyBGVerticalMosaicEffect(lineNum);
 
@@ -80,19 +79,19 @@ static void RenderBGScanline(int bgNum, uint16_t control, uint16_t hoffs, uint16
             xx = (applyBGHorizontalMosaicEffect(x) + hoffs) & 0x1FF;
         else
             xx = (x + hoffs) & 0x1FF;
-        
+
         unsigned int yy = (lineNum + voffs) & 0x1FF;
-        
+
         //if x or y go above 255 pixels it goes to the next screen base which are 0x400 WORDs long
         if (xx > 255 && mapWidthInPixels > 256) {
             bgmap += 0x400;
         }
-        
+
         if (yy > 255 && mapHeightInPixels > 256) {
             //the width check is for 512x512 mode support, it jumps by two screen bases instead
             bgmap += (mapWidthInPixels > 256) ? 0x800 : 0x400;
         }
-        
+
         //maximum width for bgtile block is 256
         xx &= 0xFF;
         yy &= 0xFF;
@@ -103,7 +102,7 @@ static void RenderBGScanline(int bgNum, uint16_t control, uint16_t hoffs, uint16
 
         unsigned int tileNum = entry & 0x3FF;
         unsigned int paletteNum = (entry >> 12) & 0xF;
-        
+
         unsigned int tileX = xx % 8;
         unsigned int tileY = yy % 8;
 
@@ -221,7 +220,7 @@ static void RenderRotScaleBGScanline(int bgNum, uint16_t control, uint16_t x, ui
 
     if (control & BGCNT_MOSAIC)
         lineNum = applyBGVerticalMosaicEffect(lineNum);
-    
+
 
     s16 pa = getBgPA(bgNum);
     s16 pb = getBgPB(bgNum);
@@ -326,7 +325,7 @@ static void RenderRotScaleBGScanline(int bgNum, uint16_t control, uint16_t x, ui
             realY += pc;
         }
     }
-    //the only way i could figure out how to get accurate mosaic on affine bgs 
+    //the only way i could figure out how to get accurate mosaic on affine bgs
     //luckily i dont think pokemon emerald uses mosaic on affine bgs
     if (control & BGCNT_MOSAIC && mosaicBGEffectX > 0)
     {
@@ -334,7 +333,7 @@ static void RenderRotScaleBGScanline(int bgNum, uint16_t control, uint16_t x, ui
         {
             uint16_t color = line[applyBGHorizontalMosaicEffect(x)];
             line[x] = color;
-            
+
         }
     }
 }
@@ -355,7 +354,7 @@ static uint16_t alphaBlendColor(uint16_t targetA, uint16_t targetB)
     unsigned int r = ((getRedChannel(targetA) * eva) + (getRedChannel(targetB) * evb)) >> 4;
     unsigned int g = ((getGreenChannel(targetA) * eva) + (getGreenChannel(targetB) * evb)) >> 4;
     unsigned int b = ((getBlueChannel(targetA) * eva) + (getBlueChannel(targetB) * evb)) >> 4;
-    
+
     if (r > 31)
         r = 31;
     if (g > 31)
@@ -372,14 +371,14 @@ static uint16_t alphaBrightnessIncrease(uint16_t targetA)
     unsigned int r = getRedChannel(targetA) + (31 - getRedChannel(targetA)) * evy / 16;
     unsigned int g = getGreenChannel(targetA) + (31 - getGreenChannel(targetA)) * evy / 16;
     unsigned int b = getBlueChannel(targetA) + (31 - getBlueChannel(targetA)) * evy / 16;
-    
+
     if (r > 31)
         r = 31;
     if (g > 31)
         g = 31;
     if (b > 31)
         b = 31;
-    
+
      return r | (g << 5) | (b << 10) | (1 << 15);
 }
 
@@ -389,20 +388,20 @@ static uint16_t alphaBrightnessDecrease(uint16_t targetA)
     unsigned int r = getRedChannel(targetA) - getRedChannel(targetA) * evy / 16;
     unsigned int g = getGreenChannel(targetA) - getGreenChannel(targetA) * evy / 16;
     unsigned int b = getBlueChannel(targetA) - getBlueChannel(targetA) * evy / 16;
-    
+
     if (r > 31)
         r = 31;
     if (g > 31)
         g = 31;
     if (b > 31)
         b = 31;
-    
+
      return r | (g << 5) | (b << 10) | (1 << 15);
 }
 
 //outputs the blended pixel in colorOutput, the prxxx are the bg priority and subpriority, pixelpos is pixel offset in scanline
 static bool alphaBlendSelectTargetB(struct scanlineData* scanline, uint16_t* colorOutput, char prnum, char prsub, int pixelpos, bool spriteBlendEnabled)
-{   
+{
     //iterate trough every possible bg to blend with, starting from specified priorities from arguments
     for (unsigned int blndprnum = prnum; blndprnum <= 3; blndprnum++)
     {
@@ -412,7 +411,7 @@ static bool alphaBlendSelectTargetB(struct scanlineData* scanline, uint16_t* col
             *colorOutput = scanline->spriteLayers[blndprnum][pixelpos];
             return true;
         }
-            
+
         for (unsigned int blndprsub = prsub; blndprsub < scanline->prioritySortedBgsCount[blndprnum]; blndprsub++)
         {
             char currLayer = scanline->prioritySortedBgs[blndprnum][blndprsub];
@@ -623,7 +622,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
                 if (pixel != 0)
                 {
                     uint16_t color = palette[pixel];;
-                    
+
                     //if sprite mode is 2 then write to the window mask instead
                     if (isObjWin)
                     {
@@ -636,7 +635,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
                     {
                         //check if its enabled in the window (if window is enabled)
                         winShouldBlendPixel = (windowsEnabled == false || scanline->winMask[global_x] & WINMASK_CLR);
-                        
+
                         //has to be separated from the blend mode switch statement because of OBJ semi transparancy feature
                         if ((blendMode == 1 && REG_BLDCNT & BLDCNT_TGT1_OBJ && winShouldBlendPixel) || isSemiTransparent)
                         {
@@ -659,7 +658,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
                                 break;
                             }
                         }
-                        
+
                         //write pixel to pixel framebuffer
                         pixels[global_x] = color | (1 << 15);
                     }
@@ -691,12 +690,12 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         uint16_t priority;
         scanline.bgcnts[bgnum] = bgcnt;
         scanline.bgtoprio[bgnum] = priority = (bgcnt & 3);
-        
+
         char priorityCount = scanline.prioritySortedBgsCount[priority];
         scanline.prioritySortedBgs[priority][priorityCount] = bgnum;
         scanline.prioritySortedBgsCount[priority]++;
     }
-    
+
     switch (mode)
     {
     case 0:
@@ -707,11 +706,11 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
             {
                 uint16_t bghoffs = *(uint16_t *)(REG_ADDR_BG0HOFS + bgnum * 4);
                 uint16_t bgvoffs = *(uint16_t *)(REG_ADDR_BG0VOFS + bgnum * 4);
-                
+
                 RenderBGScanline(bgnum, scanline.bgcnts[bgnum], bghoffs, bgvoffs, vcount, scanline.layers[bgnum]);
             }
         }
-        
+
         break;
     case 1:
         // BG2 is affine
@@ -727,7 +726,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
             {
                 uint16_t bghoffs = *(uint16_t *)(REG_ADDR_BG0HOFS + bgnum * 4);
                 uint16_t bgvoffs = *(uint16_t *)(REG_ADDR_BG0VOFS + bgnum * 4);
-                
+
                 RenderBGScanline(bgnum, scanline.bgcnts[bgnum], bghoffs, bgvoffs, vcount, scanline.layers[bgnum]);
             }
         }
@@ -736,7 +735,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         DBGPRINTF("Video mode %u is unsupported.\n", mode);
         break;
     }
-    
+
     bool windowsEnabled = false;
     uint16_t WIN0bottom, WIN0top, WIN0right, WIN0left;
     uint16_t WIN1bottom, WIN1top, WIN1right, WIN1left;
@@ -752,7 +751,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         WIN0top = (REG_WIN0V & 0xFF00) >> 8; //y1;
         WIN0right = (REG_WIN0H & 0xFF); //x2
         WIN0left = (REG_WIN0H & 0xFF00) >> 8; //x1
-        
+
         //figure out WIN Y wraparound and check bounds accordingly
         if (WIN0top > WIN0bottom) {
             if (vcount >= WIN0top || vcount < WIN0bottom)
@@ -761,7 +760,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
             if (vcount >= WIN0top && vcount < WIN0bottom)
                 WIN0enable = true;
         }
-        
+
         windowsEnabled = true;
     }
     //figure out if WIN1 masks on this scanline
@@ -771,7 +770,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         WIN1top = (REG_WIN0V & 0xFF00) >> 8; //y1;
         WIN1right = (REG_WIN0H & 0xFF); //x2
         WIN1left = (REG_WIN0H & 0xFF00) >> 8; //x1
-        
+
         if (WIN1top > WIN1bottom) {
             if (vcount >= WIN1top || vcount < WIN1bottom)
                 WIN1enable = true;
@@ -779,7 +778,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
             if (vcount >= WIN1top && vcount < WIN1bottom)
                 WIN1enable = true;
         }
-        
+
         windowsEnabled = true;
     }
     //enable windows if OBJwin is enabled
@@ -787,7 +786,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
     {
         windowsEnabled = true;
     }
-    
+
     //draw to pixel mask
     if (windowsEnabled)
     {
@@ -817,15 +816,15 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
             if (isbgEnabled(bgnum))
             {
                 uint16_t *src = scanline.layers[bgnum];
-                //copy all pixels to framebuffer 
+                //copy all pixels to framebuffer
                 for (xpos = 0; xpos < DISPLAY_WIDTH; xpos++)
                 {
                     uint16_t color = src[xpos];
                     bool winEffectEnable = true;
-                    
+
                     if (!getAlphaBit(color))
                         continue; //do nothing if alpha bit is not set
-                    
+
                     if (windowsEnabled)
                     {
                         winEffectEnable = ((scanline.winMask[xpos] & WINMASK_CLR) >> 5);
@@ -833,14 +832,14 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
                         if ( !(scanline.winMask[xpos] & 1 << bgnum) )
                             continue;
                     }
-                    
+
                     //blending code
                     if (blendMode != 0 && REG_BLDCNT & (1 << bgnum) && winEffectEnable)
                     {
                         uint16_t targetA = color;
                         uint16_t targetB = 0;
                         char isSpriteBlendingEnabled;
-                        
+
                         switch (blendMode)
                         {
                         case 1:
@@ -922,11 +921,11 @@ void DrawFrame(uint16_t *pixels)
 
         memsetu16(&pixels[i * DISPLAY_WIDTH], backdropColor, DISPLAY_WIDTH);
         DrawScanline(&pixels[i * DISPLAY_WIDTH], i);
-        
+
         REG_DISPSTAT |= INTR_FLAG_HBLANK;
 
         RunDMAs(DMA_HBLANK);
-        
+
         if (REG_DISPSTAT & DISPSTAT_HBLANK_INTR)
             gIntrTable[3]();
 
@@ -934,4 +933,3 @@ void DrawFrame(uint16_t *pixels)
         REG_DISPSTAT &= ~INTR_FLAG_VCOUNT;
     }
 }
-#endif

@@ -23,7 +23,7 @@ struct AudioCGB{
     __attribute__((aligned(4))) float outBuffer[MIXED_AUDIO_BUFFER_SIZE * 2];
 };
 
-void cgb_audio_init(u32 rate);
+_DLL_ void cgb_audio_init(u32 rate);
 void cgb_set_sweep(u8 sweep);
 void cgb_set_wavram();
 void cgb_toggle_length(u8 channel, bool8 state);
@@ -31,6 +31,6 @@ void cgb_set_length(u8 channel, u8 length);
 void cgb_set_envelope(u8 channel, u8 envelope);
 void cgb_trigger_note(u8 channel);
 void cgb_audio_generate(u16 samplesPerFrame);
-float *cgb_get_buffer();
+_DLL_ float *cgb_get_buffer();
 
 #endif

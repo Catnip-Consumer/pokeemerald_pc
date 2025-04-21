@@ -1,5 +1,5 @@
 #include "global.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "battle_anim.h"
 #include "battle_interface.h"
 #include "decompress.h"

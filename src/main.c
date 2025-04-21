@@ -1,6 +1,6 @@
 #include "global.h"
 #include "crt0.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "link.h"
 #include "link_rfu.h"
 #include "librfu.h"
@@ -68,7 +68,7 @@ bool8 gLinkTransferringData;
 struct Main gMain;
 u16 gKeyRepeatContinueDelay;
 bool8 gSoftResetDisabled;
-IntrFunc gIntrTable[INTR_COUNT];
+_DLL_ IntrFunc gIntrTable[INTR_COUNT];
 u8 gLinkVSyncDisabled;
 u32 IntrMain_Buffer[0x200];
 s8 gPcmDmaCounter;
@@ -90,7 +90,7 @@ void EnableVCountIntrAtLine150(void);
 
 #define B_START_SELECT (B_BUTTON | START_BUTTON | SELECT_BUTTON)
 
-void AgbMain()
+_DLL_ void AgbMain()
 {
     // Modern compilers are liberal with the stack on entry to this function,
     // so RegisterRamReset may crash if it resets IWRAM.
@@ -441,7 +441,7 @@ void ClearTrainerHillVBlankCounter(void)
     gTrainerHillVBlankCounter = NULL;
 }
 
-void DoSoftReset(void)
+_DLL_ void DoSoftReset(void)
 {
     REG_IME = 0;
     m4aSoundVSyncOff();

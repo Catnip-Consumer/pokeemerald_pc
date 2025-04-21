@@ -2,7 +2,7 @@
 #include "main.h"
 #include "menu.h"
 #include "bg.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "palette.h"
 #include "pokedex_area_region_map.h"
 

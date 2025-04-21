@@ -23,7 +23,7 @@
 #include "main.h"
 #include "load_save.h"
 #include "script.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "overworld.h"
 #include "event_scripts.h"
 #include "graphics.h"

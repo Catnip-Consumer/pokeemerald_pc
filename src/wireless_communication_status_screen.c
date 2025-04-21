@@ -3,7 +3,7 @@
 #include "bg.h"
 #include "palette.h"
 #include "gpu_regs.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "scanline_effect.h"
 #include "m4a.h"
 #include "dynamic_placeholder_text_util.h"

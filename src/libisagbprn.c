@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "gba/gba.h"
 #include "config.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "mini_printf.h"
 
 #define AGB_PRINT_FLUSH_ADDR 0x9FE209D

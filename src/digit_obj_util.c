@@ -1,6 +1,6 @@
 #include "global.h"
 #include "digit_obj_util.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "decompress.h"
 #include "main.h"
 #include "battle_main.h"

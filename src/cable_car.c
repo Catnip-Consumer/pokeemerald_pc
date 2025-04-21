@@ -6,7 +6,7 @@
 #include "field_weather.h"
 #include "gpu_regs.h"
 #include "graphics.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "main.h"
 #include "menu.h"
 #include "overworld.h"

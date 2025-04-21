@@ -2,7 +2,7 @@
 #include "main.h"
 #include "text.h"
 #include "task.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "gpu_regs.h"
 #include "scanline_effect.h"
 #include "text_window.h"

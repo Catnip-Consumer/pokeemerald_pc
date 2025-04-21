@@ -1,6 +1,6 @@
 #include "global.h"
 #include "naming_screen.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "palette.h"
 #include "task.h"
 #include "sprite.h"

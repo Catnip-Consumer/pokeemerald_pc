@@ -13,7 +13,7 @@
 #include "util.h"
 #include "text.h"
 #include "menu.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "bg.h"
 #include "gpu_regs.h"
 #include "coins.h"

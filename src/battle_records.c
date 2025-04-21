@@ -18,7 +18,7 @@
 #include "international_string_util.h"
 #include "sound.h"
 #include "constants/songs.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "gpu_regs.h"
 #include "constants/game_stat.h"
 #include "trainer_hill.h"

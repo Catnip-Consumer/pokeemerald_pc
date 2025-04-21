@@ -4,11 +4,11 @@
 //memory defines here because there's no better spot for them
 u16 INTR_CHECK;
 void *INTR_VECTOR;
-unsigned char REG_BASE[0x400] __attribute__ ((aligned (4)));
-unsigned char PLTT[PLTT_SIZE] __attribute__ ((aligned (4)));
-unsigned char VRAM_[VRAM_SIZE] __attribute__ ((aligned (4)));
-unsigned char OAM[OAM_SIZE] __attribute__ ((aligned (4)));
-unsigned char FLASH_BASE[131072] __attribute__ ((aligned (4)));
+_DLL_ unsigned char REG_BASE[0x400] __attribute__ ((aligned (4)));
+_DLL_ unsigned char PLTT[PLTT_SIZE] __attribute__ ((aligned (4)));
+_DLL_ unsigned char VRAM_[VRAM_SIZE] __attribute__ ((aligned (4)));
+_DLL_ unsigned char OAM[OAM_SIZE] __attribute__ ((aligned (4)));
+_DLL_ unsigned char FLASH_BASE[131072] __attribute__ ((aligned (4)));
 struct SoundInfo *SOUND_INFO_PTR;
 
 static uint32_t CPUReadMemory(const void *src)

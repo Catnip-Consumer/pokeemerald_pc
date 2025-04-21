@@ -12,7 +12,7 @@ u32 sampleRate;
 u16 lfsrMax[2];
 float ch4Samples;
 
-void cgb_audio_init(u32 rate){
+_DLL_ void cgb_audio_init(u32 rate){
     gb.ch1Freq = 0;
     gb.ch1SweepCounter = 0;
     gb.ch1SweepCounterI = 0;
@@ -252,6 +252,6 @@ void cgb_audio_generate(u16 samplesPerFrame){
 }
 
 
-float *cgb_get_buffer(){
+_DLL_ float *cgb_get_buffer(){
     return gb.outBuffer;
 }

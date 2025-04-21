@@ -10,7 +10,7 @@
 #include "item.h"
 #include "item_menu.h"
 #include "main.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "menu.h"
 #include "new_game.h"
 #include "party_menu.h"

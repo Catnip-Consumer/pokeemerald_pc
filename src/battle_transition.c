@@ -10,7 +10,7 @@
 #include "field_weather.h"
 #include "gpu_regs.h"
 #include "main.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "overworld.h"
 #include "palette.h"
 #include "random.h"

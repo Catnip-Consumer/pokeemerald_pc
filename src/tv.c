@@ -27,7 +27,7 @@
 #include "text.h"
 #include "script_menu.h"
 #include "naming_screen.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "region_map.h"
 #include "decoration.h"
 #include "secret_base.h"

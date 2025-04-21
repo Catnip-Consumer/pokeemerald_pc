@@ -11,7 +11,7 @@
 #include "string_util.h"
 #include "palette.h"
 #include "save.h"
-#include "malloc.h"
+#include "malloc_.h"
 #include "util.h"
 #include "task.h"
 #include "text.h"
