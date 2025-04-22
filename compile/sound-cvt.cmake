@@ -51,6 +51,8 @@ foreach(LINE IN LISTS MIDI_CFG_LINES)
 	math(EXPR COLON_INDEX "${COLON_INDEX} + 1")
 	string(SUBSTRING "${LINE}" ${COLON_INDEX} -1 OPTIONS)
 	string(STRIP "${OPTIONS}" OPTIONS)
+	# cmake thinks its smart when it quotes the entire string... but we don't want that
+	string(REPLACE " " ";" OPTIONS "${OPTIONS}")
 
 	# Create .o and .s files from .mid file
 	set(MID_ASM_FILE "${MID_BUILDDIR}/${MID_FILE}.s")
