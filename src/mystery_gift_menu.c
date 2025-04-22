@@ -8,7 +8,7 @@
 #include "text_window.h"
 #include "bg.h"
 #include "window.h"
-#include "strings.h"
+#include "strings_.h"
 #include "text_window.h"
 #include "menu.h"
 #include "palette.h"

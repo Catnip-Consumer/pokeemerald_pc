@@ -15,7 +15,7 @@
 #include "easy_chat.h"
 #include "lilycove_lady.h"
 #include "contest.h"
-#include "strings.h"
+#include "strings_.h"
 #include "constants/lilycove_lady.h"
 
 #include "data/lilycove_lady.h"

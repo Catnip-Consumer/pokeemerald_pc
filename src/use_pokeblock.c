@@ -18,7 +18,7 @@
 #include "constants/songs.h"
 #include "sprite.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "menu.h"
 #include "gpu_regs.h"
 #include "graphics.h"

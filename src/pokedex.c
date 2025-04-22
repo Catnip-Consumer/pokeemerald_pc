@@ -20,7 +20,7 @@
 #include "sound.h"
 #include "sprite.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "task.h"
 #include "text_window.h"
 #include "trainer_pokemon_sprites.h"

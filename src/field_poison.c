@@ -11,7 +11,7 @@
 #include "pokenav.h"
 #include "script.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "task.h"
 #include "trainer_hill.h"
 #include "constants/field_poison.h"

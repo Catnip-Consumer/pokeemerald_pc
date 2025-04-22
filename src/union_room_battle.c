@@ -12,7 +12,7 @@
 #include "text_window.h"
 #include "scanline_effect.h"
 #include "overworld.h"
-#include "strings.h"
+#include "strings_.h"
 #include "party_menu.h"
 #include "battle_setup.h"
 #include "link.h"

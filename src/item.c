@@ -7,7 +7,7 @@
 #include "malloc_.h"
 #include "secret_base.h"
 #include "item_menu.h"
-#include "strings.h"
+#include "strings_.h"
 #include "load_save.h"
 #include "item_use.h"
 #include "battle_pyramid.h"

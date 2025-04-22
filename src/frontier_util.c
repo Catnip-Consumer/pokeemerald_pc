@@ -23,7 +23,7 @@
 #include "recorded_battle.h"
 #include "data.h"
 #include "record_mixing.h"
-#include "strings.h"
+#include "strings_.h"
 #include "malloc_.h"
 #include "save.h"
 #include "load_save.h"

@@ -18,7 +18,7 @@
 #include "pokemon.h"
 #include "sprite.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "sound.h"
 #include "task.h"
 #include "text_window.h"

@@ -1,5 +1,5 @@
 #include "global.h"
-#include "strings.h"
+#include "strings_.h"
 #include "battle_pyramid_bag.h"
 #include "item_menu.h"
 

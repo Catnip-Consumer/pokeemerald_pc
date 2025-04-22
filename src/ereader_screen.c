@@ -10,7 +10,7 @@
 #include "sound.h"
 #include "sprite.h"
 #include "task.h"
-#include "strings.h"
+#include "strings_.h"
 #include "util.h"
 #include "constants/songs.h"
 

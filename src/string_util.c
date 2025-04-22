@@ -1,7 +1,7 @@
 #include "global.h"
 #include "string_util.h"
 #include "text.h"
-#include "strings.h"
+#include "strings_.h"
 
 EWRAM_DATA u8 gStringVar1[0x100] = {0};
 EWRAM_DATA u8 gStringVar2[0x100] = {0};

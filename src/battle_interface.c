@@ -21,7 +21,7 @@
 #include "battle_anim.h"
 #include "data.h"
 #include "pokemon_summary_screen.h"
-#include "strings.h"
+#include "strings_.h"
 #include "constants/battle_anim.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"

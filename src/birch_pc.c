@@ -2,7 +2,7 @@
 #include "event_data.h"
 #include "field_message_box.h"
 #include "pokedex.h"
-#include "strings.h"
+#include "strings_.h"
 
 bool16 ScriptGetPokedexInfo(void)
 {

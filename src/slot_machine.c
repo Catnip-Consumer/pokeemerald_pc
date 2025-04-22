@@ -17,7 +17,7 @@
 #include "bg.h"
 #include "gpu_regs.h"
 #include "coins.h"
-#include "strings.h"
+#include "strings_.h"
 #include "tv.h"
 #include "text_window.h"
 #include "main_menu.h"

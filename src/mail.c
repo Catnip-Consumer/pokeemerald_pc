@@ -12,7 +12,7 @@
 #include "text_window.h"
 #include "string_util.h"
 #include "international_string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "gpu_regs.h"
 #include "bg.h"
 #include "pokemon_icon.h"

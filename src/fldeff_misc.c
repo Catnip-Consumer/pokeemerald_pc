@@ -4,7 +4,7 @@
 #include "script.h"
 #include "sound.h"
 #include "task.h"
-#include "strings.h"
+#include "strings_.h"
 #include "party_menu.h"
 #include "fieldmap.h"
 #include "field_effect.h"

@@ -15,7 +15,7 @@
 #include "event_data.h"
 #include "easy_chat.h"
 #include "money.h"
-#include "strings.h"
+#include "strings_.h"
 #include "string_util.h"
 #include "trainer_card.h"
 #include "gpu_regs.h"

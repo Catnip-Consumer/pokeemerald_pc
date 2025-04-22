@@ -6,7 +6,7 @@
 #include "palette.h"
 #include "bg.h"
 #include "window.h"
-#include "strings.h"
+#include "strings_.h"
 #include "graphics.h"
 #include "decompress.h"
 #include "gpu_regs.h"

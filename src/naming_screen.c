@@ -21,7 +21,7 @@
 #include "field_effect.h"
 #include "pokemon_icon.h"
 #include "data.h"
-#include "strings.h"
+#include "strings_.h"
 #include "menu.h"
 #include "text_window.h"
 #include "overworld.h"

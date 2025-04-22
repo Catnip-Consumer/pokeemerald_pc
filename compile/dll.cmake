@@ -107,8 +107,8 @@ function(c_src_preprocess OUTPUT_VAR OUT_DIR SRC_DIR SOURCE_FILES)
 
 		# Construct paths for intermediate and output files
 		set(INTERMEDIATE_I	"${OUT_DIR_FULL}/${SOURCE_FILE}-a.i")
-		set(INTERMEDIATE_S	"${OUT_DIR_FULL}/${SOURCE_FILE}.s")
 		set(INTERMEDIATE_P	"${OUT_DIR_FULL}/${SOURCE_FILE}-b.i")
+		set(INTERMEDIATE_S	"${OUT_DIR_FULL}/${SOURCE_FILE}.s")
 		set(OUTPUT_OBJ		"${OUT_DIR_FULL}/${SOURCE_FILE}.o")
 
 		# Ensure the output directory exists
@@ -520,3 +520,6 @@ endif()
 # Include dirs
 target_include_directories(emerald PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(emerald PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+# Extra depencies
+add_dependencies(emerald emerald-sound-files)

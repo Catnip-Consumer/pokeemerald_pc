@@ -7,7 +7,7 @@
 #include "menu.h"
 #include "palette.h"
 #include "region_map.h"
-#include "strings.h"
+#include "strings_.h"
 #include "text.h"
 #include "text_window.h"
 #include "window.h"

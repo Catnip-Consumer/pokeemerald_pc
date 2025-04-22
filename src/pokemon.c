@@ -30,7 +30,7 @@
 #include "rtc.h"
 #include "sound.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "task.h"
 #include "text.h"
 #include "trainer_hill.h"

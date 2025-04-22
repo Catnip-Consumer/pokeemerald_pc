@@ -10,7 +10,7 @@
 #include "international_string_util.h"
 #include "battle.h"
 #include "frontier_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "recorded_battle.h"
 #include "easy_chat.h"
 #include "gym_leader_rematch.h"

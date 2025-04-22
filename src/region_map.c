@@ -12,7 +12,7 @@
 #include "secret_base.h"
 #include "string_util.h"
 #include "international_string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "text_window.h"
 #include "constants/songs.h"
 #include "m4a.h"

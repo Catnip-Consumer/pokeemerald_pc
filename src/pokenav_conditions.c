@@ -9,7 +9,7 @@
 #include "pokemon_storage_system.h"
 #include "sound.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "text.h"
 #include "constants/songs.h"
 

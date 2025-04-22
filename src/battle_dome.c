@@ -18,7 +18,7 @@
 #include "text.h"
 #include "bg.h"
 #include "window.h"
-#include "strings.h"
+#include "strings_.h"
 #include "palette.h"
 #include "decompress.h"
 #include "party_menu.h"

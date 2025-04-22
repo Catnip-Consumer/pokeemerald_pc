@@ -4,6 +4,7 @@
 #ifndef PORTABLE
 #define REG_BASE 0x4000000 // I/O register base address
 #else
+#include "config.h"
 _DLL_ extern unsigned char REG_BASE[];
 #endif
 

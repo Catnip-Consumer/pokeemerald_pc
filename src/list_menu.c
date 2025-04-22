@@ -9,7 +9,7 @@
 #include "decompress.h"
 #include "palette.h"
 #include "malloc_.h"
-#include "strings.h"
+#include "strings_.h"
 #include "sound.h"
 #include "constants/songs.h"
 

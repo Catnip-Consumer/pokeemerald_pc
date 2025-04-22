@@ -16,7 +16,7 @@
 #include "random.h"
 #include "scanline_effect.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "text.h"
 #include "window.h"
 #include "constants/rgb.h"

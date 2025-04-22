@@ -14,7 +14,7 @@
 #include "constants/songs.h"
 #include "decompress.h"
 #include "save.h"
-#include "strings.h"
+#include "strings_.h"
 #include "window.h"
 #include "credits.h"
 #include "bg.h"

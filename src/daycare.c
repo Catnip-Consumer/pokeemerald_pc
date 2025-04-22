@@ -13,7 +13,7 @@
 #include "menu.h"
 #include "international_string_util.h"
 #include "script.h"
-#include "strings.h"
+#include "strings_.h"
 #include "task.h"
 #include "window.h"
 #include "party_menu.h"

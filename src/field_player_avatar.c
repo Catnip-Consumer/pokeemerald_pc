@@ -17,7 +17,7 @@
 #include "script.h"
 #include "sound.h"
 #include "sprite.h"
-#include "strings.h"
+#include "strings_.h"
 #include "task.h"
 #include "tv.h"
 #include "wild_encounter.h"

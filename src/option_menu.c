@@ -8,7 +8,7 @@
 #include "palette.h"
 #include "scanline_effect.h"
 #include "sprite.h"
-#include "strings.h"
+#include "strings_.h"
 #include "task.h"
 #include "text.h"
 #include "text_window.h"

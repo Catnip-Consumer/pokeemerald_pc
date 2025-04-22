@@ -6,7 +6,7 @@
 #include "window.h"
 #include "sound.h"
 #include "dynamic_placeholder_text_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "string_util.h"
 #include "international_string_util.h"
 #include "constants/songs.h"

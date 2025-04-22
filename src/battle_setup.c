@@ -21,7 +21,7 @@
 #include "trainer_see.h"
 #include "field_message_box.h"
 #include "sound.h"
-#include "strings.h"
+#include "strings_.h"
 #include "trainer_hill.h"
 #include "secret_base.h"
 #include "string_util.h"

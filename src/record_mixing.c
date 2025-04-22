@@ -26,7 +26,7 @@
 #include "script.h"
 #include "event_data.h"
 #include "lilycove_lady.h"
-#include "strings.h"
+#include "strings_.h"
 #include "string_util.h"
 #include "record_mixing.h"
 #include "new_game.h"

@@ -7,7 +7,7 @@
 #include "menu.h"
 #include "window.h"
 #include "sprite.h"
-#include "strings.h"
+#include "strings_.h"
 #include "decompress.h"
 
 #define MAX_MONEY 999999

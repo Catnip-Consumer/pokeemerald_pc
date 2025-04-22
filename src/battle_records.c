@@ -7,7 +7,7 @@
 #include "overworld.h"
 #include "text.h"
 #include "text_window.h"
-#include "strings.h"
+#include "strings_.h"
 #include "string_util.h"
 #include "trainer_card.h"
 #include "menu.h"

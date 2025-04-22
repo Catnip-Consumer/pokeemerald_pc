@@ -11,7 +11,7 @@
 #include "pokenav.h"
 #include "sound.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "constants/songs.h"
 
 struct Pokenav_MatchCallMenu

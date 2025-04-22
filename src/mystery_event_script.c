@@ -9,7 +9,7 @@
 #include "pokemon.h"
 #include "pokemon_size_record.h"
 #include "script.h"
-#include "strings.h"
+#include "strings_.h"
 #include "string_util.h"
 #include "text.h"
 #include "util.h"

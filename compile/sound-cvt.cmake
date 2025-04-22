@@ -103,5 +103,45 @@ foreach(SOURCE_FILE IN LISTS SND_ASM_FILES)
 	list(APPEND SND_OBJ_FILES "${OUT_FILE}")
 endforeach()
 
-# Add a custom target to build all .s sound files
-add_custom_target(PokeEmerald-sound-files ALL DEPENDS ${SND_ASM_FILES})
+# Function to convert .aif files to object files
+function(aif_convert OUTPUT_VAR EXTRA_FLAGS SOURCE_FILES)
+	set(OBJECT_FILES)
+
+	foreach(SOURCE_FILE IN LISTS SOURCE_FILES)
+		remove_prefix("${SOURCE_FILE}" "${CMAKE_SOURCE_DIR}" OUTPUT_OBJ)
+		set(OUTPUT_OBJ "${CMAKE_BINARY_DIR}/${OUTPUT_OBJ}.bin")
+
+		# Ensure the output directory exists
+		cmake_path(GET OUTPUT_OBJ PARENT_PATH PARENT_DIR)
+		make_directory(${PARENT_DIR})
+
+		# Create the command to process the file
+		add_custom_command(
+			OUTPUT ${OUTPUT_OBJ}
+			COMMAND ${AIF2PCM} ${SOURCE_FILE} ${OUTPUT_OBJ} ${EXTRA_FLAGS}
+			DEPENDS ${SOURCE_FILE}
+			COMMENT "Convert ${SOURCE_FILE} to ${OUTPUT_OBJ}"
+		)
+
+		# Append the generated object file to the list
+		list(APPEND OBJECT_FILES ${OUTPUT_OBJ})
+	endforeach()
+
+	# Set the output variable to the list of object files
+	set(${OUTPUT_VAR} ${OBJECT_FILES} PARENT_SCOPE)
+endfunction()
+
+# Convert Pokemon cries to object files
+file(GLOB CRIES "${CMAKE_SOURCE_DIR}/sound/direct_sound_samples/cries/*.aif")
+aif_convert(CRIES_OBJ "--compress" "${CRIES}")
+
+# Convert samples to object files
+file(GLOB SAMPLES "${CMAKE_SOURCE_DIR}/sound/direct_sound_samples/*.aif")
+aif_convert(SAMPLES_OBJ "" "${SAMPLES}")
+
+# Convert samples to object files
+file(GLOB PHONEMES "${CMAKE_SOURCE_DIR}/sound/direct_sound_samples/phonemes/*.aif")
+aif_convert(PHONEMES_OBJ "" "${PHONEMES}")
+
+# Add a custom target to build all sound files
+add_custom_target(emerald-sound-files ALL DEPENDS ${SND_ASM_FILES} ${CRIES_OBJ} ${SAMPLES_OBJ} ${PHONEMES_OBJ})

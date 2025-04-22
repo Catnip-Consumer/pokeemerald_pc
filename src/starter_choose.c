@@ -14,7 +14,7 @@
 #include "sound.h"
 #include "sprite.h"
 #include "starter_choose.h"
-#include "strings.h"
+#include "strings_.h"
 #include "task.h"
 #include "text.h"
 #include "text_window.h"

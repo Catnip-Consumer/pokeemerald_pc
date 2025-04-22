@@ -2,7 +2,7 @@
 #include "coins.h"
 #include "text.h"
 #include "window.h"
-#include "strings.h"
+#include "strings_.h"
 #include "string_util.h"
 #include "menu.h"
 #include "international_string_util.h"

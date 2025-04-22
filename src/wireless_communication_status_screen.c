@@ -8,7 +8,7 @@
 #include "m4a.h"
 #include "dynamic_placeholder_text_util.h"
 #include "overworld.h"
-#include "strings.h"
+#include "strings_.h"
 #include "string_util.h"
 #include "international_string_util.h"
 #include "sound.h"

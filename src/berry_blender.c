@@ -33,7 +33,7 @@
 #include "graphics.h"
 #include "new_game.h"
 #include "save.h"
-#include "strings.h"
+#include "strings_.h"
 #include "constants/game_stat.h"
 #include "constants/items.h"
 #include "constants/rgb.h"

@@ -1,7 +1,7 @@
 #include "global.h"
 #include "pokenav.h"
 #include "window.h"
-#include "strings.h"
+#include "strings_.h"
 #include "text.h"
 #include "bg.h"
 #include "menu.h"

@@ -37,7 +37,7 @@
 #include "sound.h"
 #include "start_menu.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "task.h"
 #include "trade.h"
 #include "trainer_card.h"

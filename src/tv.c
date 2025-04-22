@@ -7,7 +7,7 @@
 #include "field_camera.h"
 #include "field_specials.h"
 #include "fldeff.h"
-#include "strings.h"
+#include "strings_.h"
 #include "string_util.h"
 #include "international_string_util.h"
 #include "pokemon_storage_system.h"

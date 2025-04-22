@@ -31,7 +31,7 @@
 #include "battle_message.h"
 #include "event_scripts.h"
 #include "event_data.h"
-#include "strings.h"
+#include "strings_.h"
 #include "contest_effect.h"
 #include "contest_link.h"
 #include "international_string_util.h"

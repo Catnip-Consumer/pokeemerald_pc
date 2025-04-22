@@ -18,7 +18,7 @@
 #include "scanline_effect.h"
 #include "menu.h"
 #include "text.h"
-#include "strings.h"
+#include "strings_.h"
 #include "constants/songs.h"
 #include "sound.h"
 #include "trade.h"

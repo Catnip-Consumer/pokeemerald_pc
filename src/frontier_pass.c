@@ -11,7 +11,7 @@
 #include "text_window.h"
 #include "task.h"
 #include "graphics.h"
-#include "strings.h"
+#include "strings_.h"
 #include "frontier_pass.h"
 #include "international_string_util.h"
 #include "palette.h"

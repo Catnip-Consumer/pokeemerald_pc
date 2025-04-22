@@ -6,7 +6,7 @@
 #include "battle_setup.h"
 #include "battle_tower.h"
 #include "save.h"
-#include "strings.h"
+#include "strings_.h"
 #include "fieldmap.h"
 #include "party_menu.h"
 #include "palette.h"

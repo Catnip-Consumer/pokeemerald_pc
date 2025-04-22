@@ -4,7 +4,7 @@
 #include "pokedex.h"
 #include "script_menu.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "text.h"
 #include "window.h"
 

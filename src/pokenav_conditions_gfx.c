@@ -12,7 +12,7 @@
 #include "pokenav.h"
 #include "scanline_effect.h"
 #include "string_util.h"
-#include "strings.h"
+#include "strings_.h"
 #include "text.h"
 
 static u32 LoopedTask_TransitionMons(s32);

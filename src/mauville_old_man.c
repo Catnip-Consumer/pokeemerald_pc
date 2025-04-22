@@ -15,7 +15,7 @@
 #include "m4a.h"
 #include "bard_music.h"
 #include "sound.h"
-#include "strings.h"
+#include "strings_.h"
 #include "overworld.h"
 #include "field_message_box.h"
 #include "script_menu.h"
@@ -1427,4 +1427,3 @@ bool8 Script_StorytellerInitializeRandomStat(void)
     sStorytellerPtr = &gSaveBlock1Ptr->oldMan.storyteller;
     return StorytellerInitializeRandomStat();
 }
-
