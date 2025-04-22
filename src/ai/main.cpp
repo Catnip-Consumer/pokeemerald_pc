@@ -1,107 +1,26 @@
-#define ENABLE_SDL2
-
-#ifdef ENABLE_SDL2
-	#include <SDL2/SDL.h>
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include <cstring>
 #include <algorithm>
+#include <thread>
 
-extern "C" {
-	#include <rtc.h>
-	#include <main.h>
-	#include <platform/dma.h>
-	#include <platform/dll.h>
-	#include <gba/flash_internal.h>
-}
+#include <ai/config.h>
+
+#ifdef ENABLE_SDL2
+	#include <SDL2/SDL.h>
+#endif
 
 #include <ai/sdl2.h>
+#include <ai/thread.h>
 
-struct SiiRtcInfo internalClock;
-uint16_t keys = 0;
-
-void Platform_GetStatus(struct SiiRtcInfo *rtc){
-	rtc->status = internalClock.status;
-}
-
-void Platform_SetStatus(struct SiiRtcInfo *rtc){
-	internalClock.status = rtc->status;
-}
-
-u8 BinToBcd(u8 bin) {
-	int placeCounter = 1;
-	u8 out = 0;
-	do {
-		out |= (bin % 10) * placeCounter;
-		placeCounter *= 16;
-
-	} while ((bin /= 10) > 0);
-
-	return out;
-}
-
-static void UpdateInternalClock(void){
-	time_t rawTime = time(NULL);
-	struct tm *time = localtime(&rawTime);
-
-	internalClock.year = BinToBcd(time->tm_year - 100);
-	internalClock.month = BinToBcd(time->tm_mon + 1);
-	internalClock.day = BinToBcd(time->tm_mday);
-	internalClock.dayOfWeek = BinToBcd(time->tm_wday);
-	internalClock.hour = BinToBcd(time->tm_hour);
-	internalClock.minute = BinToBcd(time->tm_min);
-	internalClock.second = BinToBcd(time->tm_sec);
-}
-
-void Platform_GetDateTime(struct SiiRtcInfo *rtc){
-	UpdateInternalClock();
-
-	rtc->year = internalClock.year;
-	rtc->month = internalClock.month;
-	rtc->day = internalClock.day;
-	rtc->dayOfWeek = internalClock.dayOfWeek;
-	rtc->hour = internalClock.hour;
-	rtc->minute = internalClock.minute;
-	rtc->second = internalClock.second;
-}
-
-void Platform_SetDateTime(struct SiiRtcInfo *rtc) {
-	internalClock.month = rtc->month;
-	internalClock.day = rtc->day;
-	internalClock.dayOfWeek = rtc->dayOfWeek;
-	internalClock.hour = rtc->hour;
-	internalClock.minute = rtc->minute;
-	internalClock.second = rtc->second;
-}
-
-void Platform_GetTime(struct SiiRtcInfo *rtc) {
-    UpdateInternalClock();
-
-	rtc->hour = internalClock.hour;
-	rtc->minute = internalClock.minute;
-	rtc->second = internalClock.second;
-}
-
-void Platform_SetTime(struct SiiRtcInfo *rtc) {
-	internalClock.hour = rtc->hour;
-	internalClock.minute = rtc->minute;
-	internalClock.second = rtc->second;
-}
-
-void Platform_SetAlarm(u8 *alarmData) {
-
-}
-
-u16 Platform_GetKeyInput(void){
-	return keys;
-}
+uint8_t flash[sizeof(FLASH_BASE)];
+volatile uint16_t keys = 0;
+volatile bool agentStop;
 
 #ifdef _WIN32
-
 #include <windows.h>
+
 static const std::filesystem::path getExecutableDir() {
     char buffer[MAX_PATH];
     GetModuleFileName(NULL, buffer, MAX_PATH);
@@ -109,9 +28,9 @@ static const std::filesystem::path getExecutableDir() {
 }
 
 #elif __linux__
-
 #include <unistd.h>
 #include <limits.h>
+
 static const std::filesystem::path getExecutableDir() {
     char buffer[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
@@ -123,9 +42,9 @@ static const std::filesystem::path getExecutableDir() {
 }
 
 #elif __APPLE__
-
 #include <mach-o/dyld.h>
 #include <limits.h>
+
 static const std::filesystem::path getExecutableDir() {
     char buffer[PATH_MAX];
     uint32_t size = sizeof(buffer);
@@ -134,20 +53,26 @@ static const std::filesystem::path getExecutableDir() {
     }
     return "";
 }
-
 #endif
 
-static const std::filesystem::path savefilePath = getExecutableDir() / "emerald-ai.sav";
-
-void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size) {
+static void ReadSaveFile() {
+	// fill flash buffer with 0xFF and read contents
+	memset(flash, 0xFF, sizeof(flash));
 	std::ifstream savefile;
 
 	try {
-		savefile = std::ifstream(savefilePath, std::ios::binary);
+		const auto savePath = getExecutableDir() / "emerald-ai.sav";
+		savefile = std::ifstream(savePath, std::ios::binary);
+
+		// get file size
+		savefile.seekg(0, std::ios::end);
+		const auto size = savefile.tellg();
+		savefile.seekg(0, std::ios::beg);
 
 		// read from file
-		savefile.seekg((sectorNum << gFlash->sector.shift) + offset, std::ios::beg);
-		savefile.read(reinterpret_cast<char*>(dest), size);
+		const auto readSize = min((std::streampos) size, (std::streampos) sizeof(flash));
+		std::cout << "Read " << readSize << " bytes from " << savePath << std::endl;
+		savefile.read(reinterpret_cast<char*>(flash), size);
 
 	} catch (std::exception*) {
 		// assume the file was not found
@@ -159,80 +84,29 @@ void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size) {
 	}
 }
 
-static void ReadSaveFile() {
-	// fill flash buffer with 0xFF and read contents
-	memset(FLASH_BASE, 0xFF, sizeof(FLASH_BASE));
-}
-
-void Platform_StoreSaveFile(void) {
-
-}
-
-void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame) {
-	std::cerr << "Platform_QueueAudio()" << std::endl;
-}
-
-void SoftReset(u32 flags) {
-	std::cerr << "SoftReset()" << std::endl;
-}
-
-void VBlankIntrWait() {
-	REG_VCOUNT = 161;
-	REG_DISPSTAT |= INTR_FLAG_VBLANK;
-	RunDMAs(DMA_HBLANK);
-
-	if (REG_DISPSTAT & DISPSTAT_VBLANK_INTR) {
-		gIntrTable[4]();
-	}
-	REG_DISPSTAT &= ~INTR_FLAG_VBLANK;
-}
-
-static struct DLL_Platform dll_platform = {
-	.HasAudio = false,
-	.VBlankIntrWait = VBlankIntrWait,
-	.SoftReset = SoftReset,
-	.GetKeyInput = Platform_GetKeyInput,
-	.StoreSaveFile = Platform_StoreSaveFile,
-	.ReadFlash = Platform_ReadFlash,
-	.QueueAudio = Platform_QueueAudio,
-	.GetStatus = Platform_GetStatus,
-	.SetStatus = Platform_SetStatus,
-	.GetDateTime = Platform_GetDateTime,
-	.SetDateTime = Platform_SetDateTime,
-	.GetTime = Platform_GetTime,
-	.SetTime = Platform_SetTime,
-	.SetAlarm = Platform_SetAlarm
-};
-
 int main(int argc, char **argv) {
-	std::memset(&internalClock, 0, sizeof(internalClock));
-	internalClock.status = SIIRTCINFO_24HOUR;
-	UpdateInternalClock();
-	Platform_Set(&dll_platform);
+	ReadSaveFile();
+
+	agentStop = false;
+	std::thread agent(runAgent, 0, 0);
 
 #ifdef ENABLE_SDL2
 	initSDL();
 #endif
 
-	ReadSaveFile();
-	REG_VCOUNT = 161;
-	AgbInit();
-
-	int frame = 0;
-
 	while(true) {
-		AgbRunFrame();
-
-		if((frame++) % 2048 == 0) {
-			drawSDL();
-		}
-		VBlankIntrWait();
-
+	#ifdef ENABLE_SDL2
 		if(handleEventsSDL()) {
 			break;
 		}
+	#endif
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
-	exitSDL();
+	agentStop = true;
+	#ifdef ENABLE_SDL2
+		exitSDL();
+	#endif
+	agent.join();
 	return 0;
 }

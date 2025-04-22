@@ -1,35 +1,29 @@
 #include <iostream>
+#include <ai/config.h>
+
+#ifdef ENABLE_SDL2
 #include <SDL2/SDL.h>
+
+#include <ai/sdl2.h>
+#include <ai/thread.h>
 
 extern "C" {
 	#include <platform/framedraw.h>
 }
 
-#include <ai/sdl2.h>
-
-// Dimensions of the GBA screen in pixels
-#define DISPLAY_WIDTH  240
-#define DISPLAY_HEIGHT 160
-
-#define GRID_ROWS 8
-#define GRID_COLS 8
-#define GRID_WIDTH  (DISPLAY_WIDTH * GRID_COLS)
-#define GRID_HEIGHT (DISPLAY_HEIGHT * GRID_ROWS)
-
 SDL_Window *sdlWindow;
 SDL_Renderer *sdlRenderer;
-SDL_Texture *sdlTexture;
+SDL_Texture *sdlTexture[CONCURRENT_AGENTS];
+uint16_t screens[CONCURRENT_AGENTS][DISPLAY_WIDTH * DISPLAY_HEIGHT];
 
 uint32_t videoScale = 10;
 bool videoScaleChanged = false;
 
-void VDraw(SDL_Texture *texture){
-    static uint16_t image[DISPLAY_WIDTH * DISPLAY_HEIGHT];
-
-    memset(image, 0, sizeof(image));
-    DrawFrame(image);
-    SDL_UpdateTexture(texture, NULL, image, DISPLAY_WIDTH * sizeof (Uint16));
-}
+double accumulator = 0.0;
+uint64_t lastGameTime = 0.0;
+volatile size_t currentFrame = 0;
+volatile int32_t agentsFinishedDrawing = -1;
+extern volatile uint16_t keys;
 
 void initSDL() {
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -58,26 +52,25 @@ void initSDL() {
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(sdlRenderer);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	SDL_RenderSetLogicalSize(sdlRenderer, GRID_WIDTH, GRID_HEIGHT);
+	SDL_RenderSetLogicalSize(sdlRenderer, (DISPLAY_WIDTH * GRID_COLS), (DISPLAY_HEIGHT * GRID_ROWS));
 
-	sdlTexture = SDL_CreateTexture(
-		sdlRenderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING,
-		DISPLAY_WIDTH, DISPLAY_HEIGHT
-	);
-	if (sdlTexture == NULL){
-		std::cout << "Texture could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return;
+	for(int i = 0; i < CONCURRENT_AGENTS; i++) {
+		sdlTexture[i] = SDL_CreateTexture(
+			sdlRenderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING,
+			DISPLAY_WIDTH, DISPLAY_HEIGHT
+		);
+
+		if (sdlTexture[i] == NULL){
+			std::cout << "Texture could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+			return;
+		}
 	}
-
-    VDraw(sdlTexture);
 }
 
 void exitSDL() {
 	SDL_DestroyWindow(sdlWindow);
 	SDL_Quit();
 }
-
-extern uint16_t keys;
 
 // Key mappings
 #define KEY_A_BUTTON      SDLK_z
@@ -161,11 +154,35 @@ bool handleEventsSDL() {
 			}
 	}
 
+	// accumulate deltatime
+	double curGameTime = SDL_GetPerformanceCounter();
+	double deltaTime = ((curGameTime - lastGameTime) / (double)SDL_GetPerformanceFrequency());
+	lastGameTime = curGameTime;
+	accumulator += deltaTime;
+
+	// check if at least 16ms has elapsed
+	if(agentsFinishedDrawing == -1 && accumulator > 1.0 / 60.0) {
+		accumulator = 0;
+		agentsFinishedDrawing = 0;
+		currentFrame = currentFrame + 1;
+
+	} else if(agentsFinishedDrawing > 0) {
+		// all agents have drawn their screens
+		agentsFinishedDrawing = -1;
+		drawSDL();
+	}
+
 	return exit;
 }
 
+static void drawTextures() {
+	for (int i = 0; i < CONCURRENT_AGENTS; i++) {
+		SDL_UpdateTexture(sdlTexture[i], NULL, screens[i], DISPLAY_WIDTH * sizeof (Uint16));
+	}
+}
+
 void drawSDL() {
-	VDraw(sdlTexture);
+	drawTextures();
 	SDL_RenderClear(sdlRenderer);
 
 	for(int i = 0; i < GRID_ROWS * GRID_COLS; i++) {
@@ -174,7 +191,7 @@ void drawSDL() {
 			(i / GRID_COLS) * DISPLAY_HEIGHT,
 			DISPLAY_WIDTH, DISPLAY_HEIGHT
 		};
-		SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, &rect);
+		SDL_RenderCopy(sdlRenderer, sdlTexture[i], NULL, &rect);
 	}
 
 	if (videoScaleChanged) {
@@ -184,3 +201,5 @@ void drawSDL() {
 
 	SDL_RenderPresent(sdlRenderer);
 }
+
+#endif

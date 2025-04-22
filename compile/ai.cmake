@@ -16,6 +16,7 @@ set(PokeEmerald_AI_SOURCES
 	"src/platform/gba_easy_draw.c"
 	"src/ai/sdl2.cpp"
 	"src/ai/main.cpp"
+	"src/ai/thread.cpp"
 )
 
 # DLL target
