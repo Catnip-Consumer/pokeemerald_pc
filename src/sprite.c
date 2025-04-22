@@ -163,7 +163,7 @@ static const struct Sprite sDummySprite =
     .oam = DUMMY_OAM_DATA,
     .anims = gDummySpriteAnimTable,
     .affineAnims = gDummySpriteAffineAnimTable,
-    .template = &gDummySpriteTemplate,
+    .template_ = &gDummySpriteTemplate,
     .callback = SpriteCallbackDummy,
     .x = DISPLAY_WIDTH + 64,
     .y = DISPLAY_HEIGHT,
@@ -554,7 +554,7 @@ u8 CreateSpriteAt(u8 index, const struct SpriteTemplate *template, s16 x, s16 y,
     sprite->oam = *template->oam;
     sprite->anims = template->anims;
     sprite->affineAnims = template->affineAnims;
-    sprite->template = template;
+    sprite->template_ = template;
     sprite->callback = template->callback;
     sprite->x = x;
     sprite->y = y;
@@ -864,23 +864,23 @@ void FreeSpriteTiles(struct Sprite *sprite)
 {
 // UB: template pointer may point to freed temporary storage
 #ifdef UBFIX
-    if (!sprite || !sprite->template)
+    if (!sprite || !sprite->template_)
         return;
 #endif
 
-    if (sprite->template->tileTag != TAG_NONE)
-        FreeSpriteTilesByTag(sprite->template->tileTag);
+    if (sprite->template_->tileTag != TAG_NONE)
+        FreeSpriteTilesByTag(sprite->template_->tileTag);
 }
 
 void FreeSpritePalette(struct Sprite *sprite)
 {
 // UB: template pointer may point to freed temporary storage
 #ifdef UBFIX
-    if (!sprite || !sprite->template)
+    if (!sprite || !sprite->template_)
         return;
 #endif
 
-    FreeSpritePaletteByTag(sprite->template->paletteTag);
+    FreeSpritePaletteByTag(sprite->template_->paletteTag);
 }
 
 void FreeSpriteOamMatrix(struct Sprite *sprite)

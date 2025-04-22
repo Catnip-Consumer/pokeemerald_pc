@@ -2,12 +2,11 @@ cmake_minimum_required(VERSION 3.18)
 
 project(PokeEmerald-dll
 	VERSION 0.0.0
-	LANGUAGES C CXX
+	LANGUAGES C
 )
 
-# requires at least C99/C++17-compatible compiler to compile the code
+# requires at least C99-compatible compiler to compile the code
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 17)
 
 # ROM information
 add_compile_definitions(TITLE=POKEMON EMER)

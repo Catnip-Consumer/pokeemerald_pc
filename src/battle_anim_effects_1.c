@@ -5077,7 +5077,7 @@ static void AnimTask_MoonlightEndFade_Step(u8 taskId)
             u8 spriteId;
             for (spriteId = 0; spriteId < MAX_SPRITES; spriteId++)
             {
-                if (gSprites[spriteId].template == &gMoonSpriteTemplate || gSprites[spriteId].template == &gMoonlightSparkleSpriteTemplate)
+                if (gSprites[spriteId].template_ == &gMoonSpriteTemplate || gSprites[spriteId].template_ == &gMoonlightSparkleSpriteTemplate)
                     gSprites[spriteId].data[0] = 1;
             }
 

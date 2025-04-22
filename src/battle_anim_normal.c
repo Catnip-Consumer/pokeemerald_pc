@@ -769,7 +769,7 @@ void AnimTask_TintPalettes(u8 taskId)
 
     if (gTasks[taskId].tFlagsScenery & 1)
     {
-        paletteIndex = IndexOfSpritePaletteTag(gSprites[gHealthboxSpriteIds[attackerBattler]].template->paletteTag);
+        paletteIndex = IndexOfSpritePaletteTag(gSprites[gHealthboxSpriteIds[attackerBattler]].template_->paletteTag);
         selectedPalettes |= (1 << paletteIndex) << 16;
     }
 

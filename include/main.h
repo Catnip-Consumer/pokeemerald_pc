@@ -56,7 +56,8 @@ extern u8 gLinkVSyncDisabled;
 extern u32 IntrMain_Buffer[];
 extern s8 gPcmDmaCounter;
 
-void AgbMain(void);
+_DLL_ void AgbInit(void);
+_DLL_ void AgbRunFrame(void);
 void SetMainCallback2(MainCallback callback);
 void InitKeys(void);
 void SetVBlankCallback(IntrCallback callback);

@@ -2,28 +2,13 @@ cmake_minimum_required(VERSION 3.18)
 
 project(PokeEmerald-sdl2
 	VERSION 0.0.0
-	LANGUAGES C CXX
+	LANGUAGES C
 )
 
-# requires at least C11/C++17-compatible compiler to compile the code
+# requires at least C11-compatible compiler to compile the code
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
 
 cmake_policy(SET CMP0065 NEW)
-
-# SDL2
-# https://github.com/libsdl-org/SDL/issues/1481
-# On 2014-06-22 17:15:50 +0000, Sam Lantinga wrote:
-#   If you link SDL statically, you also need to define HAVE_LIBC so it builds with the C runtime that your application uses.
-#   This should probably go in a FAQ.
-set(SDL_LIBC ON CACHE BOOL "Tell SDL that we want it to use our C runtime (required for proper static linking)" FORCE)
-set(SDL_STATIC ON CACHE BOOL "" FORCE)
-set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-set(SDL_TEST OFF CACHE BOOL "" FORCE)
-set(SYSTEM_SDL_MIN_VER 2.32.0)
-
-#add_definitions(-DSDL_MAIN_HANDLED)
-add_subdirectory(${CMAKE_SOURCE_DIR}/extern/SDL2 EXCLUDE_FROM_ALL)
 
 # Source files (data/ directory)
 set(PokeEmerald_SDL2_SOURCES

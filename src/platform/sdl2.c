@@ -13,6 +13,7 @@
 #include "global.h"
 #include "platform.h"
 #include "rtc.h"
+#include "main.h"
 #include "gba/defines.h"
 #include "gba/m4a_internal.h"
 #include "cgb_audio.h"
@@ -20,8 +21,6 @@
 #include "platform/dma.h"
 #include "platform/framedraw.h"
 #include "platform/dll.h"
-
-extern void (*const gIntrTable[])(void);
 
 SDL_Thread *mainLoopThread;
 SDL_Window *sdlWindow;
@@ -43,7 +42,6 @@ struct SiiRtcInfo internalClock;
 
 static FILE *sSaveFile = NULL;
 
-extern void AgbMain(void);
 extern void DoSoftReset(void);
 
 int DoMain(void *param);
@@ -319,15 +317,20 @@ void VDraw(SDL_Texture *texture)
     REG_VCOUNT = 161; // prep for being in VBlank period
 }
 
-int DoMain(void *data)
-{
-    AgbMain();
-}
-
 void VBlankIntrWait(void)
 {
-    SDL_AtomicSet(&isFrameAvailable, 1);
-    SDL_SemWait(vBlankSemaphore);
+	SDL_AtomicSet(&isFrameAvailable, 1);
+	SDL_SemWait(vBlankSemaphore);
+}
+
+int DoMain(void *data)
+{
+	AgbInit();
+
+	for (;;) {
+		AgbRunFrame();
+		VBlankIntrWait();
+	}
 }
 
 u8 BinToBcd(u8 bin)
@@ -429,7 +432,6 @@ void SoftReset(u32 resetFlags)
 
 static struct DLL_Platform dll_platform = {
 	.HasAudio = TRUE,
-	.VBlankIntrWait = VBlankIntrWait,
 	.SoftReset = SoftReset,
 	.GetKeyInput = Platform_GetKeyInput,
 	.StoreSaveFile = StoreSaveFile,
