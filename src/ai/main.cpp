@@ -90,6 +90,10 @@ static void ReadSaveFile() {
 }
 
 int main(int argc, char **argv) {
+	auto threadHandle = getCurrentThreadHandle();
+	setThreadAffinity(threadHandle, true);
+	closeThreadHandle(threadHandle);
+
 	ReadSaveFile();
 
 	#ifdef _WIN32

@@ -23,9 +23,7 @@ double accumulator = 0.0;
 uint64_t lastGameTime = 0.0;
 extern volatile uint16_t keys;
 
-std::mutex sdlMutex;
 volatile size_t sdlCurrentFrame = 0;
-volatile int32_t sdlAgentsFinishedDrawing = -1;
 
 void initSDL() {
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -162,20 +160,11 @@ bool handleEventsSDL() {
 	lastGameTime = curGameTime;
 	accumulator += deltaTime;
 
-	{
-		std::lock_guard<std::mutex> lock(sdlMutex);
-
-		// check if at least 16ms has elapsed
-		if(sdlAgentsFinishedDrawing == -1 && accumulator > 1.0 / 20.0) {
-			accumulator = 0;
-			sdlAgentsFinishedDrawing = 0;
-			sdlCurrentFrame = sdlCurrentFrame + 1;
-
-		} else if(sdlAgentsFinishedDrawing >= CONCURRENT_AGENTS) {
-			// all agents have drawn their screens
-			sdlAgentsFinishedDrawing = -1;
-			drawSDL();
-		}
+	// check if at least 16ms has elapsed
+	if(accumulator > 1.0 / 20.0) {
+		accumulator = 0;
+		drawSDL();
+		sdlCurrentFrame = sdlCurrentFrame + 1;
 	}
 
 	return exit;

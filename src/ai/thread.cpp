@@ -48,6 +48,36 @@ static void* GetProcAddress(void* dll, const char* procName) {
 	return (void*) GetProcAddress((HMODULE) dll, procName);
 }
 
+bool setThreadAffinity(void* handle, bool core0) {
+	if (SetThreadAffinityMask((HANDLE) handle, core0 ? 1 : ~1) == 0) {
+		std::cerr << "Failed to set thread affinity: " << GetLastError() << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+extern void* getCurrentThreadHandle() {
+	// Get the pseudo-handle for the current thread
+	HANDLE pseudoHandle = GetCurrentThread();
+
+    // Convert the pseudo-handle to a real handle
+    HANDLE realHandle;
+	if (!DuplicateHandle(
+			GetCurrentProcess(), pseudoHandle, GetCurrentProcess(), &realHandle,
+			0, FALSE, DUPLICATE_SAME_ACCESS
+	)) {
+		std::cerr << "Failed to duplicate thread handle. Error: " << GetLastError() << std::endl;
+		return nullptr;
+    }
+
+	return (void*) realHandle;
+}
+
+extern bool closeThreadHandle(void* handle) {
+	return CloseHandle((HANDLE) handle);
+}
+
 #elif __linux__
 
 static void* LoadEmeraldDLL(int index) {
@@ -63,6 +93,18 @@ static void* GetProcAddress(void* dll, const char* procName) {
 	return nullptr;	// TODO: Implement
 }
 
+bool setThreadAffinity(std::thread& t, bool core0) {
+	return false;	// TODO: Implement
+}
+
+extern void* getCurrentThreadHandle() {
+	return nullptr;	// TODO: Implement
+}
+
+extern bool closeThreadHandle(void* handle) {
+	return false;	// TODO: Implement
+}
+
 #elif __APPLE__
 
 static void* LoadEmeraldDLL() {
@@ -76,6 +118,18 @@ static void UnloadEmeraldDLL(void* dll) {
 
 static void* GetProcAddress(void* dll, const char* procName) {
 	return nullptr;	// TODO: Implement
+}
+
+bool setThreadAffinity(std::thread& t, bool core0) {
+	return false;	// TODO: Implement
+}
+
+extern void* getCurrentThreadHandle() {
+	return nullptr;	// TODO: Implement
+}
+
+extern bool closeThreadHandle(void* handle) {
+	return false;	// TODO: Implement
 }
 
 #endif
@@ -214,7 +268,7 @@ void SoftReset(u32 flags) {
 extern volatile uint16_t keys;
 
 u16 Platform_GetKeyInput(void){
-	return 1 << (rand() % 10);
+	return (1 << (rand() % 10)) & ~(START_BUTTON | SELECT_BUTTON);
 }
 
 static const struct DLL_Platform dll_platform = {
@@ -238,10 +292,16 @@ static const struct DLL_Platform dll_platform = {
 thread_local static size_t lastFrame = -1;
 
 void runAgent(int generation, int index) {
+	auto threadHandle = getCurrentThreadHandle();
+	setThreadAffinity(threadHandle, false);
+	closeThreadHandle(threadHandle);
+
 	auto dllHandle = LoadEmeraldDLL(index);
 	if(!dllHandle) {
 		return;
 	}
+
+	srand(time(NULL) + index + generation);
 
 	std::memset(&internalClock, 0, sizeof(internalClock));
 	internalClock.status = SIIRTCINFO_24HOUR;
@@ -261,28 +321,18 @@ void runAgent(int generation, int index) {
 	eme.AgbInit();
 
 	while(!agentStop) {
-		// time this loop
-		auto start = std::chrono::high_resolution_clock::now();
-
 		// run for multiple frames before we check SDL for updates or ask for input updates
-		while((std::chrono::high_resolution_clock::now() - start) < 7ms) {
-			for(int i = 0; i < 8; i++) {
-				eme.AgbRunFrame();
-				VBlankIntrWait();
-			}
+		for(int i = 0; i < 8; i++) {
+			eme.AgbRunFrame();
+			VBlankIntrWait();
 		}
 
 		#ifdef ENABLE_SDL2
-		{
-			std::lock_guard<std::mutex> lock(sdlMutex);
-
 			// if frame changed from SDL, draw screens
-			if(sdlAgentsFinishedDrawing >= 0 && sdlCurrentFrame != lastFrame) {
+			if(sdlCurrentFrame != lastFrame) {
 				lastFrame = sdlCurrentFrame;
 				DrawFrame(screens[index], &eme);
-				sdlAgentsFinishedDrawing = sdlAgentsFinishedDrawing + 1;
 			}
-		}
 		#endif
 	}
 
