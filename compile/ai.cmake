@@ -13,7 +13,7 @@ cmake_policy(SET CMP0065 NEW)
 
 # Source files (data/ directory)
 set(PokeEmerald_AI_SOURCES
-	"src/platform/gba_easy_draw.c"
+	"src/ai/thread_safe_gba_easy_draw.cpp"
 	"src/ai/sdl2.cpp"
 	"src/ai/main.cpp"
 	"src/ai/thread.cpp"
@@ -26,7 +26,7 @@ add_executable(emerald-ai
 
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
-target_link_libraries(emerald-ai PRIVATE emerald SDL2main SDL2-static xinput)
+target_link_libraries(emerald-ai PRIVATE SDL2main SDL2-static xinput)
 
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

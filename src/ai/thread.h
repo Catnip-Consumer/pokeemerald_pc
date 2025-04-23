@@ -1,9 +1,11 @@
 #pragma once
 
+#include <filesystem>
 #include <stdint.h>
 
 extern "C" {
 	#include <global.h>
+	#include <main.h>
 	#include <gba/flash_internal.h>
 }
 
@@ -26,3 +28,22 @@ extern volatile bool agentStop;
 
 	extern uint16_t screens[CONCURRENT_AGENTS][DISPLAY_WIDTH * DISPLAY_HEIGHT];
 #endif
+
+const std::filesystem::path getExecutableDir();
+
+struct EmeraldAddresses {
+	void (*Platform_Set)(const struct DLL_Platform*);
+	void (*RunDMAs)(u32);
+	void (*AgbInit)();
+	void (*AgbRunFrame)();
+
+	IntrFunc* gIntrTable;
+	const struct FlashType** gFlash;
+	unsigned char* REG_BASE;
+
+	#ifdef ENABLE_SDL2
+		unsigned char* VRAM_;
+		unsigned char* PLTT;
+		unsigned char* OAM;
+	#endif
+};

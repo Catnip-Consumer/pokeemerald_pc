@@ -21,6 +21,6 @@ struct DLL_Platform {
 	bool8 SkipToGame;
 };
 
-_DLL_ void Platform_Set(struct DLL_Platform *platform);
+_DLL_ void Platform_Set(const struct DLL_Platform *platform);
 
 #endif

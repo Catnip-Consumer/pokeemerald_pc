@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <ai/config.h>
+#include <ai/thread.h>
 
 extern "C" {
 	#include <rtc.h>
@@ -10,19 +11,110 @@ extern "C" {
 	#include <platform/dll.h>
 	#include <platform/dma.h>
 	#include <gba/flash_internal.h>
-
-	extern void DrawFrame(uint16_t *pixels);
 }
 
-#include <ai/thread.h>
+extern void DrawFrame(uint16_t *pixels, struct EmeraldAddresses* eme);
+static bool GetEmeraldDLLAddresses(void* dll);
+
+const auto dllpath = getExecutableDir() / "libemerald";
+
+#ifdef _WIN32
+#include <windows.h>
+
+static void* LoadEmeraldDLL() {
+	const auto _dllPath = dllpath.string() + ".dll";
+    HMODULE dll = LoadLibrary(_dllPath.c_str());
+
+    if (!dll) {
+        std::cerr << "Failed to load " << _dllPath << std::endl;
+        return nullptr;
+    }
+
+	if(!GetEmeraldDLLAddresses(dll)) {
+		FreeLibrary(dll);
+		return nullptr;
+	}
+
+	return dll;
+}
+
+static void UnloadEmeraldDLL(void* dll) {
+    FreeLibrary((HMODULE) dll);
+}
+
+static void* GetProcAddress(void* dll, const char* procName) {
+	return (void*) GetProcAddress((HMODULE) dll, procName);
+}
+
+#elif __linux__
+
+static void* LoadEmeraldDLL() {
+	// TODO: Implement
+	return nullptr;
+}
+
+static void UnloadEmeraldDLL(void* dll) {
+	// TODO: Implement
+}
+
+static void* GetProcAddress(void* dll, const char* procName) {
+	return nullptr;	// TODO: Implement
+}
+
+#elif __APPLE__
+
+static void* LoadEmeraldDLL() {
+	// TODO: Implement
+	return nullptr;
+}
+
+static void UnloadEmeraldDLL(void* dll) {
+	// TODO: Implement
+}
+
+static void* GetProcAddress(void* dll, const char* procName) {
+	return nullptr;	// TODO: Implement
+}
+
+#endif
+
+thread_local static struct EmeraldAddresses eme;
+
+static bool GetEmeraldDLLAddresses(void* dll) {
+#define GRAB_ADDRESS(member)											\
+	eme.member = (typeof(eme.member))GetProcAddress(dll, #member);		\
+	if (!eme.member) {													\
+		std::cerr << "Failed to get address of " #member << std::endl;	\
+		return false;													\
+	}
+
+	GRAB_ADDRESS(Platform_Set);
+	GRAB_ADDRESS(RunDMAs);
+	GRAB_ADDRESS(AgbInit);
+	GRAB_ADDRESS(AgbRunFrame);
+
+	GRAB_ADDRESS(gIntrTable);
+	GRAB_ADDRESS(gFlash);
+	GRAB_ADDRESS(REG_BASE);
+
+	#ifdef ENABLE_SDL2
+		GRAB_ADDRESS(VRAM_);
+		GRAB_ADDRESS(PLTT);
+		GRAB_ADDRESS(OAM);
+	#endif
+	return true;
+}
+
+// some hax because some of the following commands refer to REG_BASE directly!
+#define REG_BASE (eme.REG_BASE)
 
 void VBlankIntrWait() {
 	REG_VCOUNT = 161;
 	REG_DISPSTAT |= INTR_FLAG_VBLANK;
-	RunDMAs(DMA_HBLANK);
+	eme.RunDMAs(DMA_HBLANK);
 
 	if (REG_DISPSTAT & DISPSTAT_VBLANK_INTR) {
-		gIntrTable[4]();
+		eme.gIntrTable[4]();
 	}
 	REG_DISPSTAT &= ~INTR_FLAG_VBLANK;
 }
@@ -98,7 +190,7 @@ void Platform_SetTime(struct SiiRtcInfo *rtc) {
 }
 
 void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size) {
-	memcpy(dest, flash + offset + (sectorNum << gFlash->sector.shift), size);
+	memcpy(dest, flash + offset + (sectorNum << (*eme.gFlash)->sector.shift), size);
 }
 
 void Platform_SetAlarm(u8 *alarmData) {
@@ -123,7 +215,7 @@ u16 Platform_GetKeyInput(void){
 	return keys;
 }
 
-static struct DLL_Platform dll_platform = {
+static const struct DLL_Platform dll_platform = {
 	.VBlankIntrWait = VBlankIntrWait,
 	.SoftReset = SoftReset,
 	.GetKeyInput = Platform_GetKeyInput,
@@ -141,29 +233,35 @@ static struct DLL_Platform dll_platform = {
 	.SkipToGame = true,
 };
 
-static size_t lastFrame = -1;
+thread_local static size_t lastFrame = -1;
 
 void runAgent(int generation, int index) {
+	auto dllHandle = LoadEmeraldDLL();
+	if(!dllHandle) {
+		return;
+	}
+
 	std::memset(&internalClock, 0, sizeof(internalClock));
 	internalClock.status = SIIRTCINFO_24HOUR;
 	UpdateInternalClock();
-	Platform_Set(&dll_platform);
+	eme.Platform_Set(&dll_platform);
 
 	REG_VCOUNT = 161;
-	AgbInit();
+	eme.AgbInit();
 
 	while(!agentStop) {
-		AgbRunFrame();
+		eme.AgbRunFrame();
 		VBlankIntrWait();
 
 		#ifdef ENABLE_SDL2
 			// if frame changed from SDL, draw screens
 			if(agentsFinishedDrawing >= 0 && currentFrame != lastFrame) {
 				lastFrame = currentFrame;
-				memset(screens[index], 0, sizeof(screens[index]));
-				DrawFrame(screens[index]);
+				DrawFrame(screens[index], &eme);
 				agentsFinishedDrawing = agentsFinishedDrawing + 1;
 			}
 		#endif
 	}
+
+	UnloadEmeraldDLL(dllHandle);
 }

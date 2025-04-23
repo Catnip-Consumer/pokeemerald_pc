@@ -12,9 +12,9 @@
 
 #include "platform/dll.h"
 
-struct DLL_Platform *gPlatform = NULL;
+const struct DLL_Platform *gPlatform = NULL;
 
-_DLL_ void Platform_Set(struct DLL_Platform *platform) {
+_DLL_ void Platform_Set(const struct DLL_Platform *platform) {
 	gPlatform = platform;
 }
 

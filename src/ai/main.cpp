@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <filesystem>
 #include <cstring>
 #include <algorithm>
 #include <thread>
@@ -21,7 +20,7 @@ volatile bool agentStop;
 #ifdef _WIN32
 #include <windows.h>
 
-static const std::filesystem::path getExecutableDir() {
+const std::filesystem::path getExecutableDir() {
     char buffer[MAX_PATH];
     GetModuleFileName(NULL, buffer, MAX_PATH);
     return std::filesystem::path(buffer).parent_path();
@@ -31,7 +30,7 @@ static const std::filesystem::path getExecutableDir() {
 #include <unistd.h>
 #include <limits.h>
 
-static const std::filesystem::path getExecutableDir() {
+const std::filesystem::path getExecutableDir() {
     char buffer[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
     if (len != -1) {
@@ -45,7 +44,7 @@ static const std::filesystem::path getExecutableDir() {
 #include <mach-o/dyld.h>
 #include <limits.h>
 
-static const std::filesystem::path getExecutableDir() {
+const std::filesystem::path getExecutableDir() {
     char buffer[PATH_MAX];
     uint32_t size = sizeof(buffer);
     if (_NSGetExecutablePath(buffer, &size) == 0) {
@@ -72,6 +71,8 @@ static void ReadSaveFile() {
 		// read from file
 		const auto readSize = min((std::streampos) size, (std::streampos) sizeof(flash));
 		savefile.read(reinterpret_cast<char*>(flash), size);
+
+		std::cout << "Read " << size << " bytes from " << savePath << std::endl;
 
 	} catch (std::exception*) {
 		// assume the file was not found
