@@ -71,7 +71,6 @@ static void ReadSaveFile() {
 
 		// read from file
 		const auto readSize = min((std::streampos) size, (std::streampos) sizeof(flash));
-		std::cout << "Read " << readSize << " bytes from " << savePath << std::endl;
 		savefile.read(reinterpret_cast<char*>(flash), size);
 
 	} catch (std::exception*) {

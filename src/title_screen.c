@@ -20,6 +20,7 @@
 #include "gpu_regs.h"
 #include "trig.h"
 #include "graphics.h"
+#include "platform.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
 
@@ -567,8 +568,15 @@ static void VBlankCB(void)
     SetGpuReg(REG_OFFSET_BG1VOFS, gBattle_BG1_Y);
 }
 
+extern void CB2_ContinueSavedGame(void);
+
 void CB2_InitTitleScreen(void)
 {
+	if(Platform_SkipToGame()) {
+		SetMainCallback2(CB2_ContinueSavedGame);
+		return;
+	}
+
     switch (gMain.state)
     {
     default:

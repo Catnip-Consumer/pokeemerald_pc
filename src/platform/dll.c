@@ -27,6 +27,15 @@ bool8 Platform_HasAudio(void)
 	return FALSE;
 }
 
+bool8 Platform_SkipToGame(void)
+{
+	if(gPlatform != NULL) {
+		return gPlatform->SkipToGame;
+	}
+
+	return FALSE;
+}
+
 void Platform_StoreSaveFile(void)
 {
 	if(gPlatform != NULL) {

@@ -36,7 +36,7 @@ bool paused = false;
 double simTime = 0;
 double lastGameTime = 0;
 double curGameTime = 0;
-double fixedTimestep = 1.0 / 60.0; // 16.666667ms
+double fixedTimestep = 1.0 / 59.727500569606; // 16.7427063ms
 double timeScale = 1.0;
 struct SiiRtcInfo internalClock;
 
@@ -431,7 +431,7 @@ void SoftReset(u32 resetFlags)
 }
 
 static struct DLL_Platform dll_platform = {
-	.HasAudio = TRUE,
+	.VBlankIntrWait = VBlankIntrWait,
 	.SoftReset = SoftReset,
 	.GetKeyInput = Platform_GetKeyInput,
 	.StoreSaveFile = StoreSaveFile,
@@ -443,7 +443,9 @@ static struct DLL_Platform dll_platform = {
 	.SetDateTime = Platform_SetDateTime,
 	.GetTime = Platform_GetTime,
 	.SetTime = Platform_SetTime,
-	.SetAlarm = Platform_SetAlarm
+	.SetAlarm = Platform_SetAlarm,
+	.HasAudio = TRUE,
+	.SkipToGame = TRUE,
 };
 
 int main(int argc, char **argv)

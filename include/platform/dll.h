@@ -4,7 +4,6 @@
 #include "global.h"
 
 struct DLL_Platform {
-	bool8 HasAudio;
 	void (*VBlankIntrWait)(void);
 	void (*SoftReset)(u32);
 	u16 (*GetKeyInput)(void);
@@ -18,6 +17,8 @@ struct DLL_Platform {
 	void (*GetTime)(struct SiiRtcInfo *rtc);
 	void (*SetTime)(struct SiiRtcInfo *rtc);
 	void (*SetAlarm)(u8 *alarmData);
+	bool8 HasAudio;
+	bool8 SkipToGame;
 };
 
 _DLL_ void Platform_Set(struct DLL_Platform *platform);

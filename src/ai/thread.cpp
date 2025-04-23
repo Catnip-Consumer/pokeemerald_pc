@@ -124,7 +124,6 @@ u16 Platform_GetKeyInput(void){
 }
 
 static struct DLL_Platform dll_platform = {
-	.HasAudio = false,
 	.VBlankIntrWait = VBlankIntrWait,
 	.SoftReset = SoftReset,
 	.GetKeyInput = Platform_GetKeyInput,
@@ -137,7 +136,9 @@ static struct DLL_Platform dll_platform = {
 	.SetDateTime = Platform_SetDateTime,
 	.GetTime = Platform_GetTime,
 	.SetTime = Platform_SetTime,
-	.SetAlarm = Platform_SetAlarm
+	.SetAlarm = Platform_SetAlarm,
+	.HasAudio = false,
+	.SkipToGame = true,
 };
 
 static size_t lastFrame = -1;
