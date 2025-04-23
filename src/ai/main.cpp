@@ -15,7 +15,12 @@
 
 uint8_t flash[sizeof(FLASH_BASE)];
 volatile uint16_t keys = 0;
+
 volatile bool agentStop;
+volatile bool agentWaitSync;
+
+std::mutex agentMutex;
+volatile size_t agentWaitingSync;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -87,12 +92,54 @@ static void ReadSaveFile() {
 int main(int argc, char **argv) {
 	ReadSaveFile();
 
+	#ifdef _WIN32
+		std::filesystem::create_directory(getExecutableDir() / "_dll");
+	#endif
+
 	agentStop = false;
-	std::thread agent(runAgent, 0, 0);
+	agentWaitSync = true;
+	agentWaitingSync = 0;
+	std::thread agent[CONCURRENT_AGENTS];
+
+	for(int i = 0; i < CONCURRENT_AGENTS; i++) {
+		#ifdef _WIN32
+			// because Windows tries to load the same DLL multiple times, create copies of the DLL for each thread! yay!
+			const auto target = getExecutableDir() / "_dll" / ("libemerald_" + std::to_string(i) + ".dll");
+
+			if(std::filesystem::exists(target)) {
+				std::filesystem::remove(target);
+			}
+
+			std::filesystem::copy_file(getExecutableDir() / "libemerald.dll", target);
+		#endif
+		agent[i] = std::thread(runAgent, 0, i);
+	}
 
 #ifdef ENABLE_SDL2
 	initSDL();
 #endif
+
+	std::cout << "Waiting for agents to sync..." << std::endl;
+
+	while(true) {
+		#ifdef ENABLE_SDL2
+			if(handleEventsSDL()) {
+				break;
+			}
+		#endif
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+		{
+			std::lock_guard<std::mutex> lock(agentMutex);
+			if(agentWaitingSync >= CONCURRENT_AGENTS) {
+				break;
+			}
+		}
+	}
+
+	agentWaitSync = false;
+	std::cout << "Running " << CONCURRENT_AGENTS << " agents..." << std::endl;
 
 	while(true) {
 	#ifdef ENABLE_SDL2
@@ -107,6 +154,9 @@ int main(int argc, char **argv) {
 	#ifdef ENABLE_SDL2
 		exitSDL();
 	#endif
-	agent.join();
+
+	for(int i = 0; i < CONCURRENT_AGENTS; i++) {
+		agent[i].join();
+	}
 	return 0;
 }

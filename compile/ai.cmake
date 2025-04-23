@@ -27,6 +27,7 @@ add_executable(emerald-ai
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 target_link_libraries(emerald-ai PRIVATE SDL2main SDL2-static xinput)
+target_link_options(emerald-ai PRIVATE -Wl,--large-address-aware)
 
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

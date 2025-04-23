@@ -36,7 +36,9 @@ add_executable(emerald-sdl2
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(emerald-sdl2 PROPERTIES LINKER_LANGUAGE C)
+
 target_link_libraries(emerald-sdl2 PRIVATE emerald SDL2main SDL2-static xinput)
+target_link_options(emerald-sdl2 PRIVATE -Wl,--large-address-aware)
 
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -65,15 +67,6 @@ endif()
 target_include_directories(emerald-sdl2 PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(emerald-sdl2 PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(emerald-sdl2 PRIVATE ${CMAKE_SOURCE_DIR}/extern/SDL/include)
-
-# Compiler options
-target_compile_options(emerald-sdl2 PRIVATE
-	-Wformat -Wformat-security -fomit-frame-pointer
-	-Wno-trigraphs -Wimplicit -Wparentheses -Wunused
-	-fleading-underscore -fno-dce -fno-builtin
-	-mmmx -msse -msse2 -mfxsr
-	-m32 -std=gnu99 -O3
-)
 
 # Compiler toggle flags
 target_compile_definitions(emerald-sdl2 PRIVATE RENDERER_EASY_DRAW)

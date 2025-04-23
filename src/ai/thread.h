@@ -1,7 +1,7 @@
 #pragma once
 
 #include <filesystem>
-#include <stdint.h>
+#include <mutex>
 
 extern "C" {
 	#include <global.h>
@@ -12,10 +12,15 @@ extern "C" {
 extern uint8_t flash[sizeof(FLASH_BASE)];
 extern void runAgent(int generation, int index);
 extern volatile bool agentStop;
+extern volatile bool agentWaitSync;
+
+extern std::mutex agentMutex;
+extern volatile size_t agentWaitingSync;
 
 #ifdef ENABLE_SDL2
-	extern volatile size_t currentFrame;
-	extern volatile int32_t agentsFinishedDrawing;
+	extern std::mutex sdlMutex;
+	extern volatile size_t sdlCurrentFrame;
+	extern volatile int32_t sdlAgentsFinishedDrawing;
 
 	// Dimensions of the GBA screen in pixels
 	#define DISPLAY_WIDTH  240

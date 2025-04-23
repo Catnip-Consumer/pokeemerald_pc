@@ -1,6 +1,7 @@
 #include <thread>
 #include <iostream>
 #include <cstring>
+#include <chrono>
 
 #include <ai/config.h>
 #include <ai/thread.h>
@@ -13,16 +14,17 @@ extern "C" {
 	#include <gba/flash_internal.h>
 }
 
+using namespace std::chrono_literals;
+
 extern void DrawFrame(uint16_t *pixels, struct EmeraldAddresses* eme);
 static bool GetEmeraldDLLAddresses(void* dll);
-
-const auto dllpath = getExecutableDir() / "libemerald";
 
 #ifdef _WIN32
 #include <windows.h>
 
-static void* LoadEmeraldDLL() {
-	const auto _dllPath = dllpath.string() + ".dll";
+static void* LoadEmeraldDLL(int index) {
+	const auto _exedir = getExecutableDir();
+	const auto _dllPath = (_exedir / ("_dll/libemerald_"+ std::to_string(index) + ".dll")).string();
     HMODULE dll = LoadLibrary(_dllPath.c_str());
 
     if (!dll) {
@@ -48,7 +50,7 @@ static void* GetProcAddress(void* dll, const char* procName) {
 
 #elif __linux__
 
-static void* LoadEmeraldDLL() {
+static void* LoadEmeraldDLL(int index) {
 	// TODO: Implement
 	return nullptr;
 }
@@ -119,7 +121,7 @@ void VBlankIntrWait() {
 	REG_DISPSTAT &= ~INTR_FLAG_VBLANK;
 }
 
-struct SiiRtcInfo internalClock;
+thread_local struct SiiRtcInfo internalClock;
 
 void Platform_GetStatus(struct SiiRtcInfo *rtc){
 	rtc->status = internalClock.status;
@@ -212,7 +214,7 @@ void SoftReset(u32 flags) {
 extern volatile uint16_t keys;
 
 u16 Platform_GetKeyInput(void){
-	return keys;
+	return 1 << (rand() % 10);
 }
 
 static const struct DLL_Platform dll_platform = {
@@ -236,7 +238,7 @@ static const struct DLL_Platform dll_platform = {
 thread_local static size_t lastFrame = -1;
 
 void runAgent(int generation, int index) {
-	auto dllHandle = LoadEmeraldDLL();
+	auto dllHandle = LoadEmeraldDLL(index);
 	if(!dllHandle) {
 		return;
 	}
@@ -246,20 +248,41 @@ void runAgent(int generation, int index) {
 	UpdateInternalClock();
 	eme.Platform_Set(&dll_platform);
 
+	{
+		std::lock_guard<std::mutex> lock(agentMutex);
+		agentWaitingSync = agentWaitingSync + 1;
+	}
+
+	while(agentWaitSync) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+
 	REG_VCOUNT = 161;
 	eme.AgbInit();
 
 	while(!agentStop) {
-		eme.AgbRunFrame();
-		VBlankIntrWait();
+		// time this loop
+		auto start = std::chrono::high_resolution_clock::now();
+
+		// run for multiple frames before we check SDL for updates or ask for input updates
+		while((std::chrono::high_resolution_clock::now() - start) < 7ms) {
+			for(int i = 0; i < 8; i++) {
+				eme.AgbRunFrame();
+				VBlankIntrWait();
+			}
+		}
 
 		#ifdef ENABLE_SDL2
+		{
+			std::lock_guard<std::mutex> lock(sdlMutex);
+
 			// if frame changed from SDL, draw screens
-			if(agentsFinishedDrawing >= 0 && currentFrame != lastFrame) {
-				lastFrame = currentFrame;
+			if(sdlAgentsFinishedDrawing >= 0 && sdlCurrentFrame != lastFrame) {
+				lastFrame = sdlCurrentFrame;
 				DrawFrame(screens[index], &eme);
-				agentsFinishedDrawing = agentsFinishedDrawing + 1;
+				sdlAgentsFinishedDrawing = sdlAgentsFinishedDrawing + 1;
 			}
+		}
 		#endif
 	}
 

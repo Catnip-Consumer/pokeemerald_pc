@@ -493,6 +493,7 @@ add_library(emerald SHARED
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(emerald PROPERTIES LINKER_LANGUAGE C)
+target_link_options(emerald PRIVATE -Wl,--large-address-aware)
 
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

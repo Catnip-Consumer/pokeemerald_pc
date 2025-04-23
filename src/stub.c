@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#define STUB_FUNC(func) func { puts("function \"" #func "\" is a stub"); }
-#define STUB_FUNC_BLOCK(func, block) func { puts("function \"" #func "\" is a stub"); block }
+#define STUB_FUNC(func) func { /*puts("function \"" #func "\" is a stub");*/ }
+#define STUB_FUNC_BLOCK(func, block) func { /*puts("function \"" #func "\" is a stub");*/ block }
 #define STUB_FUNC_QUIET(func) func {}
 #define STUB_FUNC_QUIET_BLOCK(func, block) func { block }
 
