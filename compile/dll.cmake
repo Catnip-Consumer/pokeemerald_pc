@@ -21,13 +21,14 @@ set(COMPILE_DEFS
 	-DMODERN=1
 	-DPORTABLE=1
 	-DUBFIX=1
+	-DVER_64BIT=1
 	-DIS_DLL
 )
 
 # Preprocessor options
 set(CPP_OPTS
 	-iquote include -Wno-trigraphs
-	-D NONMATCHING -D PORTABLE -D RENDERER_EASY_DRAW -D MODERN=1 -D UBFIX -D IS_DLL
+	-D NONMATCHING -D PORTABLE -D RENDERER_EASY_DRAW -D MODERN=1 -D UBFIX -D IS_DLL -D VER_64BIT
 )
 
 # Compiler options
@@ -35,13 +36,12 @@ set(COMPILE_OPTS
 	-Wformat -Wformat-security -fomit-frame-pointer
 	-Wno-trigraphs -Wimplicit -Wno-int-conversion -Wparentheses -Wunused
 	-fleading-underscore -fno-dce -fno-builtin -Wno-unused-function
-	-mmmx -msse -msse2 -mfxsr
-	-m32 -std=gnu99 -O3
+	-msse3 -std=gnu99 -O3
 )
 
 # Assembler options
 set(AS_OPTS
-	--32 --defsym MODERN=1 --defsym PORTABLE=1 --defsym UBFIX=1
+	--64 --defsym MODERN=1 --defsym PORTABLE=1 --defsym UBFIX=1 --defsym IS_DLL=1 --defsym VER_64BIT=1
 )
 
 # Add `DEBUG` macro definition if compiling under Debug or RelWithDebInfo
@@ -82,7 +82,6 @@ function(asm_src_preprocess OUTPUT_VAR OUT_DIR SRC_DIR SOURCE_FILES)
 					".2byte" ".short"
 					".4byte" ".int"
 			COMMAND ${AS} ${AS_OPTS} -o ${OUTPUT_OBJ} ${INTERMEDIATE_P2}
-			COMMAND ${OBJCOPY} --prefix-symbol _ ${OUTPUT_OBJ}
 			DEPENDS ${INPUT_SRC}
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			COMMENT "Processing ${INPUT_SRC} to generate ${OUTPUT_OBJ}"
@@ -490,25 +489,15 @@ add_library(emerald SHARED
 	${SND_OBJ_FILES}
 )
 
-set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(emerald PROPERTIES LINKER_LANGUAGE C)
-target_link_options(emerald PRIVATE -Wl,--large-address-aware)
+target_link_libraries(emerald -static gcc)
+add_dependencies(emerald emerald-sound-files)
 
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(emerald PRIVATE -Wreturn-type -Werror=return-type -Wformat -Wformat-security -fomit-frame-pointer)
 	target_compile_options(emerald PRIVATE -Wno-trigraphs -Wimplicit -Wno-int-conversion -Wparentheses -Wunused)
 	target_compile_options(emerald PRIVATE -fleading-underscore -fno-dce -fno-builtin -Wno-unused-function)
-
-	if(WIN32)
-		# handle windows-specific options
-		link_libraries(-static gcc stdc++ winpthread)
-
-		if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-			target_compile_options(emerald PRIVATE -mconsole)
-		endif()
-	endif()
 
 	# strip all symbol info on gnu on release builds
 	if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -520,6 +509,3 @@ endif()
 # Include dirs
 target_include_directories(emerald PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(emerald PRIVATE ${CMAKE_SOURCE_DIR}/include)
-
-# Extra depencies
-add_dependencies(emerald emerald-sound-files)

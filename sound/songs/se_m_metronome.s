@@ -72,8 +72,10 @@ se_m_metronome:
 	.byte	se_m_metronome_pri	/* Priority*/
 	.byte	se_m_metronome_rev	/* Reverb.*/
 
-	.int	se_m_metronome_grp
+	.space 4
 
-	.int	se_m_metronome_1
+	.quad	se_m_metronome_grp
+
+	.quad	se_m_metronome_1
 
 	.end

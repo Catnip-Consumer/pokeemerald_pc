@@ -51,8 +51,10 @@ se_m_poison_powder:
 	.byte	se_m_poison_powder_pri	/* Priority*/
 	.byte	se_m_poison_powder_rev	/* Reverb.*/
 
-	.int	se_m_poison_powder_grp
+	.space 4
 
-	.int	se_m_poison_powder_1
+	.quad	se_m_poison_powder_grp
+
+	.quad	se_m_poison_powder_1
 
 	.end

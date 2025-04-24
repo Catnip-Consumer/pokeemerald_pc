@@ -105,15 +105,15 @@ se_m_moonlight_1_004:
 	.byte		N20   , Gn6 , v100
 	.byte	W21
 	.byte	PATT
-	 .int	se_m_moonlight_1_000
+	 .quad	se_m_moonlight_1_000
 	.byte	PATT
-	 .int	se_m_moonlight_1_001
+	 .quad	se_m_moonlight_1_001
 	.byte	PATT
-	 .int	se_m_moonlight_1_002
+	 .quad	se_m_moonlight_1_002
 	.byte	PATT
-	 .int	se_m_moonlight_1_003
+	 .quad	se_m_moonlight_1_003
 	.byte	PATT
-	 .int	se_m_moonlight_1_004
+	 .quad	se_m_moonlight_1_004
 	.byte	FINE
 
 /*********************** Track  2 **********************@*/
@@ -192,11 +192,11 @@ se_m_moonlight_2_002:
 	.byte		        Gn6 , v096
 	.byte	W05
 	.byte	PATT
-	 .int	se_m_moonlight_2_000
+	 .quad	se_m_moonlight_2_000
 	.byte	PATT
-	 .int	se_m_moonlight_2_001
+	 .quad	se_m_moonlight_2_001
 	.byte	PATT
-	 .int	se_m_moonlight_2_002
+	 .quad	se_m_moonlight_2_002
 	.byte	W24
 	.byte	W24
 	.byte	FINE
@@ -210,9 +210,11 @@ se_m_moonlight:
 	.byte	se_m_moonlight_pri	/* Priority*/
 	.byte	se_m_moonlight_rev	/* Reverb.*/
 
-	.int	se_m_moonlight_grp
+	.space 4
 
-	.int	se_m_moonlight_1
-	.int	se_m_moonlight_2
+	.quad	se_m_moonlight_grp
+
+	.quad	se_m_moonlight_1
+	.quad	se_m_moonlight_2
 
 	.end

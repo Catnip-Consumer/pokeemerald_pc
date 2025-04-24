@@ -55,8 +55,10 @@ se_m_bubble3:
 	.byte	se_m_bubble3_pri	/* Priority*/
 	.byte	se_m_bubble3_rev	/* Reverb.*/
 
-	.int	se_m_bubble3_grp
+	.space 4
 
-	.int	se_m_bubble3_1
+	.quad	se_m_bubble3_grp
+
+	.quad	se_m_bubble3_1
 
 	.end

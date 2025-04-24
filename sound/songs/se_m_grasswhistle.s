@@ -122,9 +122,11 @@ se_m_grasswhistle:
 	.byte	se_m_grasswhistle_pri	/* Priority*/
 	.byte	se_m_grasswhistle_rev	/* Reverb.*/
 
-	.int	se_m_grasswhistle_grp
+	.space 4
 
-	.int	se_m_grasswhistle_1
-	.int	se_m_grasswhistle_2
+	.quad	se_m_grasswhistle_grp
+
+	.quad	se_m_grasswhistle_1
+	.quad	se_m_grasswhistle_2
 
 	.end

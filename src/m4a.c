@@ -380,10 +380,12 @@ void SoundInit(struct SoundInfo *soundInfo)
                    | SOUND_ALL_MIX_FULL;
     REG_SOUNDBIAS_H = (REG_SOUNDBIAS_H & 0x3F) | 0x40;
 
+    #ifndef PORTABLE
     REG_DMA1SAD = (s32)soundInfo->pcmBuffer;
     REG_DMA1DAD = (s32)&REG_FIFO_A;
     REG_DMA2SAD = (s32)soundInfo->pcmBuffer + PCM_DMA_BUF_SIZE;
     REG_DMA2DAD = (s32)&REG_FIFO_B;
+    #endif
 
     SOUND_INFO_PTR = soundInfo;
     CpuFill32(0, soundInfo, sizeof(struct SoundInfo));
@@ -515,7 +517,11 @@ void SoundClear(void)
     {
         ((struct SoundChannel *)chan)->statusFlags = 0;
         i--;
+        #ifdef VER_64BIT
+        chan = (void *)((s64)chan + sizeof(struct SoundChannel));
+        #else
         chan = (void *)((s32)chan + sizeof(struct SoundChannel));
+        #endif
     }
 
     chan = soundInfo->cgbChans;
@@ -529,7 +535,11 @@ void SoundClear(void)
             soundInfo->CgbOscOff(i);
             ((struct CgbChannel *)chan)->statusFlags = 0;
             i++;
+            #ifdef VER_64BIT
+            chan = (void *)((s64)chan + sizeof(struct CgbChannel));
+            #else
             chan = (void *)((s32)chan + sizeof(struct CgbChannel));
+            #endif
         }
     }
 
@@ -612,8 +622,8 @@ void MPlayOpen(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *track
         soundInfo->MPlayMainHead = NULL;
     }
 
-    soundInfo->musicPlayerHead = (u32)mplayInfo;
-    soundInfo->MPlayMainHead = (u32)MP2KPlayerMain;
+    soundInfo->musicPlayerHead = mplayInfo;
+    soundInfo->MPlayMainHead = MP2KPlayerMain;
     soundInfo->ident = ID_NUMBER;
     mplayInfo->ident = ID_NUMBER;
 }
@@ -1015,7 +1025,11 @@ void CgbSound(void)
                     #endif
                     // fallthrough
                 case 2:
+                    #ifdef VER_64BIT
+                    *nrx1ptr = ((u64)channels->wavePointer << 6) + channels->length;
+                    #else
                     *nrx1ptr = ((u32)channels->wavePointer << 6) + channels->length;
+                    #endif
                     goto init_env_step_time_dir;
                 case 3:
                     if (channels->wavePointer != channels->currentPointer)
@@ -1039,7 +1053,11 @@ void CgbSound(void)
                     break;
                 default:
                     *nrx1ptr = channels->length;
+                    #ifdef VER_64BIT
+                    *nrx3ptr = (u64)channels->wavePointer << 3;
+                    #else
                     *nrx3ptr = (u32)channels->wavePointer << 3;
+                    #endif
                 init_env_step_time_dir:
                     envelopeStepTimeAndDir = channels->attack + CGB_NRx2_ENV_DIR_INC;
                     if (channels->length)
@@ -1571,7 +1589,11 @@ void ply_xxx(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *track)
 
 void ply_xwave(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *track)
 {
+#ifdef VER_64BIT
+    u64 wav;
+#else
     u32 wav;
+#endif
 
 #ifdef UBFIX
     wav = 0;
@@ -1717,7 +1739,11 @@ start_song:
     gPokemonCrySongs[i].tone = tone;
     gPokemonCrySongs[i].part[0] = &gPokemonCrySongs[i].part0;
     gPokemonCrySongs[i].part[1] = &gPokemonCrySongs[i].part1;
+    #ifdef VER_64BIT
+    gPokemonCrySongs[i].gotoTarget = (u64)&gPokemonCrySongs[i].cont;
+    #else
     gPokemonCrySongs[i].gotoTarget = (u32)&gPokemonCrySongs[i].cont;
+    #endif
 
     mplayInfo->ident = ID_NUMBER;
 

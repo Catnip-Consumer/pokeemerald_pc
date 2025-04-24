@@ -110,9 +110,11 @@ se_m_explosion:
 	.byte	se_m_explosion_pri	/* Priority*/
 	.byte	se_m_explosion_rev	/* Reverb.*/
 
-	.int	se_m_explosion_grp
+	.space 4
 
-	.int	se_m_explosion_1
-	.int	se_m_explosion_2
+	.quad	se_m_explosion_grp
+
+	.quad	se_m_explosion_1
+	.quad	se_m_explosion_2
 
 	.end

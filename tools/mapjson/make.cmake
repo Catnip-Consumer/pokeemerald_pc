@@ -10,6 +10,7 @@ add_executable(mapjson
 target_compile_definitions(mapjson PRIVATE APPDIR="tools/mapjson")
 target_compile_definitions(mapjson PRIVATE PROGRAMNAME="mapjson")
 set_target_properties(mapjson PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools")
+set(MAPJSON $<TARGET_FILE:mapjson>)
 
 cmake_policy(SET CMP0065 NEW)
 

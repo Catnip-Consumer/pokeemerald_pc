@@ -100,17 +100,17 @@ se_m_encore2_1_000:
 	.byte	W02
 	.byte	PEND
 	.byte	PATT
-	 .int	se_m_encore2_1_000
+	 .quad	se_m_encore2_1_000
 	.byte	PATT
-	 .int	se_m_encore2_1_000
+	 .quad	se_m_encore2_1_000
 	.byte	PATT
-	 .int	se_m_encore2_1_000
+	 .quad	se_m_encore2_1_000
 	.byte	PATT
-	 .int	se_m_encore2_1_000
+	 .quad	se_m_encore2_1_000
 	.byte	PATT
-	 .int	se_m_encore2_1_000
+	 .quad	se_m_encore2_1_000
 	.byte	PATT
-	 .int	se_m_encore2_1_000
+	 .quad	se_m_encore2_1_000
 	.byte		VOL   , 96*se_m_encore2_mvl/mxv
 	.byte		PAN   , c_v+0
 	.byte	W01
@@ -166,8 +166,10 @@ se_m_encore2:
 	.byte	se_m_encore2_pri	/* Priority*/
 	.byte	se_m_encore2_rev	/* Reverb.*/
 
-	.int	se_m_encore2_grp
+	.space 4
 
-	.int	se_m_encore2_1
+	.quad	se_m_encore2_grp
+
+	.quad	se_m_encore2_1
 
 	.end

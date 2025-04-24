@@ -2,11 +2,11 @@ CXX ?= g++
 
 CXXFLAGS := -Wall -std=c++17 -O2
 
-INCLUDES := -I .
+INCLUDES := -I . -I ../../extern/json/include
 
 SRCS := jsonproc.cpp
 
-HEADERS := jsonproc.h inja.hpp nlohmann/json.hpp
+HEADERS := jsonproc.h inja.hpp
 
 ifeq ($(OS),Windows_NT)
 EXE := .exe

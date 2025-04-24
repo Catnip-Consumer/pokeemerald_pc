@@ -90,9 +90,11 @@ se_m_hail:
 	.byte	se_m_hail_pri	/* Priority*/
 	.byte	se_m_hail_rev	/* Reverb.*/
 
-	.int	se_m_hail_grp
+	.space 4
 
-	.int	se_m_hail_1
-	.int	se_m_hail_2
+	.quad	se_m_hail_grp
+
+	.quad	se_m_hail_1
+	.quad	se_m_hail_2
 
 	.end

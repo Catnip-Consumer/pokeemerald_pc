@@ -112,9 +112,9 @@ se_m_string_shot2_2_000:
 	.byte	W12
 	.byte	PEND
 	.byte	PATT
-	 .int	se_m_string_shot2_2_000
+	 .quad	se_m_string_shot2_2_000
 	.byte	PATT
-	 .int	se_m_string_shot2_2_000
+	 .quad	se_m_string_shot2_2_000
 	.byte	FINE
 
 /*******************************************************@*/
@@ -126,9 +126,11 @@ se_m_string_shot2:
 	.byte	se_m_string_shot2_pri	/* Priority*/
 	.byte	se_m_string_shot2_rev	/* Reverb.*/
 
-	.int	se_m_string_shot2_grp
+	.space 4
 
-	.int	se_m_string_shot2_1
-	.int	se_m_string_shot2_2
+	.quad	se_m_string_shot2_grp
+
+	.quad	se_m_string_shot2_1
+	.quad	se_m_string_shot2_2
 
 	.end

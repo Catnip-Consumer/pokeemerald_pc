@@ -1110,13 +1110,13 @@ static void SlotMachine_VBlankCB(void)
 }
 
 #define tMachineId    data[0]
-#define tExitCallback data[1]
+#define tExitCallback genericPtr[0]
 
 static void PlaySlotMachine_Internal(u8 machineId, MainCallback exitCallback)
 {
     struct Task *task = &gTasks[CreateTask(SlotMachineDummyTask, 0xFF)];
     task->tMachineId = machineId;
-    StoreWordInTwoHalfwords(&task->tExitCallback, (intptr_t)exitCallback);
+    task->tExitCallback = exitCallback;
 }
 
 // Extracts and assigns machineId and exit callback from task.
@@ -1124,7 +1124,7 @@ static void SlotMachine_InitFromTask(void)
 {
     struct Task *task = &gTasks[FindTaskIdByFunc(SlotMachineDummyTask)];
     sSlotMachine->machineId = task->tMachineId;
-    LoadWordFromTwoHalfwords((u16 *)&task->tExitCallback, (u32 *)&sSlotMachine->prevMainCb);
+    sSlotMachine->prevMainCb = task->tExitCallback;
 }
 
 static void SlotMachineDummyTask(u8 taskId)

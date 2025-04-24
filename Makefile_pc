@@ -1,12 +1,12 @@
-PREFIX := i686-w64-mingw32-
+PREFIX :=
 OBJCOPY := $(PREFIX)objcopy
 CC := $(PREFIX)gcc
 AS := $(PREFIX)as
 
-SDL_DIR := /home/pokeemerald/SDL2-2.0.14/i686-w64-mingw32
+SDL_DIR := /home/pokeemerald/SDL2-2.0.14/x86_64-w64-mingw32
 ASM_PSEUDO_OP_CONV := sed -e 's/\.4byte/\.int/g;s/\.2byte/\.short/g'
 #FIX_UNDERSCORE is required for 32 bit windows
-FIX_UNDERSCORE := $(OBJCOPY) --prefix-symbol _
+FIX_UNDERSCORE := $(OBJCOPY)
 
 export CPP := $(PREFIX)cpp
 export LD := $(PREFIX)ld
@@ -47,17 +47,16 @@ DATA_ASM_BUILDDIR = $(OBJ_DIR)/$(DATA_ASM_SUBDIR)
 SONG_BUILDDIR = $(OBJ_DIR)/$(SONG_SUBDIR)
 MID_BUILDDIR = $(OBJ_DIR)/$(MID_SUBDIR)
 
-ASFLAGS := --32 --defsym MODERN=$(MODERN) --defsym PORTABLE=1 --defsym UBFIX=1
+ASFLAGS := --64 --defsym MODERN=$(MODERN) --defsym PORTABLE=1 --defsym VER_64BIT=1 --defsym UBFIX=1
 
 GCC_VER := $(shell $(CC) -dumpversion)
 
 CC1 	:= $(shell $(PREFIX)gcc --print-prog-name=cc1) -quiet
-override CFLAGS += -mmmx -msse -msse2 -mfxsr
-override CFLAGS += -Wno-trigraphs -Wimplicit -Wno-int-conversion -Wparentheses -Wunused -m32 -std=gnu99 -fleading-underscore -fno-dce -fno-builtin -Wno-unused-function -DPORTABLE -DNONMATCHING -DUBFIX -DMODERN=$(MODERN)
-ROM		:= pokeemerald.exe
+override CFLAGS += -msse3 -Wno-trigraphs -Wno-int-conversion -Wno-incompatible-pointer-types -Wno-implicit-function-declaration -Wimplicit -Wparentheses -Wunused -m64 -std=gnu99 -fno-dce -fno-builtin -Wno-unused-function -DPORTABLE -DNONMATCHING -D UBFIX -DMODERN=$(MODERN)
+ROM		:= pokeemerald64.exe
 OBJ_DIR	:= build/pc
 
-CPPFLAGS := -iquote include -Wno-trigraphs -D NONMATCHING -D PORTABLE -D $(TARGET_PLATFORM) -D $(TILE_RENDERER) -D MODERN=$(MODERN) -D UBFIX -I$(SDL_DIR)/include -L$(SDL_DIR)/lib
+CPPFLAGS := -iquote include -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -D NONMATCHING -D PORTABLE -D $(TARGET_PLATFORM) -D $(TILE_RENDERER) -D VER_64BIT -D MODERN=$(MODERN) -D UBFIX  -I$(SDL_DIR)/include -L$(SDL_DIR)/lib
 
 LDFLAGS = -Map ../../$(MAP)
 
@@ -153,7 +152,7 @@ SONG_OBJS := $(patsubst $(SONG_SUBDIR)/%.s,$(SONG_BUILDDIR)/%.o,$(SONG_SRCS))
 MID_SRCS := $(wildcard $(MID_SUBDIR)/*.mid)
 MID_OBJS := $(patsubst $(MID_SUBDIR)/%.mid,$(MID_BUILDDIR)/%.o,$(MID_SRCS))
 
-OBJS     := $(C_OBJS) $(ASM_OBJS) $(DATA_ASM_OBJS) $(SONG_OBJS) $(MID_OBJS)
+OBJS     := $(ASM_OBJS) $(DATA_ASM_OBJS) $(SONG_OBJS) $(MID_OBJS)
 OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
 SUBDIRS  := $(sort $(dir $(OBJS)))
@@ -161,7 +160,7 @@ SUBDIRS  := $(sort $(dir $(OBJS)))
 $(shell mkdir -p $(SUBDIRS))
 
 $(shell rm -f ${OBJ_DIR}/objects.rsp)
-$(foreach obj, $(OBJS), $(shell echo $(obj) >> ${OBJ_DIR}/objects.rsp))
+#$(foreach obj, $(OBJS), $(shell echo $(obj) >> ${OBJ_DIR}/objects.rsp))
 
 rom: $(ROM)
 ifeq ($(COMPARE),1)
@@ -223,17 +222,11 @@ else
 $(C_BUILDDIR)/%.o: c_dep = $(shell [[ -f $(C_SUBDIR)/$*.c ]] && $(SCANINC) -I include -I $(TOOLS_DIR)/agbcc/include $(C_SUBDIR)/$*.c)
 endif
 
-ifeq ($(DINFO),1)
+#ifeq ($(DINFO),1)
 override CFLAGS += -g -O0
-else
-override CFLAGS += -O3
-endif
-
-$(C_BUILDDIR)/%.o : $(C_SUBDIR)/%.c $$(c_dep)
-	@$(CPP) $(CPPFLAGS) $< -o $(C_BUILDDIR)/$*.i
-	@$(PREPROC) $(C_BUILDDIR)/$*.i charmap.txt | $(CC1) $(CFLAGS) -o $(C_BUILDDIR)/$*.s
-	@echo -e ".text\n\t.align\t2, 0\n" >> $(C_BUILDDIR)/$*.s
-	$(AS) $(ASFLAGS) -o $@ $(C_BUILDDIR)/$*.s
+#else
+#override CFLAGS += -O3
+#endif
 
 # The dep rules have to be explicit or else missing files won't be reported.
 # As a side effect, they're evaluated immediately instead of when the rule is invoked.
@@ -291,5 +284,5 @@ $(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS)
 	bash -x __ld.sh
 	$(FIX) $@ -t"$(TITLE)" -c$(GAME_CODE) -m$(MAKER_CODE) -r$(REVISION) --silent
 
-$(ROM): ${OBJ_DIR}/objects.rsp $(OBJS)
+$(ROM): $(OBJS)
 	@$(CC) $(CFLAGS) -Wl,--demangle -Wl,@${OBJ_DIR}/objects.rsp -static-libgcc -L$(SDL_DIR)/lib $(PLATFORM_INCLUDES) -lwinmm -lxinput -o $@

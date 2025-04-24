@@ -125,9 +125,9 @@ se_m_bubble_beam_1_001:
 	.byte		        c_v-7
 	.byte	W02
 	.byte	PATT
-	 .int	se_m_bubble_beam_1_000
+	 .quad	se_m_bubble_beam_1_000
 	.byte	PATT
-	 .int	se_m_bubble_beam_1_001
+	 .quad	se_m_bubble_beam_1_001
 	.byte		PAN   , c_v-6
 	.byte	W01
 	.byte		        c_v+0
@@ -166,8 +166,10 @@ se_m_bubble_beam:
 	.byte	se_m_bubble_beam_pri	/* Priority*/
 	.byte	se_m_bubble_beam_rev	/* Reverb.*/
 
-	.int	se_m_bubble_beam_grp
+	.space 4
 
-	.int	se_m_bubble_beam_1
+	.quad	se_m_bubble_beam_grp
+
+	.quad	se_m_bubble_beam_1
 
 	.end

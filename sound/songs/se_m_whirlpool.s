@@ -118,8 +118,10 @@ se_m_whirlpool:
 	.byte	se_m_whirlpool_pri	/* Priority*/
 	.byte	se_m_whirlpool_rev	/* Reverb.*/
 
-	.int	se_m_whirlpool_grp
+	.space 4
 
-	.int	se_m_whirlpool_1
+	.quad	se_m_whirlpool_grp
+
+	.quad	se_m_whirlpool_1
 
 	.end

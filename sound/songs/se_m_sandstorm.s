@@ -230,7 +230,7 @@ se_m_sandstorm_2_000:
 	.byte		        Cn3 , v100
 	.byte	W03
 	.byte	PATT
-	 .int	se_m_sandstorm_2_000
+	 .quad	se_m_sandstorm_2_000
 	.byte	W02
 	.byte		N03   , Cn3 , v076
 	.byte	W04
@@ -282,9 +282,11 @@ se_m_sandstorm:
 	.byte	se_m_sandstorm_pri	/* Priority*/
 	.byte	se_m_sandstorm_rev	/* Reverb.*/
 
-	.int	se_m_sandstorm_grp
+	.space 4
 
-	.int	se_m_sandstorm_1
-	.int	se_m_sandstorm_2
+	.quad	se_m_sandstorm_grp
+
+	.quad	se_m_sandstorm_1
+	.quad	se_m_sandstorm_2
 
 	.end

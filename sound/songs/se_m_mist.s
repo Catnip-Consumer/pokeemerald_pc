@@ -87,8 +87,10 @@ se_m_mist:
 	.byte	se_m_mist_pri	/* Priority*/
 	.byte	se_m_mist_rev	/* Reverb.*/
 
-	.int	se_m_mist_grp
+	.space 4
 
-	.int	se_m_mist_1
+	.quad	se_m_mist_grp
+
+	.quad	se_m_mist_1
 
 	.end

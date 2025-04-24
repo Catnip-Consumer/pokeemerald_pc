@@ -21,11 +21,13 @@
 	.else
 	.byte 0
 	.endif
-	.int \sample_data_pointer
+    .space 4
+	.quad \sample_data_pointer
 	.byte \attack
 	.byte \decay
 	.byte \sustain
 	.byte \release
+    .space 4
 	.endm
 
 	.macro voice_square_1 base_midi_key:req, pan:req, sweep:req, duty_cycle:req, attack:req, decay:req, sustain:req, release:req
@@ -45,12 +47,15 @@
 	.byte 0
 	.endif
 	.byte \sweep
+    .space 4
 	.byte (\duty_cycle & 0x3)
 	.byte 0, 0, 0
+    .space 4
 	.byte (\attack  & 0x7)
 	.byte (\decay   & 0x7)
 	.byte (\sustain & 0xF)
 	.byte (\release & 0x7)
+    .space 4
 	.endm
 
 	.macro voice_square_2 base_midi_key:req, pan:req, duty_cycle:req, attack:req, decay:req, sustain:req, release:req
@@ -70,12 +75,15 @@
 	.byte 0
 	.endif
 	.byte 0
+    .space 4
 	.byte (\duty_cycle & 0x3)
 	.byte 0, 0, 0
+    .space 4
 	.byte (\attack  & 0x7)
 	.byte (\decay   & 0x7)
 	.byte (\sustain & 0xF)
 	.byte (\release & 0x7)
+    .space 4
 	.endm
 
 	.macro voice_programmable_wave base_midi_key:req, pan:req, wave_samples_pointer:req, attack:req, decay:req, sustain:req, release:req
@@ -95,11 +103,13 @@
 	.byte 0
 	.endif
 	.byte 0
-	.int \wave_samples_pointer
+    .space 4
+	.quad \wave_samples_pointer
 	.byte (\attack  & 0x7)
 	.byte (\decay   & 0x7)
 	.byte (\sustain & 0xF)
 	.byte (\release & 0x7)
+    .space 4
 	.endm
 
 	.macro voice_noise base_midi_key:req, pan:req, period:req, attack:req, decay:req, sustain:req, release:req
@@ -119,34 +129,43 @@
 	.byte 0
 	.endif
 	.byte 0
+    .space 4
 	.byte (\period & 0x1)
 	.byte 0, 0, 0
+    .space 4
 	.byte (\attack  & 0x7)
 	.byte (\decay   & 0x7)
 	.byte (\sustain & 0xF)
 	.byte (\release & 0x7)
+    .space 4
 	.endm
 
 	.macro voice_keysplit voice_group_pointer:req, keysplit_table_pointer:req
 	.byte 0x40, 0, 0, 0
-	.int \voice_group_pointer
-	.int \keysplit_table_pointer
+    .space 4
+	.quad \voice_group_pointer
+	.quad \keysplit_table_pointer
 	.endm
 
 	.macro voice_keysplit_all voice_group_pointer:req
 	.byte 0x80, 0, 0, 0
-	.int \voice_group_pointer
-	.int 0
+    .space 4
+	.quad \voice_group_pointer
+	.quad 0
 	.endm
 
 	.macro cry sample:req
 	.byte 0x20, 60, 0, 0
-	.int \sample
+    .space 4
+	.quad \sample
 	.byte 0xff, 0, 0xff, 0
+    .space 4
 	.endm
 
 	.macro cry_reverse sample:req
 	.byte 0x30, 60, 0, 0
-	.int \sample
+    .space 4
+	.quad \sample
 	.byte 0xff, 0, 0xff, 0
+    .space 4
 	.endm

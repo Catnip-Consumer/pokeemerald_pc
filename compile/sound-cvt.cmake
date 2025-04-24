@@ -24,7 +24,7 @@ endfunction()
 
 # Assembler options
 set(AS_OPTS
-	--32 --defsym MODERN=1 --defsym PORTABLE=1 --defsym UBFIX=1
+	--64 --defsym MODERN=1 --defsym VER_64BIT=1 --defsym PORTABLE=1 --defsym UBFIX=1
 )
 
 # Read all .s sound files
@@ -66,8 +66,9 @@ foreach(LINE IN LISTS MIDI_CFG_LINES)
 	add_custom_command(
 		OUTPUT "${MID_ASM_FILE}"
 		COMMAND ${MID2AGB} "${MID_FILE}" "${MID_ASM_FILE}" ${OPTIONS} > ${NULL_DEVICE}
-		DEPENDS "${MID_FILE}" "${MID_CFG_PATH}"
+		DEPENDS ${MID_FILE} ${MID_CFG_PATH}
 		COMMENT "Processing ${MID_FILE} into ${MID_ASM_FILE} with options: ${OPTIONS}"
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 
 	# Add the output file to the list of generated files
@@ -123,6 +124,7 @@ function(aif_convert OUTPUT_VAR EXTRA_FLAGS SOURCE_FILES)
 			COMMAND ${AIF2PCM} ${SOURCE_FILE} ${OUTPUT_OBJ} ${EXTRA_FLAGS}
 			DEPENDS ${SOURCE_FILE}
 			COMMENT "Convert ${SOURCE_FILE} to ${OUTPUT_OBJ}"
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 		)
 
 		# Append the generated object file to the list

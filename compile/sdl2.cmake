@@ -38,19 +38,15 @@ set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(emerald-sdl2 PROPERTIES LINKER_LANGUAGE C)
 
 target_link_libraries(emerald-sdl2 PRIVATE emerald SDL2main SDL2-static xinput)
-target_link_options(emerald-sdl2 PRIVATE -Wl,--large-address-aware)
 
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	target_compile_options(emerald-sdl2 PRIVATE -Wformat -Wformat-security -fomit-frame-pointer)
+	target_compile_options(emerald-sdl2 PRIVATE -Wformat -Wformat-security -fomit-frame-pointer -msse3)
 	target_compile_options(emerald-sdl2 PRIVATE -Wno-trigraphs -Wimplicit -Wno-int-conversion -Wparentheses -Wunused)
 	target_compile_options(emerald-sdl2 PRIVATE -fleading-underscore -fno-dce -fno-builtin -Wno-unused-function)
-	target_compile_options(emerald-sdl2 PRIVATE -mmmx -msse -msse2 -mfxsr -m32)
 
 	if(WIN32)
 		# handle windows-specific options
-		link_libraries(-static gcc stdc++ winpthread)
-
 		if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 			target_compile_options(emerald-sdl2 PRIVATE -mconsole)
 		endif()
@@ -74,6 +70,7 @@ target_compile_definitions(emerald-sdl2 PRIVATE NONMATCHING)
 target_compile_definitions(emerald-sdl2 PRIVATE MODERN=1)
 target_compile_definitions(emerald-sdl2 PRIVATE PORTABLE=1)
 target_compile_definitions(emerald-sdl2 PRIVATE UBFIX=1)
+target_compile_definitions(emerald-sdl2 PRIVATE VER_64BIT=1)
 
 # Add `DEBUG` macro definition if compiling under Debug or RelWithDebInfo
 # configuration

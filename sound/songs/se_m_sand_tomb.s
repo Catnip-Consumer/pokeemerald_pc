@@ -189,9 +189,11 @@ se_m_sand_tomb:
 	.byte	se_m_sand_tomb_pri	/* Priority*/
 	.byte	se_m_sand_tomb_rev	/* Reverb.*/
 
-	.int	se_m_sand_tomb_grp
+	.space 4
 
-	.int	se_m_sand_tomb_1
-	.int	se_m_sand_tomb_2
+	.quad	se_m_sand_tomb_grp
+
+	.quad	se_m_sand_tomb_1
+	.quad	se_m_sand_tomb_2
 
 	.end

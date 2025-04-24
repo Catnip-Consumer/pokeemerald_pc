@@ -16,6 +16,8 @@ struct DMATransfer {
     u16 control;
 } DMAList[DMA_COUNT];
 
+struct DMATransfer DMASet[DMA_COUNT];
+
 _DLL_ void RunDMAs(u32 type)
 {
     for (int dmaNum = 0; dmaNum < DMA_COUNT; dmaNum++)
@@ -30,7 +32,7 @@ _DLL_ void RunDMAs(u32 type)
         if ( (dma->control & DMA_ENABLE) &&
            (((dma->control & DMA_START_MASK) >> 12) == type))
         {
-            //printf("DMA%d src=%p, dest=%p, control=%d\n", dmaNum, dma->src, dma->dest, dma->control);
+            //printf("DMA%d src=%p, dest=%p, control=%d\n", dmaNum, dma->src, dma->dst, dma->control);
             for (int i = 0; i < (dma->size); i++)
             {
                 if ((dma->control) & DMA_32BIT)
@@ -77,7 +79,7 @@ _DLL_ void RunDMAs(u32 type)
                 dma->size = ((&REG_DMA0CNT)[dmaNum * 3] & 0x1FFFF);
                 if (((dma->control) & DMA_DEST_MASK) == DMA_DEST_RELOAD)
                 {
-                    dma->dst = ((&REG_DMA0DAD)[dmaNum * 3]);
+                    dma->dst = DMASet[dmaNum].dst;
                 }
             }
             else
@@ -92,15 +94,22 @@ void DmaSet(int dmaNum, const void *src, void *dest, u32 control)
 {
     if (dmaNum >= DMA_COUNT)
     {
-        DBGPRINTF("DmaSet with invalid DMA number: dmaNum=%d, src=%p, dest=%p, control=%d\n", dmaNum, src, dest, control);
+        fprintf(stderr, "DmaSet with invalid DMA number: dmaNum=%d, src=%p, dest=%p, control=%d\n", dmaNum, src, dest, control);
         return;
     }
 
+    struct DMATransfer *dma = &DMASet[dmaNum];
+    dma->src = src;
+    dma->dst = dest;
+    dma->size = control & 0x1ffff;
+    dma->control = control >> 16;
+
+    //todo: get rid of these
     (&REG_DMA0SAD)[dmaNum * 3] = src;
     (&REG_DMA0DAD)[dmaNum * 3] = dest;
     (&REG_DMA0CNT)[dmaNum * 3] = control;
 
-    struct DMATransfer *dma = &DMAList[dmaNum];
+    dma = &DMAList[dmaNum];
     dma->src = src;
     dma->dst = dest;
     dma->size = control & 0x1ffff;

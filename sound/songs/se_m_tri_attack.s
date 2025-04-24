@@ -91,9 +91,11 @@ se_m_tri_attack:
 	.byte	se_m_tri_attack_pri	/* Priority*/
 	.byte	se_m_tri_attack_rev	/* Reverb.*/
 
-	.int	se_m_tri_attack_grp
+	.space 4
 
-	.int	se_m_tri_attack_1
-	.int	se_m_tri_attack_2
+	.quad	se_m_tri_attack_grp
+
+	.quad	se_m_tri_attack_1
+	.quad	se_m_tri_attack_2
 
 	.end

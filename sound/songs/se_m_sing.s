@@ -68,9 +68,9 @@ se_m_sing_1_001:
 	.byte	W06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_sing_1_000
+	 .quad	se_m_sing_1_000
 	.byte	PATT
-	 .int	se_m_sing_1_001
+	 .quad	se_m_sing_1_001
 	.byte		VOL   , 95*se_m_sing_mvl/mxv
 	.byte		N66   , Gn4 , v112
 	.byte	W06
@@ -151,9 +151,9 @@ se_m_sing_2_001:
 	.byte	W06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_sing_2_000
+	 .quad	se_m_sing_2_000
 	.byte	PATT
-	 .int	se_m_sing_2_001
+	 .quad	se_m_sing_2_001
 	.byte		VOL   , 95*se_m_sing_mvl/mxv
 	.byte		PAN   , c_v-12
 	.byte		N66   , Gn4 , v060
@@ -190,9 +190,11 @@ se_m_sing:
 	.byte	se_m_sing_pri	/* Priority*/
 	.byte	se_m_sing_rev	/* Reverb.*/
 
-	.int	se_m_sing_grp
+	.space 4
 
-	.int	se_m_sing_1
-	.int	se_m_sing_2
+	.quad	se_m_sing_grp
+
+	.quad	se_m_sing_1
+	.quad	se_m_sing_2
 
 	.end

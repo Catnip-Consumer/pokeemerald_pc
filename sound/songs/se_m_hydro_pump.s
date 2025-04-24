@@ -116,9 +116,11 @@ se_m_hydro_pump:
 	.byte	se_m_hydro_pump_pri	/* Priority*/
 	.byte	se_m_hydro_pump_rev	/* Reverb.*/
 
-	.int	se_m_hydro_pump_grp
+	.space 4
 
-	.int	se_m_hydro_pump_1
-	.int	se_m_hydro_pump_2
+	.quad	se_m_hydro_pump_grp
+
+	.quad	se_m_hydro_pump_1
+	.quad	se_m_hydro_pump_2
 
 	.end

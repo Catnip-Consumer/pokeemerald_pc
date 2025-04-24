@@ -34,8 +34,10 @@ se_wall_hit:
 	.byte	se_wall_hit_pri	/* Priority*/
 	.byte	se_wall_hit_rev	/* Reverb.*/
 
-	.int	se_wall_hit_grp
+	.space 4
 
-	.int	se_wall_hit_1
+	.quad	se_wall_hit_grp
+
+	.quad	se_wall_hit_1
 
 	.end

@@ -64,9 +64,11 @@ se_m_icy_wind:
 	.byte	se_m_icy_wind_pri	/* Priority*/
 	.byte	se_m_icy_wind_rev	/* Reverb.*/
 
-	.int	se_m_icy_wind_grp
+	.space 4
 
-	.int	se_m_icy_wind_1
-	.int	se_m_icy_wind_2
+	.quad	se_m_icy_wind_grp
+
+	.quad	se_m_icy_wind_1
+	.quad	se_m_icy_wind_2
 
 	.end

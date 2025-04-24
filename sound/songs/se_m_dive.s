@@ -115,9 +115,11 @@ se_m_dive:
 	.byte	se_m_dive_pri	/* Priority*/
 	.byte	se_m_dive_rev	/* Reverb.*/
 
-	.int	se_m_dive_grp
+	.space 4
 
-	.int	se_m_dive_1
-	.int	se_m_dive_2
+	.quad	se_m_dive_grp
+
+	.quad	se_m_dive_1
+	.quad	se_m_dive_2
 
 	.end

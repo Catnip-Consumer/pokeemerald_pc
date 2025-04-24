@@ -63,43 +63,43 @@
 	.include "data/script_cmd_table.inc"
 
 gSpecialVars::
-	.int gSpecialVar_0x8000
-	.int gSpecialVar_0x8001
-	.int gSpecialVar_0x8002
-	.int gSpecialVar_0x8003
-	.int gSpecialVar_0x8004
-	.int gSpecialVar_0x8005
-	.int gSpecialVar_0x8006
-	.int gSpecialVar_0x8007
-	.int gSpecialVar_0x8008
-	.int gSpecialVar_0x8009
-	.int gSpecialVar_0x800A
-	.int gSpecialVar_0x800B
-	.int gSpecialVar_Facing
-	.int gSpecialVar_Result
-	.int gSpecialVar_ItemId
-	.int gSpecialVar_LastTalked
-	.int gSpecialVar_ContestRank
-	.int gSpecialVar_ContestCategory
-	.int gSpecialVar_MonBoxId
-	.int gSpecialVar_MonBoxPos
-	.int gSpecialVar_Unused_0x8014
-	.int gTrainerBattleOpponent_A
+	.quad gSpecialVar_0x8000
+	.quad gSpecialVar_0x8001
+	.quad gSpecialVar_0x8002
+	.quad gSpecialVar_0x8003
+	.quad gSpecialVar_0x8004
+	.quad gSpecialVar_0x8005
+	.quad gSpecialVar_0x8006
+	.quad gSpecialVar_0x8007
+	.quad gSpecialVar_0x8008
+	.quad gSpecialVar_0x8009
+	.quad gSpecialVar_0x800A
+	.quad gSpecialVar_0x800B
+	.quad gSpecialVar_Facing
+	.quad gSpecialVar_Result
+	.quad gSpecialVar_ItemId
+	.quad gSpecialVar_LastTalked
+	.quad gSpecialVar_ContestRank
+	.quad gSpecialVar_ContestCategory
+	.quad gSpecialVar_MonBoxId
+	.quad gSpecialVar_MonBoxPos
+	.quad gSpecialVar_Unused_0x8014
+	.quad gTrainerBattleOpponent_A
 
 	.include "data/specials.inc"
 
 gStdScripts::
-	.int Std_ObtainItem              /* STD_OBTAIN_ITEM*/
-	.int Std_FindItem                /* STD_FIND_ITEM*/
-	.int Std_MsgboxNPC               /* MSGBOX_NPC*/
-	.int Std_MsgboxSign              /* MSGBOX_SIGN*/
-	.int Std_MsgboxDefault           /* MSGBOX_DEFAULT*/
-	.int Std_MsgboxYesNo             /* MSGBOX_YESNO*/
-	.int Std_MsgboxAutoclose         /* MSGBOX_AUTOCLOSE*/
-	.int Std_ObtainDecoration        /* STD_OBTAIN_DECORATION*/
-	.int Std_RegisteredInMatchCall   /* STD_REGISTER_MATCH_CALL*/
-	.int Std_MsgboxGetPoints         /* MSGBOX_GETPOINTS*/
-	.int Std_MsgboxPokenav           /* MSGBOX_POKENAV*/
+	.quad Std_ObtainItem              /* STD_OBTAIN_ITEM*/
+	.quad Std_FindItem                /* STD_FIND_ITEM*/
+	.quad Std_MsgboxNPC               /* MSGBOX_NPC*/
+	.quad Std_MsgboxSign              /* MSGBOX_SIGN*/
+	.quad Std_MsgboxDefault           /* MSGBOX_DEFAULT*/
+	.quad Std_MsgboxYesNo             /* MSGBOX_YESNO*/
+	.quad Std_MsgboxAutoclose         /* MSGBOX_AUTOCLOSE*/
+	.quad Std_ObtainDecoration        /* STD_OBTAIN_DECORATION*/
+	.quad Std_RegisteredInMatchCall   /* STD_REGISTER_MATCH_CALL*/
+	.quad Std_MsgboxGetPoints         /* MSGBOX_GETPOINTS*/
+	.quad Std_MsgboxPokenav           /* MSGBOX_POKENAV*/
 gStdScripts_End::
 
 	.include "data/maps/PetalburgCity/scripts.inc"

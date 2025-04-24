@@ -328,9 +328,11 @@ se_m_reversal:
 	.byte	se_m_reversal_pri	/* Priority*/
 	.byte	se_m_reversal_rev	/* Reverb.*/
 
-	.int	se_m_reversal_grp
+	.space 4
 
-	.int	se_m_reversal_1
-	.int	se_m_reversal_2
+	.quad	se_m_reversal_grp
+
+	.quad	se_m_reversal_1
+	.quad	se_m_reversal_2
 
 	.end

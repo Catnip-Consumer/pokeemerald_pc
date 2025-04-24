@@ -13,39 +13,39 @@
 
 	.align 2
 gBattlescriptsForBallThrow::
-	.int BattleScript_BallThrow        /* ITEM_NONE*/
-	.int BattleScript_BallThrow        /* ITEM_MASTER_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_ULTRA_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_GREAT_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_POKE_BALL*/
-	.int BattleScript_SafariBallThrow  /* ITEM_SAFARI_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_NET_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_DIVE_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_NEST_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_REPEAT_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_TIMER_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_LUXURY_BALL*/
-	.int BattleScript_BallThrow        /* ITEM_PREMIER_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_NONE*/
+	.quad BattleScript_BallThrow        /* ITEM_MASTER_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_ULTRA_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_GREAT_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_POKE_BALL*/
+	.quad BattleScript_SafariBallThrow  /* ITEM_SAFARI_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_NET_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_DIVE_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_NEST_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_REPEAT_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_TIMER_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_LUXURY_BALL*/
+	.quad BattleScript_BallThrow        /* ITEM_PREMIER_BALL*/
 
 	.align 2
 gBattlescriptsForUsingItem::
-	.int BattleScript_PlayerUsesItem
-	.int BattleScript_OpponentUsesHealItem        /* AI_ITEM_FULL_RESTORE*/
-	.int BattleScript_OpponentUsesHealItem        /* AI_ITEM_HEAL_HP*/
-	.int BattleScript_OpponentUsesStatusCureItem  /* AI_ITEM_CURE_CONDITION*/
-	.int BattleScript_OpponentUsesXItem           /* AI_ITEM_X_STAT*/
-	.int BattleScript_OpponentUsesGuardSpec       /* AI_ITEM_GUARD_SPEC*/
+	.quad BattleScript_PlayerUsesItem
+	.quad BattleScript_OpponentUsesHealItem        /* AI_ITEM_FULL_RESTORE*/
+	.quad BattleScript_OpponentUsesHealItem        /* AI_ITEM_HEAL_HP*/
+	.quad BattleScript_OpponentUsesStatusCureItem  /* AI_ITEM_CURE_CONDITION*/
+	.quad BattleScript_OpponentUsesXItem           /* AI_ITEM_X_STAT*/
+	.quad BattleScript_OpponentUsesGuardSpec       /* AI_ITEM_GUARD_SPEC*/
 
 	.align 2
 gBattlescriptsForRunningByItem::
-	.int BattleScript_RunByUsingItem
+	.quad BattleScript_RunByUsingItem
 
 	.align 2
 gBattlescriptsForSafariActions::
-	.int BattleScript_ActionWatchesCarefully
-	.int BattleScript_ActionGetNear
-	.int BattleScript_ActionThrowPokeblock
-	.int BattleScript_ActionWallyThrow
+	.quad BattleScript_ActionWatchesCarefully
+	.quad BattleScript_ActionGetNear
+	.quad BattleScript_ActionThrowPokeblock
+	.quad BattleScript_ActionWallyThrow
 
 BattleScript_BallThrow::
 	jumpifword CMP_COMMON_BITS, gBattleTypeFlags, BATTLE_TYPE_WALLY_TUTORIAL, BattleScript_BallThrowByWally

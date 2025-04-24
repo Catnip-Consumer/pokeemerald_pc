@@ -8888,7 +8888,7 @@ static void CreateLevitateMovementTask(struct ObjectEvent *objectEvent)
     u8 taskId = CreateTask(ApplyLevitateMovement, 0xFF);
     struct Task *task = &gTasks[taskId];
 
-    StoreWordInTwoHalfwords(&task->data[0], (u32)objectEvent);
+    task->genericPtr[0] = (void*)objectEvent;
     objectEvent->warpArrowSpriteId = taskId;
     task->data[3] = 0xFFFF;
 }
@@ -8899,7 +8899,7 @@ static void ApplyLevitateMovement(u8 taskId)
     struct Sprite *sprite;
     struct Task *task = &gTasks[taskId];
 
-    LoadWordFromTwoHalfwords(&task->data[0], (u32 *)&objectEvent); // load the map object pointer.
+    objectEvent = (struct ObjectEvent*)task->genericPtr[0];
     sprite = &gSprites[objectEvent->spriteId];
 
     if(!(task->data[2] & 3))
@@ -8916,7 +8916,7 @@ static void DestroyLevitateMovementTask(u8 taskId)
     struct ObjectEvent *objectEvent;
     struct Task *task = &gTasks[taskId];
 
-    LoadWordFromTwoHalfwords(&task->data[0], (u32 *)&objectEvent); // unused objectEvent
+    objectEvent = (struct ObjectEvent*)task->genericPtr[0];
     DestroyTask(taskId);
 }
 

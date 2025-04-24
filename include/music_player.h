@@ -38,6 +38,7 @@ struct MP2KInstrument {
             u8 decay;
             u8 sustain;
             u8 release;
+            u8 padding[4];
         };
         u8 *keySplitTable;
     };

@@ -83,11 +83,11 @@ se_m_flamethrower_1_000:
 	.byte	W03
 	.byte	PEND
 	.byte	PATT
-	 .int	se_m_flamethrower_1_000
+	 .quad	se_m_flamethrower_1_000
 	.byte	PATT
-	 .int	se_m_flamethrower_1_000
+	 .quad	se_m_flamethrower_1_000
 	.byte	PATT
-	 .int	se_m_flamethrower_1_000
+	 .quad	se_m_flamethrower_1_000
 	.byte		PAN   , c_v+4
 	.byte	W03
 	.byte		        c_v-5
@@ -167,9 +167,11 @@ se_m_flamethrower:
 	.byte	se_m_flamethrower_pri	/* Priority*/
 	.byte	se_m_flamethrower_rev	/* Reverb.*/
 
-	.int	se_m_flamethrower_grp
+	.space 4
 
-	.int	se_m_flamethrower_1
-	.int	se_m_flamethrower_2
+	.quad	se_m_flamethrower_grp
+
+	.quad	se_m_flamethrower_1
+	.quad	se_m_flamethrower_2
 
 	.end

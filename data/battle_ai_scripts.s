@@ -15,38 +15,38 @@
 
 	.align 2
 gBattleAI_ScriptsTable::
-	.int AI_CheckBadMove          /* AI_SCRIPT_CHECK_BAD_MOVE*/
-	.int AI_TryToFaint            /* AI_SCRIPT_TRY_TO_FAINT*/
-	.int AI_CheckViability        /* AI_SCRIPT_CHECK_VIABILITY*/
-	.int AI_SetupFirstTurn        /* AI_SCRIPT_SETUP_FIRST_TURN*/
-	.int AI_Risky                 /* AI_SCRIPT_RISKY*/
-	.int AI_PreferPowerExtremes   /* AI_SCRIPT_PREFER_POWER_EXTREMES*/
-	.int AI_PreferBatonPass       /* AI_SCRIPT_PREFER_BATON_PASS*/
-	.int AI_DoubleBattle 	        /* AI_SCRIPT_DOUBLE_BATTLE*/
-	.int AI_HPAware               /* AI_SCRIPT_HP_AWARE*/
-	.int AI_TrySunnyDayStart      /* AI_SCRIPT_TRY_SUNNY_DAY_START*/
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Ret
-	.int AI_Roaming               /* AI_SCRIPT_ROAMING*/
-	.int AI_Safari                /* AI_SCRIPT_SAFARI*/
-	.int AI_FirstBattle           /* AI_SCRIPT_FIRST_BATTLE*/
+	.quad AI_CheckBadMove          /* AI_SCRIPT_CHECK_BAD_MOVE*/
+	.quad AI_TryToFaint            /* AI_SCRIPT_TRY_TO_FAINT*/
+	.quad AI_CheckViability        /* AI_SCRIPT_CHECK_VIABILITY*/
+	.quad AI_SetupFirstTurn        /* AI_SCRIPT_SETUP_FIRST_TURN*/
+	.quad AI_Risky                 /* AI_SCRIPT_RISKY*/
+	.quad AI_PreferPowerExtremes   /* AI_SCRIPT_PREFER_POWER_EXTREMES*/
+	.quad AI_PreferBatonPass       /* AI_SCRIPT_PREFER_BATON_PASS*/
+	.quad AI_DoubleBattle 	        /* AI_SCRIPT_DOUBLE_BATTLE*/
+	.quad AI_HPAware               /* AI_SCRIPT_HP_AWARE*/
+	.quad AI_TrySunnyDayStart      /* AI_SCRIPT_TRY_SUNNY_DAY_START*/
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Ret
+	.quad AI_Roaming               /* AI_SCRIPT_ROAMING*/
+	.quad AI_Safari                /* AI_SCRIPT_SAFARI*/
+	.quad AI_FirstBattle           /* AI_SCRIPT_FIRST_BATTLE*/
 
 AI_CheckBadMove:
 	if_target_is_ally AI_Ret

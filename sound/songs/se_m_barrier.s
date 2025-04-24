@@ -216,7 +216,7 @@ se_m_barrier_2_000:
 	.byte	W02
 	.byte	PEND
 	.byte	PATT
-	 .int	se_m_barrier_2_000
+	 .quad	se_m_barrier_2_000
 	.byte		VOL   , 56*se_m_barrier_mvl/mxv
 	.byte	W01
 	.byte		        24*se_m_barrier_mvl/mxv
@@ -268,9 +268,11 @@ se_m_barrier:
 	.byte	se_m_barrier_pri	/* Priority*/
 	.byte	se_m_barrier_rev	/* Reverb.*/
 
-	.int	se_m_barrier_grp
+	.space 4
 
-	.int	se_m_barrier_1
-	.int	se_m_barrier_2
+	.quad	se_m_barrier_grp
+
+	.quad	se_m_barrier_1
+	.quad	se_m_barrier_2
 
 	.end

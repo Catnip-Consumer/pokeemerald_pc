@@ -184,9 +184,11 @@ se_m_sweet_scent:
 	.byte	se_m_sweet_scent_pri	/* Priority*/
 	.byte	se_m_sweet_scent_rev	/* Reverb.*/
 
-	.int	se_m_sweet_scent_grp
+	.space 4
 
-	.int	se_m_sweet_scent_1
-	.int	se_m_sweet_scent_2
+	.quad	se_m_sweet_scent_grp
+
+	.quad	se_m_sweet_scent_1
+	.quad	se_m_sweet_scent_2
 
 	.end

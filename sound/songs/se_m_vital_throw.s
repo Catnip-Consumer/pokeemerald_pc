@@ -67,9 +67,11 @@ se_m_vital_throw:
 	.byte	se_m_vital_throw_pri	/* Priority*/
 	.byte	se_m_vital_throw_rev	/* Reverb.*/
 
-	.int	se_m_vital_throw_grp
+	.space 4
 
-	.int	se_m_vital_throw_1
-	.int	se_m_vital_throw_2
+	.quad	se_m_vital_throw_grp
+
+	.quad	se_m_vital_throw_1
+	.quad	se_m_vital_throw_2
 
 	.end

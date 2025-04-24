@@ -97,9 +97,11 @@ se_m_snore:
 	.byte	se_m_snore_pri	/* Priority*/
 	.byte	se_m_snore_rev	/* Reverb.*/
 
-	.int	se_m_snore_grp
+	.space 4
 
-	.int	se_m_snore_1
-	.int	se_m_snore_2
+	.quad	se_m_snore_grp
+
+	.quad	se_m_snore_1
+	.quad	se_m_snore_2
 
 	.end

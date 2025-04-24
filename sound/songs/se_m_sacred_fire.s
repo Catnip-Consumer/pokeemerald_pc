@@ -97,9 +97,11 @@ se_m_sacred_fire:
 	.byte	se_m_sacred_fire_pri	/* Priority*/
 	.byte	se_m_sacred_fire_rev	/* Reverb.*/
 
-	.int	se_m_sacred_fire_grp
+	.space 4
 
-	.int	se_m_sacred_fire_1
-	.int	se_m_sacred_fire_2
+	.quad	se_m_sacred_fire_grp
+
+	.quad	se_m_sacred_fire_1
+	.quad	se_m_sacred_fire_2
 
 	.end

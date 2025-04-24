@@ -16,7 +16,11 @@ struct ScriptContext
     const u8 *stack[20];
     ScrCmdFunc *cmdTable;
     ScrCmdFunc *cmdTableEnd;
+    #ifdef VER_64BIT
+    u64 data[4];
+    #else
     u32 data[4];
+    #endif
 };
 
 #define ScriptReadByte(ctx) (*(ctx->scriptPtr++))
@@ -31,6 +35,12 @@ void ScriptCall(struct ScriptContext *ctx, const u8 *ptr);
 void ScriptReturn(struct ScriptContext *ctx);
 u16 ScriptReadHalfword(struct ScriptContext *ctx);
 u32 ScriptReadWord(struct ScriptContext *ctx);
+u64 ScriptReadQuadWord(struct ScriptContext *ctx);
+#ifdef VER_64BIT
+u64 ScriptReadPointer(struct ScriptContext *ctx);
+#else
+u32 ScriptReadPointer(struct ScriptContext *ctx);
+#endif
 void LockPlayerFieldControls(void);
 void UnlockPlayerFieldControls(void);
 bool8 ArePlayerFieldControlsLocked(void);

@@ -821,11 +821,7 @@ static void AnimShakeMonOrBattleTerrain(struct Sprite *sprite)
         break;
     }
 
-#ifndef PORTABLE
-    sprite->data[4] = *(u16 *)(sprite->data[6] | (sprite->data[7] << 16));
-#else
-    sprite->data[4] = *(u16 *)LoadPointerFromVars(sprite->data[6], sprite->data[7]);
-#endif
+    sprite->data[4] = *(u16 *)LoadPointerFromVars(sprite->intPtr);
     sprite->data[5] = gBattleAnimArgs[3];
     var0 = sprite->data[5] - 2;
     if (var0 < 2)
@@ -849,21 +845,13 @@ static void AnimShakeMonOrBattleTerrain_Step(struct Sprite *sprite)
         else
         {
             sprite->data[1] = sprite->data[2];
-#ifndef PORTABLE
-            *(u16 *)(sprite->data[6] | (sprite->data[7] << 16)) += sprite->data[0];
-#else
-            *(u16 *)LoadPointerFromVars(sprite->data[6], sprite->data[7]) += sprite->data[0];
-#endif
+            *(u16 *)LoadPointerFromVars(sprite->intPtr) += sprite->data[0];
             sprite->data[0] = -sprite->data[0];
         }
     }
     else
     {
-#ifndef PORTABLE
-        *(u16 *)(sprite->data[6] | (sprite->data[7] << 16)) = sprite->data[4];
-#else
-        *(u16 *)LoadPointerFromVars(sprite->data[6], sprite->data[7]) = sprite->data[4];
-#endif
+        *(u16 *)LoadPointerFromVars(sprite->intPtr) = sprite->data[4];
         var0 = sprite->data[5] - 2;
         if (var0 < 2)
         {

@@ -147,9 +147,11 @@ se_m_absorb_2:
 	.byte	se_m_absorb_2_pri	/* Priority*/
 	.byte	se_m_absorb_2_rev	/* Reverb.*/
 
-	.int	se_m_absorb_2_grp
+	.space 4
 
-	.int	se_m_absorb_2_1
-	.int	se_m_absorb_2_2
+	.quad	se_m_absorb_2_grp
+
+	.quad	se_m_absorb_2_1
+	.quad	se_m_absorb_2_2
 
 	.end

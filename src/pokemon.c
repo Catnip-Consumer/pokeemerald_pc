@@ -6727,16 +6727,9 @@ const u8 *GetTrainerPartnerName(void)
     }
 }
 
-#define READ_PTR_FROM_TASK(taskId, dataId)                      \
-    (void *)(                                                   \
-    ((u16)(gTasks[taskId].data[dataId]) |                       \
-    ((u16)(gTasks[taskId].data[dataId + 1]) << 16)))
+#define READ_PTR_FROM_TASK(taskId) gTasks[taskId].genericPtr[0]
 
-#define STORE_PTR_IN_TASK(ptr, taskId, dataId)                 \
-{                                                              \
-    gTasks[taskId].data[dataId] = (u32)(ptr);                  \
-    gTasks[taskId].data[dataId + 1] = (u32)(ptr) >> 16;        \
-}
+#define STORE_PTR_IN_TASK(ptr, taskId) gTasks[taskId].genericPtr[0] = (void*)(ptr)
 
 #define sAnimId    data[2]
 #define sAnimDelay data[3]
@@ -6745,7 +6738,7 @@ static void Task_AnimateAfterDelay(u8 taskId)
 {
     if (--gTasks[taskId].sAnimDelay == 0)
     {
-        LaunchAnimationTaskForFrontSprite(READ_PTR_FROM_TASK(taskId, 0), gTasks[taskId].sAnimId);
+        LaunchAnimationTaskForFrontSprite(READ_PTR_FROM_TASK(taskId), gTasks[taskId].sAnimId);
         DestroyTask(taskId);
     }
 }
@@ -6754,7 +6747,7 @@ static void Task_PokemonSummaryAnimateAfterDelay(u8 taskId)
 {
     if (--gTasks[taskId].sAnimDelay == 0)
     {
-        StartMonSummaryAnimation(READ_PTR_FROM_TASK(taskId, 0), gTasks[taskId].sAnimId);
+        StartMonSummaryAnimation(READ_PTR_FROM_TASK(taskId), gTasks[taskId].sAnimId);
         SummaryScreen_SetAnimDelayTaskId(TASK_NONE);
         DestroyTask(taskId);
     }
@@ -6802,7 +6795,7 @@ void DoMonFrontSpriteAnimation(struct Sprite *sprite, u16 species, bool8 noCry, 
         {
             // Animation has delay, start delay task
             u8 taskId = CreateTask(Task_AnimateAfterDelay, 0);
-            STORE_PTR_IN_TASK(sprite, taskId, 0);
+            STORE_PTR_IN_TASK(sprite, taskId);
             gTasks[taskId].sAnimId = sMonFrontAnimIdsTable[species - 1];
             gTasks[taskId].sAnimDelay = sMonAnimationDelayTable[species - 1];
         }
@@ -6823,7 +6816,7 @@ void PokemonSummaryDoMonAnimation(struct Sprite *sprite, u16 species, bool8 oneF
     {
         // Animation has delay, start delay task
         u8 taskId = CreateTask(Task_PokemonSummaryAnimateAfterDelay, 0);
-        STORE_PTR_IN_TASK(sprite, taskId, 0);
+        STORE_PTR_IN_TASK(sprite, taskId);
         gTasks[taskId].sAnimId = sMonFrontAnimIdsTable[species - 1];
         gTasks[taskId].sAnimDelay = sMonAnimationDelayTable[species - 1];
         SummaryScreen_SetAnimDelayTaskId(taskId);

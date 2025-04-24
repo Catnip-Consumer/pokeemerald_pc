@@ -138,9 +138,11 @@ se_m_nightmare:
 	.byte	se_m_nightmare_pri	/* Priority*/
 	.byte	se_m_nightmare_rev	/* Reverb.*/
 
-	.int	se_m_nightmare_grp
+	.space 4
 
-	.int	se_m_nightmare_1
-	.int	se_m_nightmare_2
+	.quad	se_m_nightmare_grp
+
+	.quad	se_m_nightmare_1
+	.quad	se_m_nightmare_2
 
 	.end

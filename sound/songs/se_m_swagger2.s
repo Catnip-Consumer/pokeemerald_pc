@@ -49,8 +49,10 @@ se_m_swagger2:
 	.byte	se_m_swagger2_pri	/* Priority*/
 	.byte	se_m_swagger2_rev	/* Reverb.*/
 
-	.int	se_m_swagger2_grp
+	.space 4
 
-	.int	se_m_swagger2_1
+	.quad	se_m_swagger2_grp
+
+	.quad	se_m_swagger2_1
 
 	.end

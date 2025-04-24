@@ -85,13 +85,13 @@ se_m_perish_song_1_003:
 	.byte		PAN   , c_v+4
 	.byte	W02
 	.byte	PATT
-	 .int	se_m_perish_song_1_000
+	 .quad	se_m_perish_song_1_000
 	.byte	PATT
-	 .int	se_m_perish_song_1_001
+	 .quad	se_m_perish_song_1_001
 	.byte	PATT
-	 .int	se_m_perish_song_1_002
+	 .quad	se_m_perish_song_1_002
 	.byte	PATT
-	 .int	se_m_perish_song_1_003
+	 .quad	se_m_perish_song_1_003
 	.byte		PAN   , c_v-4
 	.byte	W06
 	.byte		        c_v+0
@@ -171,7 +171,7 @@ se_m_perish_song_2_000:
 	.byte		        40*se_m_perish_song_mvl/mxv
 	.byte	W03
 	.byte	PATT
-	 .int	se_m_perish_song_2_000
+	 .quad	se_m_perish_song_2_000
 	.byte		VOL   , 56*se_m_perish_song_mvl/mxv
 	.byte	W03
 	.byte		        62*se_m_perish_song_mvl/mxv
@@ -213,9 +213,11 @@ se_m_perish_song:
 	.byte	se_m_perish_song_pri	/* Priority*/
 	.byte	se_m_perish_song_rev	/* Reverb.*/
 
-	.int	se_m_perish_song_grp
+	.space 4
 
-	.int	se_m_perish_song_1
-	.int	se_m_perish_song_2
+	.quad	se_m_perish_song_grp
+
+	.quad	se_m_perish_song_1
+	.quad	se_m_perish_song_2
 
 	.end

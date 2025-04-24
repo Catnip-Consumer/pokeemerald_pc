@@ -109,7 +109,7 @@ se_m_waterfall_2_000:
 	.byte	W06
 	.byte	PEND
 	.byte	PATT
-	 .int	se_m_waterfall_2_000
+	 .quad	se_m_waterfall_2_000
 	.byte		N06   , Cn3 , v032
 	.byte	W06
 	.byte		        Gn2
@@ -129,9 +129,11 @@ se_m_waterfall:
 	.byte	se_m_waterfall_pri	/* Priority*/
 	.byte	se_m_waterfall_rev	/* Reverb.*/
 
-	.int	se_m_waterfall_grp
+	.space 4
 
-	.int	se_m_waterfall_1
-	.int	se_m_waterfall_2
+	.quad	se_m_waterfall_grp
+
+	.quad	se_m_waterfall_1
+	.quad	se_m_waterfall_2
 
 	.end

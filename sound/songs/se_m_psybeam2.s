@@ -209,8 +209,10 @@ se_m_psybeam2:
 	.byte	se_m_psybeam2_pri	/* Priority*/
 	.byte	se_m_psybeam2_rev	/* Reverb.*/
 
-	.int	se_m_psybeam2_grp
+	.space 4
 
-	.int	se_m_psybeam2_1
+	.quad	se_m_psybeam2_grp
+
+	.quad	se_m_psybeam2_1
 
 	.end

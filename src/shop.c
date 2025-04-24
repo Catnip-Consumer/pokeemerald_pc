@@ -409,23 +409,17 @@ static void Task_ShopMenu(u8 taskId)
 #define tItemCount  data[1]
 #define tItemId     data[5]
 #define tListTaskId data[7]
-#define tCallbackHi data[8]
-#define tCallbackLo data[9]
 
 static void Task_HandleShopMenuBuy(u8 taskId)
 {
-    s16 *data = gTasks[taskId].data;
-    tCallbackHi = (u32)CB2_InitBuyMenu >> 16;
-    tCallbackLo = (u32)CB2_InitBuyMenu;
+    gTasks[taskId].funcPtr = CB2_InitBuyMenu;
     gTasks[taskId].func = Task_GoToBuyOrSellMenu;
     FadeScreen(FADE_TO_BLACK, 0);
 }
 
 static void Task_HandleShopMenuSell(u8 taskId)
 {
-    s16 *data = gTasks[taskId].data;
-    tCallbackHi = (u32)CB2_GoToSellMenu >> 16;
-    tCallbackLo = (u32)CB2_GoToSellMenu;
+    gTasks[taskId].funcPtr = CB2_GoToSellMenu;
     gTasks[taskId].func = Task_GoToBuyOrSellMenu;
     FadeScreen(FADE_TO_BLACK, 0);
 }
@@ -454,7 +448,7 @@ static void Task_GoToBuyOrSellMenu(u8 taskId)
     if (!gPaletteFade.active)
     {
         DestroyTask(taskId);
-        SetMainCallback2((void *)((u16)tCallbackHi << 16 | (u16)tCallbackLo));
+        SetMainCallback2(gTasks[taskId].funcPtr);
     }
 }
 
@@ -1242,8 +1236,6 @@ static void RecordItemPurchase(u8 taskId)
 #undef tItemCount
 #undef tItemId
 #undef tListTaskId
-#undef tCallbackHi
-#undef tCallbackLo
 
 void CreatePokemartMenu(const u16 *itemsForSale)
 {

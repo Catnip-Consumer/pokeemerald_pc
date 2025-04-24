@@ -137,7 +137,7 @@ void PrintWord(const char *format, ...)
 {
     std::va_list args;
     va_start(args, format);
-    std::fprintf(g_outputFile, "\t .4byte\t");
+    std::fprintf(g_outputFile, "\t .quad\t");
     std::vfprintf(g_outputFile, format, args);
     std::fprintf(g_outputFile, "\n");
     va_end(args);
@@ -536,13 +536,13 @@ void PrintAgbFooter()
     std::fprintf(g_outputFile, "\t.byte\t%u\n", 0);
     std::fprintf(g_outputFile, "\t.byte\t%s_pri\n", g_asmLabel.c_str());
     std::fprintf(g_outputFile, "\t.byte\t%s_rev\n", g_asmLabel.c_str());
-    std::fprintf(g_outputFile, "\n");
-    std::fprintf(g_outputFile, "\t.4byte\t%s_grp\n", g_asmLabel.c_str());
+    std::fprintf(g_outputFile, ".space 4\n");
+    std::fprintf(g_outputFile, "\t.quad\t%s_grp\n", g_asmLabel.c_str());
     std::fprintf(g_outputFile, "\n");
 
     // track pointers
     for (int i = 1; i <= trackCount; i++)
-        std::fprintf(g_outputFile, "\t.4byte\t%s_%u\n", g_asmLabel.c_str(), i);
+        std::fprintf(g_outputFile, "\t.quad\t%s_%u\n", g_asmLabel.c_str(), i);
 
     std::fprintf(g_outputFile, "\n\t.end\n");
 }

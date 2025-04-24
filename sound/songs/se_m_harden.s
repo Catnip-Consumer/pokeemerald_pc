@@ -66,9 +66,11 @@ se_m_harden:
 	.byte	se_m_harden_pri	/* Priority*/
 	.byte	se_m_harden_rev	/* Reverb.*/
 
-	.int	se_m_harden_grp
+	.space 4
 
-	.int	se_m_harden_1
-	.int	se_m_harden_2
+	.quad	se_m_harden_grp
+
+	.quad	se_m_harden_1
+	.quad	se_m_harden_2
 
 	.end

@@ -1241,8 +1241,13 @@ static void HallOfFame_PrintPlayerInfo(u8 unused1, u8 unused2)
 
 static void ClearVramOamPltt_LoadHofPal(void)
 {
+    #ifdef VER_64BIT
+    u64 vramOffset, oamOffset, plttOffset;
+    u64 vramSize, oamSize, plttSize;
+    #else
     u32 vramOffset, oamOffset, plttOffset;
     u32 vramSize, oamSize, plttSize;
+    #endif
 
     vramOffset = (VRAM);
     vramSize = VRAM_SIZE;

@@ -237,8 +237,9 @@ struct PokemonCrySong
     u8 gap;
     u8 part0; // 0x11
     u8 tuneValue; // 0x12
+    u8 gap2[4];
     u8 gotoCmd; // 0x13
-    u32 gotoTarget; // 0x14
+    u64 gotoTarget; // 0x14
     u8 part1; // 0x18
     u8 tuneValue2; // 0x19
     u8 cont[2]; // 0x1A

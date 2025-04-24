@@ -122,31 +122,31 @@ se_m_earthquake_1_008:
 	.byte	W02
 	.byte	PEND
 	.byte	PATT
-	 .int	se_m_earthquake_1_000
+	 .quad	se_m_earthquake_1_000
 	.byte	PATT
-	 .int	se_m_earthquake_1_001
+	 .quad	se_m_earthquake_1_001
 	.byte	PATT
-	 .int	se_m_earthquake_1_002
+	 .quad	se_m_earthquake_1_002
 	.byte	PATT
-	 .int	se_m_earthquake_1_003
+	 .quad	se_m_earthquake_1_003
 	.byte	PATT
-	 .int	se_m_earthquake_1_007
+	 .quad	se_m_earthquake_1_007
 	.byte	PATT
-	 .int	se_m_earthquake_1_008
+	 .quad	se_m_earthquake_1_008
 	.byte	PATT
-	 .int	se_m_earthquake_1_000
+	 .quad	se_m_earthquake_1_000
 	.byte	PATT
-	 .int	se_m_earthquake_1_001
+	 .quad	se_m_earthquake_1_001
 	.byte	PATT
-	 .int	se_m_earthquake_1_002
+	 .quad	se_m_earthquake_1_002
 	.byte	PATT
-	 .int	se_m_earthquake_1_003
+	 .quad	se_m_earthquake_1_003
 	.byte	PATT
-	 .int	se_m_earthquake_1_004
+	 .quad	se_m_earthquake_1_004
 	.byte	PATT
-	 .int	se_m_earthquake_1_005
+	 .quad	se_m_earthquake_1_005
 	.byte	PATT
-	 .int	se_m_earthquake_1_006
+	 .quad	se_m_earthquake_1_006
 	.byte		VOL   , 106*se_m_earthquake_mvl/mxv
 	.byte		PAN   , c_v+0
 	.byte		N03   , Cn2 , v112
@@ -228,43 +228,43 @@ se_m_earthquake_2_000:
 	.byte		N06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_earthquake_2_000
+	 .quad	se_m_earthquake_2_000
 	.byte		N06   , Bn1 , v080
 	.byte	W06
 	.byte		N06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_earthquake_2_000
+	 .quad	se_m_earthquake_2_000
 	.byte		N06   , Bn1 , v080
 	.byte	W06
 	.byte		N06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_earthquake_2_000
+	 .quad	se_m_earthquake_2_000
 	.byte		N06   , Bn1 , v080
 	.byte	W06
 	.byte		N06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_earthquake_2_000
+	 .quad	se_m_earthquake_2_000
 	.byte		N06   , Bn1 , v080
 	.byte	W06
 	.byte		N06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_earthquake_2_000
+	 .quad	se_m_earthquake_2_000
 	.byte		N06   , Bn1 , v080
 	.byte	W06
 	.byte		N06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_earthquake_2_000
+	 .quad	se_m_earthquake_2_000
 	.byte		N06   , Bn1 , v080
 	.byte	W06
 	.byte		N06
 	.byte	W06
 	.byte	PATT
-	 .int	se_m_earthquake_2_000
+	 .quad	se_m_earthquake_2_000
 	.byte		N06   , Bn1 , v080
 	.byte	W06
 	.byte		N06
@@ -318,9 +318,11 @@ se_m_earthquake:
 	.byte	se_m_earthquake_pri	/* Priority*/
 	.byte	se_m_earthquake_rev	/* Reverb.*/
 
-	.int	se_m_earthquake_grp
+	.space 4
 
-	.int	se_m_earthquake_1
-	.int	se_m_earthquake_2
+	.quad	se_m_earthquake_grp
+
+	.quad	se_m_earthquake_1
+	.quad	se_m_earthquake_2
 
 	.end

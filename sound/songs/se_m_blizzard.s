@@ -84,7 +84,7 @@ se_m_blizzard_1_B1:
 	.byte		PAN   , c_v-11
 	.byte	W03
 	.byte	GOTO
-	 .int	se_m_blizzard_1_B1
+	 .quad	se_m_blizzard_1_B1
 	.byte	FINE
 
 /*******************************************************@*/
@@ -96,8 +96,10 @@ se_m_blizzard:
 	.byte	se_m_blizzard_pri	/* Priority*/
 	.byte	se_m_blizzard_rev	/* Reverb.*/
 
-	.int	se_m_blizzard_grp
+	.space 4
 
-	.int	se_m_blizzard_1
+	.quad	se_m_blizzard_grp
+
+	.quad	se_m_blizzard_1
 
 	.end

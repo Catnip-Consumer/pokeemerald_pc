@@ -95,7 +95,7 @@ se_m_hyper_beam2_2_000:
 	.byte	W04
 	.byte	PEND
 	.byte	PATT
-	 .int	se_m_hyper_beam2_2_000
+	 .quad	se_m_hyper_beam2_2_000
 	.byte	FINE
 
 /*******************************************************@*/
@@ -107,9 +107,11 @@ se_m_hyper_beam2:
 	.byte	se_m_hyper_beam2_pri	/* Priority*/
 	.byte	se_m_hyper_beam2_rev	/* Reverb.*/
 
-	.int	se_m_hyper_beam2_grp
+	.space 4
 
-	.int	se_m_hyper_beam2_1
-	.int	se_m_hyper_beam2_2
+	.quad	se_m_hyper_beam2_grp
+
+	.quad	se_m_hyper_beam2_1
+	.quad	se_m_hyper_beam2_2
 
 	.end

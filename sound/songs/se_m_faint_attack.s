@@ -82,8 +82,10 @@ se_m_faint_attack:
 	.byte	se_m_faint_attack_pri	/* Priority*/
 	.byte	se_m_faint_attack_rev	/* Reverb.*/
 
-	.int	se_m_faint_attack_grp
+	.space 4
 
-	.int	se_m_faint_attack_1
+	.quad	se_m_faint_attack_grp
+
+	.quad	se_m_faint_attack_1
 
 	.end

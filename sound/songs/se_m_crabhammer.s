@@ -51,8 +51,10 @@ se_m_crabhammer:
 	.byte	se_m_crabhammer_pri	/* Priority*/
 	.byte	se_m_crabhammer_rev	/* Reverb.*/
 
-	.int	se_m_crabhammer_grp
+	.space 4
 
-	.int	se_m_crabhammer_1
+	.quad	se_m_crabhammer_grp
+
+	.quad	se_m_crabhammer_1
 
 	.end

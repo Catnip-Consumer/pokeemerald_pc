@@ -127,9 +127,11 @@ se_m_morning_sun:
 	.byte	se_m_morning_sun_pri	/* Priority*/
 	.byte	se_m_morning_sun_rev	/* Reverb.*/
 
-	.int	se_m_morning_sun_grp
+	.space 4
 
-	.int	se_m_morning_sun_1
-	.int	se_m_morning_sun_2
+	.quad	se_m_morning_sun_grp
+
+	.quad	se_m_morning_sun_1
+	.quad	se_m_morning_sun_2
 
 	.end

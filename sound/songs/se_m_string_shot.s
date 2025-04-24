@@ -73,8 +73,10 @@ se_m_string_shot:
 	.byte	se_m_string_shot_pri	/* Priority*/
 	.byte	se_m_string_shot_rev	/* Reverb.*/
 
-	.int	se_m_string_shot_grp
+	.space 4
 
-	.int	se_m_string_shot_1
+	.quad	se_m_string_shot_grp
+
+	.quad	se_m_string_shot_1
 
 	.end
