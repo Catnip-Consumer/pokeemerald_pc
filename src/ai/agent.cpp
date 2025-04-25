@@ -18,6 +18,7 @@ using namespace std::chrono_literals;
 #define REG_BASE (eme.REG_BASE)
 
 static thread_local struct EmeraldAddresses eme;
+static thread_local uint32_t aiTileMap[AI_TILEMAP_SIZE];
 
 void VBlankIntrWait() {
 	REG_VCOUNT = 161;
@@ -102,7 +103,7 @@ void Platform_SetTime(struct SiiRtcInfo *rtc) {
 }
 
 void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size) {
-	memcpy(dest, flash + offset + (sectorNum << (*eme.gFlash)->sector.shift), size);
+	std::memcpy(dest, flash + offset + (sectorNum << (*eme.gFlash)->sector.shift), size);
 }
 
 void Platform_SetAlarm(u8 *alarmData) {
@@ -147,6 +148,68 @@ static const struct DLL_Platform dll_platform = {
 
 thread_local static size_t lastFrame = -1;
 
+void updateFrameCount(int index, size_t count) {
+	std::lock_guard<std::mutex> lock(sdlState.mutexSDS);
+	sdlState.sds.frameCounts[index][sdlState.gos.fpsIndex] = count + sdlState.sds.frameCounts[index][sdlState.gos.fpsIndex];
+}
+
+/* aiframe should match this table when reading SDLPlaybackSpeed to check whether to update draw at all. */
+constexpr bool isAiFrameUpdate[] = {
+	[(size_t) SDLPlaybackSpeed::PAUSED] = false,
+	[(size_t) SDLPlaybackSpeed::REALTIME] = false,
+	[(size_t) SDLPlaybackSpeed::FAST] = false,
+	[(size_t) SDLPlaybackSpeed::SLIDESHOW] = true,
+	[(size_t) SDLPlaybackSpeed::MAX] = true,
+};
+
+size_t fpsNotUpdated = 0;
+
+bool checkDrawUpdate(int index, bool aiframe) {
+	#ifndef ENABLE_SDL2
+		return false;
+	#else
+		// Check if the current frame is ai update frame or any frame
+		if(aiframe != isAiFrameUpdate[(size_t) sdlState.gos.playbackSpeed]) {
+			return false;
+		}
+
+		// Check if the current frame is the same as the last frame drawn
+		while(sdlState.gos.currentFrame == lastFrame) {
+			if(aiframe) {
+				// if there isn't a frame available, but this is an ai frame, keep running
+				fpsNotUpdated += AI_FRAMES_BEFORE_POLL;
+				return false;
+			}
+
+			// if the agent is not running, we need to abort this loop
+			if(agentState != AgentState::RUNNING) {
+				return false;
+			}
+
+			// we are synchronizing with SDL, so we need to wait for a frame to be available
+			std::this_thread::sleep_for(1ms);
+		}
+
+		// We are here, so that means a new frame was available
+		lastFrame = sdlState.gos.currentFrame;
+
+		// update frame index
+		updateFrameCount(index, fpsNotUpdated + 1);
+		fpsNotUpdated = 0;
+
+		if(sdlState.gos.viewIndex == -1) {
+			// Draw frame only
+			DrawFrame(sdlState.aos.screens[index], &eme);
+
+		} else if(sdlState.gos.viewIndex == index) {
+			// Draw and update ai tilemap
+			DrawFrame(sdlState.aos.screens[index], &eme);
+			std::memcpy(sdlState.aos.aiTileMap, aiTileMap, sizeof(aiTileMap));
+		}
+		return true;
+	#endif
+}
+
 void runAgent(int generation, int index) {
 	/* Set affinity to not run on core0. See main.cpp for more info. */
 	auto threadHandle = getCurrentThreadHandle();
@@ -179,23 +242,18 @@ void runAgent(int generation, int index) {
 
 	/* Sleep while other agents are still trying to initialize */
 	while(AgentState::WAIT_SYNC == agentState) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(1ms);
 	}
 
 	while(AgentState::RUNNING == agentState) {
 		/* Run for number of frames before AI is polled for inputs */
-		for(int i = 0; i < 8; i++) {
+		for(int i = 0; i < AI_FRAMES_BEFORE_POLL; i++) {
 			eme.AgbRunFrame();
 			VBlankIntrWait();
+			checkDrawUpdate(index, false);
 		}
 
-		#ifdef ENABLE_SDL2
-			/* When a new frame is requested by SDL, render it */
-			if(sdlCurrentFrame != lastFrame) {
-				lastFrame = sdlCurrentFrame;
-				DrawFrame(screens[index], &eme);
-			}
-		#endif
+		checkDrawUpdate(index, true);
 	}
 
 	/* Simulation completed, unload DLL and exit. */

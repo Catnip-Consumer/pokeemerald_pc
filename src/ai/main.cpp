@@ -10,7 +10,6 @@
 	#include <SDL2/SDL.h>
 #endif
 
-#include <ai/sdl2.h>
 #include <ai/main.h>
 
 uint8_t flash[sizeof(FLASH_BASE)];
@@ -98,7 +97,7 @@ int main(int argc, char **argv) {
 
 	while(true) {
 		#ifdef ENABLE_SDL2
-			if(handleEventsSDL()) {
+			if(updateSDL()) {
 				goto exit_simulation;
 			}
 		#endif
@@ -124,11 +123,11 @@ int main(int argc, char **argv) {
 
 	while(true) {
 		/* Agents are running their code. This thread really only handles SDL2 events (if enabled) */
-	#ifdef ENABLE_SDL2
-		if(handleEventsSDL()) {
-			break;
-		}
-	#endif
+		#ifdef ENABLE_SDL2
+			if(updateSDL()) {
+				goto exit_simulation;
+			}
+		#endif
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 	}
 

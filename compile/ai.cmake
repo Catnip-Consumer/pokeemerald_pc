@@ -5,9 +5,9 @@ project(PokeEmerald-ai
 	LANGUAGES C CXX
 )
 
-# requires at least C11/C++20-compatible compiler to compile the code
+# requires at least C11/C++23-compatible compiler to compile the code
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 cmake_policy(SET CMP0065 NEW)
 
