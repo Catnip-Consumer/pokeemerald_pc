@@ -96,7 +96,6 @@ foreach(SOURCE_FILE IN LISTS SND_ASM_FILES)
 				".2byte" ".short"
 				".4byte" ".int"
 		COMMAND ${AS} ${AS_OPTS} -I sound -o "${OUT_FILE}" "${OUT_FILE_TEMP}"
-		COMMAND ${OBJCOPY} --prefix-symbol _ ${OUT_FILE}
 		DEPENDS "${SOURCE_FILE}"
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 		COMMENT "Assembling ${SOURCE_FILE} into ${OUT_FILE}"

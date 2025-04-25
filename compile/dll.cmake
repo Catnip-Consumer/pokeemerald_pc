@@ -33,9 +33,8 @@ set(CPP_OPTS
 
 # Compiler options
 set(COMPILE_OPTS
-	-Wformat -Wformat-security -fomit-frame-pointer
+	-Wformat -Wformat-security -fomit-frame-pointer -Wno-unused-function
 	-Wno-trigraphs -Wimplicit -Wno-int-conversion -Wparentheses -Wunused
-	-fleading-underscore -fno-dce -fno-builtin -Wno-unused-function
 	-msse3 -std=gnu99 -O3
 )
 

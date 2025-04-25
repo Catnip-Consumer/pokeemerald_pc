@@ -32,7 +32,6 @@ target_link_libraries(emerald-ai PRIVATE SDL2main SDL2-static xinput)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(emerald-ai PRIVATE -Wall -Wformat -Wformat-security -fomit-frame-pointer)
 	target_compile_options(emerald-ai PRIVATE -Wno-trigraphs -Wparentheses -Wunused)
-	target_compile_options(emerald-ai PRIVATE -fleading-underscore -fno-dce -fno-builtin)
 
 	if(WIN32)
 		# handle windows-specific options

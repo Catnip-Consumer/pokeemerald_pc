@@ -445,7 +445,7 @@ static struct DLL_Platform dll_platform = {
 	.SetTime = Platform_SetTime,
 	.SetAlarm = Platform_SetAlarm,
 	.HasAudio = TRUE,
-	.SkipToGame = TRUE,
+	.SkipToGame = FALSE,
 };
 
 int main(int argc, char **argv)

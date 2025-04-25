@@ -42,8 +42,7 @@ target_link_libraries(emerald-sdl2 PRIVATE emerald SDL2main SDL2-static xinput)
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(emerald-sdl2 PRIVATE -Wformat -Wformat-security -fomit-frame-pointer -msse3)
-	target_compile_options(emerald-sdl2 PRIVATE -Wno-trigraphs -Wimplicit -Wno-int-conversion -Wparentheses -Wunused)
-	target_compile_options(emerald-sdl2 PRIVATE -fleading-underscore -fno-dce -fno-builtin -Wno-unused-function)
+	target_compile_options(emerald-sdl2 PRIVATE -Wno-trigraphs -Wimplicit -Wno-int-conversion -Wparentheses -Wunused -Wno-unused-function)
 
 	if(WIN32)
 		# handle windows-specific options
