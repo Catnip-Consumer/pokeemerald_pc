@@ -5,7 +5,7 @@
 #include <SDL2/SDL.h>
 
 #include <ai/sdl2.h>
-#include <ai/thread.h>
+#include <ai/main.h>
 
 extern "C" {
 	#include <platform/framedraw.h>

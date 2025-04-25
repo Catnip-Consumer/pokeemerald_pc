@@ -1,5 +1,5 @@
 #include <ai/config.h>
-#include <ai/thread.h>
+#include <ai/main.h>
 
 #ifdef ENABLE_SDL2
 #include "global.h"

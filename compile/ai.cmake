@@ -13,11 +13,28 @@ cmake_policy(SET CMP0065 NEW)
 
 # Source files (data/ directory)
 set(PokeEmerald_AI_SOURCES
-	"src/ai/thread_safe_gba_easy_draw.cpp"
-	"src/ai/sdl2.cpp"
+	"src/ai/system/shared.cpp"
 	"src/ai/main.cpp"
-	"src/ai/thread.cpp"
+	"src/ai/agent.cpp"
+
+	# need to be included only when SDL2 is used.
+	"src/ai/system/thread_safe_gba_easy_draw.cpp"
+	"src/ai/system/sdl2.cpp"
 )
+
+if(WIN32)
+	list(APPEND PokeEmerald_AI_SOURCES
+		"src/ai/system/win32.cpp"
+	)
+elseif(LINUX)
+	list(APPEND PokeEmerald_AI_SOURCES
+		"src/ai/system/linux.cpp"
+	)
+else()
+	list(APPEND PokeEmerald_AI_SOURCES
+		"src/ai/system/macos.cpp"
+	)
+endif()
 
 # DLL target
 add_executable(emerald-ai

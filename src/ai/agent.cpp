@@ -4,7 +4,7 @@
 #include <chrono>
 
 #include <ai/config.h>
-#include <ai/thread.h>
+#include <ai/main.h>
 
 extern "C" {
 	#include <rtc.h>
@@ -15,154 +15,9 @@ extern "C" {
 }
 
 using namespace std::chrono_literals;
-
-extern void DrawFrame(uint16_t *pixels, struct EmeraldAddresses* eme);
-static bool GetEmeraldDLLAddresses(void* dll);
-
-#ifdef _WIN32
-#include <windows.h>
-
-static void* LoadEmeraldDLL(int index) {
-	const auto _exedir = getExecutableDir();
-	const auto _dllPath = (_exedir / ("_dll/libemerald_"+ std::to_string(index) + ".dll")).string();
-    HMODULE dll = LoadLibrary(_dllPath.c_str());
-
-    if (!dll) {
-        std::cerr << "Failed to load " << _dllPath << std::endl;
-        return nullptr;
-    }
-
-	if(!GetEmeraldDLLAddresses(dll)) {
-		FreeLibrary(dll);
-		return nullptr;
-	}
-
-	return dll;
-}
-
-static void UnloadEmeraldDLL(void* dll) {
-    FreeLibrary((HMODULE) dll);
-}
-
-static void* GetProcAddress(void* dll, const char* procName) {
-	return (void*) GetProcAddress((HMODULE) dll, procName);
-}
-
-bool setThreadAffinity(void* handle, bool core0) {
-	if (SetThreadAffinityMask((HANDLE) handle, core0 ? 1 : ~1) == 0) {
-		std::cerr << "Failed to set thread affinity: " << GetLastError() << std::endl;
-		return false;
-	}
-
-	return true;
-}
-
-extern void* getCurrentThreadHandle() {
-	// Get the pseudo-handle for the current thread
-	HANDLE pseudoHandle = GetCurrentThread();
-
-    // Convert the pseudo-handle to a real handle
-    HANDLE realHandle;
-	if (!DuplicateHandle(
-			GetCurrentProcess(), pseudoHandle, GetCurrentProcess(), &realHandle,
-			0, FALSE, DUPLICATE_SAME_ACCESS
-	)) {
-		std::cerr << "Failed to duplicate thread handle. Error: " << GetLastError() << std::endl;
-		return nullptr;
-    }
-
-	return (void*) realHandle;
-}
-
-extern bool closeThreadHandle(void* handle) {
-	return CloseHandle((HANDLE) handle);
-}
-
-#elif __linux__
-
-static void* LoadEmeraldDLL(int index) {
-	// TODO: Implement
-	return nullptr;
-}
-
-static void UnloadEmeraldDLL(void* dll) {
-	// TODO: Implement
-}
-
-static void* GetProcAddress(void* dll, const char* procName) {
-	return nullptr;	// TODO: Implement
-}
-
-bool setThreadAffinity(std::thread& t, bool core0) {
-	return false;	// TODO: Implement
-}
-
-extern void* getCurrentThreadHandle() {
-	return nullptr;	// TODO: Implement
-}
-
-extern bool closeThreadHandle(void* handle) {
-	return false;	// TODO: Implement
-}
-
-#elif __APPLE__
-
-static void* LoadEmeraldDLL() {
-	// TODO: Implement
-	return nullptr;
-}
-
-static void UnloadEmeraldDLL(void* dll) {
-	// TODO: Implement
-}
-
-static void* GetProcAddress(void* dll, const char* procName) {
-	return nullptr;	// TODO: Implement
-}
-
-bool setThreadAffinity(std::thread& t, bool core0) {
-	return false;	// TODO: Implement
-}
-
-extern void* getCurrentThreadHandle() {
-	return nullptr;	// TODO: Implement
-}
-
-extern bool closeThreadHandle(void* handle) {
-	return false;	// TODO: Implement
-}
-
-#endif
-
-thread_local static struct EmeraldAddresses eme;
-
-static bool GetEmeraldDLLAddresses(void* dll) {
-#define GRAB_ADDRESS(member)											\
-	eme.member = (typeof(eme.member))GetProcAddress(dll, #member);		\
-	if (!eme.member) {													\
-		std::cerr << "Failed to get address of " #member << std::endl;	\
-		return false;													\
-	}
-
-	GRAB_ADDRESS(Platform_Set);
-	GRAB_ADDRESS(RunDMAs);
-	GRAB_ADDRESS(AgbInit);
-	GRAB_ADDRESS(AgbRunFrame);
-
-	GRAB_ADDRESS(gIntrTable);
-	GRAB_ADDRESS(gFlash);
-	GRAB_ADDRESS(REG_BASE);
-
-	#ifdef ENABLE_SDL2
-		GRAB_ADDRESS(VRAM_);
-		GRAB_ADDRESS(PLTT);
-		GRAB_ADDRESS(OAM);
-	#endif
-	return true;
-}
-
-// some hax because some of the following commands refer to REG_BASE directly!
 #define REG_BASE (eme.REG_BASE)
+
+static thread_local struct EmeraldAddresses eme;
 
 void VBlankIntrWait() {
 	REG_VCOUNT = 161;
@@ -172,6 +27,7 @@ void VBlankIntrWait() {
 	if (REG_DISPSTAT & DISPSTAT_VBLANK_INTR) {
 		eme.gIntrTable[4]();
 	}
+
 	REG_DISPSTAT &= ~INTR_FLAG_VBLANK;
 }
 
@@ -292,43 +148,49 @@ static const struct DLL_Platform dll_platform = {
 thread_local static size_t lastFrame = -1;
 
 void runAgent(int generation, int index) {
+	/* Set affinity to not run on core0. See main.cpp for more info. */
 	auto threadHandle = getCurrentThreadHandle();
 	setThreadAffinity(threadHandle, false);
 	closeThreadHandle(threadHandle);
 
-	auto dllHandle = LoadEmeraldDLL(index);
+	// Load the emerald.dll for this agent
+	auto dllHandle = LoadEmeraldDLL(&eme, index);
 	if(!dllHandle) {
 		return;
 	}
 
 	srand(time(NULL) + index + generation);
 
+	/* Initialize the internal clock of this agent. This is used for GBA-compatibility purposes. */
 	std::memset(&internalClock, 0, sizeof(internalClock));
 	internalClock.status = SIIRTCINFO_24HOUR;
 	UpdateInternalClock();
+
+	/* Set platform functions and initialize the game. */
 	eme.Platform_Set(&dll_platform);
-
-	{
-		std::lock_guard<std::mutex> lock(agentMutex);
-		agentWaitingSync = agentWaitingSync + 1;
-	}
-
-	while(agentWaitSync) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	}
-
 	REG_VCOUNT = 161;
 	eme.AgbInit();
 
-	while(!agentStop) {
-		// run for multiple frames before we check SDL for updates or ask for input updates
+	{
+		/* Let main thread know this agent is done initializing */
+		std::lock_guard<std::mutex> lock(agentMutex);
+		agentData.agentsCounter = agentData.agentsCounter - 1;
+	}
+
+	/* Sleep while other agents are still trying to initialize */
+	while(AgentState::WAIT_SYNC == agentState) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+
+	while(AgentState::RUNNING == agentState) {
+		/* Run for number of frames before AI is polled for inputs */
 		for(int i = 0; i < 8; i++) {
 			eme.AgbRunFrame();
 			VBlankIntrWait();
 		}
 
 		#ifdef ENABLE_SDL2
-			// if frame changed from SDL, draw screens
+			/* When a new frame is requested by SDL, render it */
 			if(sdlCurrentFrame != lastFrame) {
 				lastFrame = sdlCurrentFrame;
 				DrawFrame(screens[index], &eme);
@@ -336,5 +198,7 @@ void runAgent(int generation, int index) {
 		#endif
 	}
 
+	/* Simulation completed, unload DLL and exit. */
 	UnloadEmeraldDLL(dllHandle);
+	agentData.agentsCounter = agentData.agentsCounter - 1;
 }

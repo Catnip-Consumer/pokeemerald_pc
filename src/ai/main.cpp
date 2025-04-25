@@ -11,53 +11,14 @@
 #endif
 
 #include <ai/sdl2.h>
-#include <ai/thread.h>
+#include <ai/main.h>
 
 uint8_t flash[sizeof(FLASH_BASE)];
 volatile uint16_t keys = 0;
 
-volatile bool agentStop;
-volatile bool agentWaitSync;
-
 std::mutex agentMutex;
-volatile size_t agentWaitingSync;
-
-#ifdef _WIN32
-#include <windows.h>
-
-const std::filesystem::path getExecutableDir() {
-    char buffer[MAX_PATH];
-    GetModuleFileName(NULL, buffer, MAX_PATH);
-    return std::filesystem::path(buffer).parent_path();
-}
-
-#elif __linux__
-#include <unistd.h>
-#include <limits.h>
-
-const std::filesystem::path getExecutableDir() {
-    char buffer[PATH_MAX];
-    ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
-    if (len != -1) {
-        buffer[len] = '\0';
-        return std::filesystem::path(buffer).parent_path();
-    }
-    return "";
-}
-
-#elif __APPLE__
-#include <mach-o/dyld.h>
-#include <limits.h>
-
-const std::filesystem::path getExecutableDir() {
-    char buffer[PATH_MAX];
-    uint32_t size = sizeof(buffer);
-    if (_NSGetExecutablePath(buffer, &size) == 0) {
-        return std::filesystem::path(buffer).parent_path();
-    }
-    return "";
-}
-#endif
+AgentDataStruct agentData;
+volatile AgentState agentState;
 
 static void ReadSaveFile() {
 	// fill flash buffer with 0xFF and read contents
@@ -90,24 +51,31 @@ static void ReadSaveFile() {
 }
 
 int main(int argc, char **argv) {
+	/*
+	 * Set our affinity to core0. No agent should have permission to run on core0.
+	 * This ensures that SDL2 can render and the computer is somewhat usable.
+	 */
 	auto threadHandle = getCurrentThreadHandle();
 	setThreadAffinity(threadHandle, true);
 	closeThreadHandle(threadHandle);
 
 	ReadSaveFile();
 
+	/*
+	 * Create a directory for DLL's to be dumped on. This method makes sure that Windows thinks we're
+	 * opening many DLL's, which ensures thread safety. This is dumb but an easy solution to a hard problem.
+	 */
 	#ifdef _WIN32
 		std::filesystem::create_directory(getExecutableDir() / "_dll");
 	#endif
 
-	agentStop = false;
-	agentWaitSync = true;
-	agentWaitingSync = 0;
+	agentState = AgentState::WAIT_SYNC;
+	agentData.agentsCounter = CONCURRENT_AGENTS;
 	std::thread agent[CONCURRENT_AGENTS];
 
 	for(int i = 0; i < CONCURRENT_AGENTS; i++) {
 		#ifdef _WIN32
-			// because Windows tries to load the same DLL multiple times, create copies of the DLL for each thread! yay!
+			/* Delete the old DLL (should be able to without deletion but I can't be bothered rn) */
 			const auto target = getExecutableDir() / "_dll" / ("libemerald_" + std::to_string(i) + ".dll");
 
 			if(std::filesystem::exists(target)) {
@@ -116,6 +84,8 @@ int main(int argc, char **argv) {
 
 			std::filesystem::copy_file(getExecutableDir() / "libemerald.dll", target);
 		#endif
+
+		// Start the agent thread
 		agent[i] = std::thread(runAgent, 0, i);
 	}
 
@@ -123,12 +93,13 @@ int main(int argc, char **argv) {
 	initSDL();
 #endif
 
+	/* Wait until each agent has initialized and are waiting for sync */
 	std::cout << "Waiting for agents to sync..." << std::endl;
 
 	while(true) {
 		#ifdef ENABLE_SDL2
 			if(handleEventsSDL()) {
-				break;
+				goto exit_simulation;
 			}
 		#endif
 
@@ -136,25 +107,34 @@ int main(int argc, char **argv) {
 
 		{
 			std::lock_guard<std::mutex> lock(agentMutex);
-			if(agentWaitingSync >= CONCURRENT_AGENTS) {
+			if(agentData.agentsCounter <= 0) {
 				break;
 			}
 		}
 	}
 
-	agentWaitSync = false;
+	{
+		/* Agents are now synced, allow them to run their code */
+		std::lock_guard<std::mutex> lock(agentMutex);
+		agentState = AgentState::RUNNING;
+		agentData.agentsCounter = CONCURRENT_AGENTS;
+	}
+
 	std::cout << "Running " << CONCURRENT_AGENTS << " agents..." << std::endl;
 
 	while(true) {
+		/* Agents are running their code. This thread really only handles SDL2 events (if enabled) */
 	#ifdef ENABLE_SDL2
 		if(handleEventsSDL()) {
 			break;
 		}
 	#endif
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 	}
 
-	agentStop = true;
+	/* Agents are now quitting */
+	exit_simulation:
+	agentState = AgentState::EXIT;
 	#ifdef ENABLE_SDL2
 		exitSDL();
 	#endif
@@ -162,5 +142,6 @@ int main(int argc, char **argv) {
 	for(int i = 0; i < CONCURRENT_AGENTS; i++) {
 		agent[i].join();
 	}
+
 	return 0;
 }
