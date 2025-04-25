@@ -19,7 +19,6 @@ SDL_Texture *sdlTexture[CONCURRENT_AGENTS];
 
 double FPSAccumulator = 0.0;
 double fps = 0;
-bool fpsUpdated = false;
 
 double drawAccumulator = 0.0;
 uint64_t lastGameTime = 0;
@@ -72,7 +71,7 @@ void exitSDL() {
 	SDL_Quit();
 }
 
-bool handleEventsSDL(SDL_Event& event) {
+static bool handleEventsSDL(SDL_Event& event) {
 	// Key mappings
 	#define KEY_A_BUTTON      SDLK_z
 	#define KEY_B_BUTTON      SDLK_x
@@ -145,7 +144,21 @@ bool handleEventsSDL(SDL_Event& event) {
 	return false;
 }
 
-void updateDeltaFPS(double deltaTime) {
+static inline void updateTitle() {
+	// Update the title of the window with the current FPS
+	std::string title = "emerald-ai ";
+
+	if(fps < 1000) {
+		title += std::to_string((size_t) round(fps)) + " fps";
+
+	} else {
+		title += std::to_string((size_t) round(fps / 1000)) + " FPM";
+	}
+
+	SDL_SetWindowTitle(sdlWindow, title.c_str());
+}
+
+static void updateDeltaFPS(double deltaTime) {
 	FPSAccumulator += deltaTime;
 
 	// check if a second has elaped
@@ -153,7 +166,6 @@ void updateDeltaFPS(double deltaTime) {
 		return;
 	}
 
-	fpsUpdated = true;
 	fps = 0;
 
 	// Load the total number of FPS from all agents
@@ -168,13 +180,13 @@ void updateDeltaFPS(double deltaTime) {
 	}
 
 	fps /= FPS_COUNTS;
+	updateTitle();
 
 	// Reset accumulator and FPS counters
 	FPSAccumulator = min(1.0, FPSAccumulator - 1);
 
 	{
 		std::lock_guard<std::mutex> lock(sdlState.mutexSDS);
-
 		sdlState.gos.fpsIndex = (sdlState.gos.fpsIndex + 1) % FPS_COUNTS;
 
 		for (int i = 0; i < CONCURRENT_AGENTS; i++) {
@@ -184,7 +196,7 @@ void updateDeltaFPS(double deltaTime) {
 }
 
 /* aiframe should match this table when reading SDLPlaybackSpeed to check whether to update draw at all. */
-constexpr double deltaForNextFrame[] = {
+static constexpr double deltaForNextFrame[] = {
 	[(size_t) SDLPlaybackSpeed::PAUSED] =		INFINITY,
 	[(size_t) SDLPlaybackSpeed::REALTIME] =		1 / 60.0,
 	[(size_t) SDLPlaybackSpeed::FAST] =			1 / 360.0,
@@ -192,7 +204,9 @@ constexpr double deltaForNextFrame[] = {
 	[(size_t) SDLPlaybackSpeed::MAX] =			1 * 4.0,
 };
 
-void updateDeltaTime(double deltaTime) {
+static void drawSDL();
+
+static void updateDeltaTime(double deltaTime) {
 	drawAccumulator += deltaTime;
 
 	// check if deltatime has elapsed
@@ -213,9 +227,15 @@ void updateDeltaTime(double deltaTime) {
 	// Draw the next frame
 	drawSDL();
 	sdlState.gos.currentFrame = sdlState.gos.currentFrame + 1;
+
+	{
+		// Signal all threads SDL is ready now
+		std::lock_guard<std::mutex> lock(sdlState.signal.mutex);
+		sdlState.signal.cv.notify_all();
+	}
 }
 
-void updateDeltas() {
+static void updateDeltas() {
 	// getg the new delta time
 	uint64_t curGameTime = SDL_GetPerformanceCounter();
 	double deltaTime = ((curGameTime - lastGameTime) / (double)SDL_GetPerformanceFrequency());
@@ -238,11 +258,11 @@ bool updateSDL() {
 	return exit;
 }
 
-static void drawTextureOf(int16_t index) {
+static inline void drawTextureOf(int16_t index) {
 	SDL_UpdateTexture(sdlTexture[index], NULL, sdlState.aos.screens[index], DISPLAY_WIDTH * sizeof (Uint16));
 }
 
-static void drawTextures() {
+static inline void drawTextures() {
 	// If viewing an AI agent, only draw that agent's texture
 	if(sdlState.gos.viewIndex >= 0) {
 		drawTextureOf(sdlState.gos.viewIndex);
@@ -255,7 +275,7 @@ static void drawTextures() {
 	}
 }
 
-void drawAiGrid() {
+static inline void drawAiGrid() {
 	// Draw each ai agent in a grid
 	for(int i = 0; i < GRID_ROWS * GRID_COLS; i++) {
 		const SDL_Rect rect = {
@@ -267,30 +287,8 @@ void drawAiGrid() {
 	}
 }
 
-void updateTitle() {
-	// Title is only updated if the FPS has changed
-	if(!fpsUpdated) {
-		return;
-	}
-
-	fpsUpdated = false;
-
-	// Update the title of the window with the current FPS
-	std::string title = "emerald-ai ";
-
-	if(fps < 1000) {
-		title += std::to_string((size_t) round(fps)) + " fps";
-
-	} else {
-		title += std::to_string((size_t) round(fps / 1000)) + " FPM";
-	}
-
-	SDL_SetWindowTitle(sdlWindow, title.c_str());
-}
-
-void drawSDL() {
+static void drawSDL() {
 	drawTextures();
-	SDL_RenderClear(sdlRenderer);
 	drawAiGrid();
 	updateTitle();
 

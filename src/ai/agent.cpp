@@ -146,11 +146,15 @@ static const struct DLL_Platform dll_platform = {
 	.SkipToGame = true,
 };
 
+#ifdef ENABLE_SDL2
 thread_local static size_t lastFrame = -1;
 
+/* Update the number of frames ran to SDL */
 void updateFrameCount(int index, size_t count) {
 	std::lock_guard<std::mutex> lock(sdlState.mutexSDS);
-	sdlState.sds.frameCounts[index][sdlState.gos.fpsIndex] = count + sdlState.sds.frameCounts[index][sdlState.gos.fpsIndex];
+
+	auto* fpsAddr = &(sdlState.sds.frameCounts[index][sdlState.gos.fpsIndex]);
+	*fpsAddr = count + *fpsAddr;
 }
 
 /* aiframe should match this table when reading SDLPlaybackSpeed to check whether to update draw at all. */
@@ -165,50 +169,50 @@ constexpr bool isAiFrameUpdate[] = {
 size_t fpsNotUpdated = 0;
 
 bool checkDrawUpdate(int index, bool aiframe) {
-	#ifndef ENABLE_SDL2
+	// Check if the current frame is ai update frame or any frame
+	if(aiframe != isAiFrameUpdate[(size_t) sdlState.gos.playbackSpeed]) {
 		return false;
-	#else
-		// Check if the current frame is ai update frame or any frame
-		if(aiframe != isAiFrameUpdate[(size_t) sdlState.gos.playbackSpeed]) {
+	}
+
+	// Check if the current frame is the same as the last frame drawn
+	if(sdlState.gos.currentFrame == lastFrame) {
+		if(aiframe) {
+			// if there isn't a frame available, but this is an ai frame, keep running
+			fpsNotUpdated += AI_FRAMES_BEFORE_POLL;
 			return false;
 		}
 
-		// Check if the current frame is the same as the last frame drawn
-		while(sdlState.gos.currentFrame == lastFrame) {
-			if(aiframe) {
-				// if there isn't a frame available, but this is an ai frame, keep running
-				fpsNotUpdated += AI_FRAMES_BEFORE_POLL;
-				return false;
-			}
-
-			// if the agent is not running, we need to abort this loop
-			if(agentState != AgentState::RUNNING) {
-				return false;
-			}
-
-			// we are synchronizing with SDL, so we need to wait for a frame to be available
-			std::this_thread::sleep_for(1ms);
+		{
+			// sleep until frame is received
+			std::unique_lock<std::mutex> lock(sdlState.signal.mutex);
+			sdlState.signal.cv.wait(lock, [] { return sdlState.gos.currentFrame != lastFrame; });
 		}
+	}
 
-		// We are here, so that means a new frame was available
-		lastFrame = sdlState.gos.currentFrame;
+	// We are here, so that means a new frame was available
+	lastFrame = sdlState.gos.currentFrame;
 
-		// update frame index
-		updateFrameCount(index, fpsNotUpdated + 1);
-		fpsNotUpdated = 0;
+	// update frame index
+	updateFrameCount(index, fpsNotUpdated + 1);
+	fpsNotUpdated = 0;
 
-		if(sdlState.gos.viewIndex == -1) {
-			// Draw frame only
-			DrawFrame(sdlState.aos.screens[index], &eme);
+	if(sdlState.gos.viewIndex == -1) {
+		// Draw frame only
+		DrawFrame(sdlState.aos.screens[index], &eme);
 
-		} else if(sdlState.gos.viewIndex == index) {
-			// Draw and update ai tilemap
-			DrawFrame(sdlState.aos.screens[index], &eme);
-			std::memcpy(sdlState.aos.aiTileMap, aiTileMap, sizeof(aiTileMap));
-		}
-		return true;
-	#endif
+	} else if(sdlState.gos.viewIndex == index) {
+		// Draw and update ai tilemap
+		DrawFrame(sdlState.aos.screens[index], &eme);
+		std::memcpy(sdlState.aos.aiTileMap, aiTileMap, sizeof(aiTileMap));
+	}
+	return true;
 }
+
+#else
+bool checkDrawUpdate(int index, bool aiframe) {
+	return false;
+}
+#endif
 
 void runAgent(int generation, int index) {
 	/* Set affinity to not run on core0. See main.cpp for more info. */

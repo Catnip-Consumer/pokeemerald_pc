@@ -128,7 +128,6 @@ int main(int argc, char **argv) {
 				goto exit_simulation;
 			}
 		#endif
-		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 	}
 
 	/* Agents are now quitting */

@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <mutex>
 #include <thread>
+#include <condition_variable>
 
 extern "C" {
 	#include <global.h>
@@ -77,7 +78,6 @@ extern const std::filesystem::path getExecutableDir();
 	void initSDL();
 	void exitSDL();
 	bool updateSDL();
-	void drawSDL();
 
 	// Define number of agents
 	#define GRID_ROWS 8
@@ -113,11 +113,18 @@ extern const std::filesystem::path getExecutableDir();
 
 		/* State that needs a mutex to access */
 		struct SDLSharedState {
+
 			volatile size_t frameCounts[CONCURRENT_AGENTS][FPS_COUNTS] = {0};
 		} sds;
 
 		/* Mutexes for the shared state */
 		std::mutex mutexSDS;
+
+		/* Variables for handling waiting on SDL to request the next frame */
+		struct {
+			std::mutex mutex;
+			std::condition_variable cv;
+		} signal;
 	};
 
 	extern SDLState sdlState;
