@@ -4,6 +4,7 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include <atomic>
 
 extern "C" {
 	#include <global.h>
@@ -90,7 +91,7 @@ extern const std::filesystem::path getExecutableDir();
 		REALTIME,		// 60fps - display every frame
 		FAST,			// 360fps - display every frame
 		SLIDESHOW,		// 20fps - display when requested
-		MAX,			// 4spf - display when requested
+		MAX,			// 1fps - display when requested
 	};
 
 	struct SDLState {
@@ -111,8 +112,7 @@ extern const std::filesystem::path getExecutableDir();
 
 		/* State that needs a mutex to access */
 		struct SDLSharedState {
-
-			volatile size_t frameCounts[CONCURRENT_AGENTS][FPS_COUNTS] = {0};
+			std::atomic<size_t> frameCounts[CONCURRENT_AGENTS][FPS_COUNTS] = {0};
 		} sds;
 
 		/* Mutexes for the shared state */

@@ -224,13 +224,13 @@ static bool handleEventsSDL(SDL_Event& event) {
 
 static inline void updateTitle() {
 	// Update the title of the window with the current FPS
-	std::string title = "emerald-ai ";
+	std::string title = "emerald-ai - fps: "+ std::to_string((size_t) io->Framerate) +" - ai: ";
 
 	if(fps < 1000) {
-		title += std::to_string((size_t) round(fps)) + " fps";
+		title += std::to_string((size_t) round(fps)) + " per second";
 
 	} else {
-		title += std::to_string((size_t) round(fps / 1000)) + " FPM";
+		title += std::to_string((size_t) round(fps / 1000)) + " per ms";
 	}
 
 	SDL_SetWindowTitle(sdlWindow, title.c_str());
@@ -265,13 +265,12 @@ static void updateDeltaFPS(double deltaTime) {
 	// Reset accumulator and FPS counters
 	FPSAccumulator = min(1.0, FPSAccumulator - 1);
 
-	{
-		std::lock_guard<std::mutex> lock(sdlState.mutexSDS);
-		sdlState.gos.fpsIndex = (sdlState.gos.fpsIndex + 1) % FPS_COUNTS;
+	sdlState.gos.fpsIndex = (sdlState.gos.fpsIndex + 1) % FPS_COUNTS;
 
-		for (int i = 0; i < CONCURRENT_AGENTS; i++) {
-			sdlState.sds.frameCounts[i][sdlState.gos.fpsIndex] = 0;
-		}
+	for (int i = 0; i < CONCURRENT_AGENTS; i++) {
+		// WARNING: This technically can make us lose a few FPS if the later agents push their FPS updates to new FPS index.
+		// I honestly dont care enough to fix it though. FPS anyway is just an approximation.
+		sdlState.sds.frameCounts[i][sdlState.gos.fpsIndex] = 0;
 	}
 }
 
@@ -281,7 +280,7 @@ static constexpr double deltaForNextFrame[] = {
 	[(size_t) SDLPlaybackSpeed::REALTIME] =		1 / 60.0,
 	[(size_t) SDLPlaybackSpeed::FAST] =			1 / 360.0,
 	[(size_t) SDLPlaybackSpeed::SLIDESHOW] =	1 / 20.0,
-	[(size_t) SDLPlaybackSpeed::MAX] =			1 * 4.0,
+	[(size_t) SDLPlaybackSpeed::MAX] =			1.0,
 };
 
 static void updateDeltaTime(double deltaTime) {
@@ -342,6 +341,8 @@ static inline ImVec2 calculateWindowInnerSize() {
 	return area;
 }
 
+static constexpr ImVec2 displaySize = ImVec2(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
 static inline void drawAiGrid() {
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	ImGui::SetNextWindowSize(getGBAScreenSizeAtScale(GRID_COLS, GRID_ROWS));
@@ -353,7 +354,7 @@ static inline void drawAiGrid() {
 			ImGui::SetCursorPos(ImVec2(x * DISPLAY_WIDTH, y * DISPLAY_HEIGHT));
 			ImGui::Image(
 				(ImTextureID)(intptr_t) glAgentTex[x + (y * GRID_COLS)],
-				ImVec2(DISPLAY_WIDTH, DISPLAY_HEIGHT)
+				displaySize
 			);
 		}
 	}

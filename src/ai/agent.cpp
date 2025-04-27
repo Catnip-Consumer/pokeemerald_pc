@@ -146,12 +146,10 @@ static const struct DLL_Platform dll_platform = {
 };
 
 #ifdef ENABLE_SDL2
-thread_local static size_t lastFrame = -1;
+thread_local static uint8_t lastFrame = -1;
 
 /* Update the number of frames ran to SDL */
 void updateFrameCount(int index, size_t count) {
-	std::lock_guard<std::mutex> lock(sdlState.mutexSDS);
-
 	auto* fpsAddr = &(sdlState.sds.frameCounts[index][sdlState.gos.fpsIndex]);
 	*fpsAddr = count + *fpsAddr;
 }
@@ -166,11 +164,25 @@ constexpr bool isAiFrameUpdate[] = {
 };
 
 size_t fpsNotUpdated = 0;
+uint8_t missedFramesCount = 0;
 
 bool checkDrawUpdate(int index, bool aiframe) {
 	// Check if the current frame is ai update frame or any frame
 	if(aiframe != isAiFrameUpdate[(size_t) sdlState.gos.playbackSpeed]) {
 		return false;
+	}
+
+	if(!aiframe && missedFramesCount > 0) {
+		if(sdlState.gos.currentFrame == lastFrame) {
+			// We missed rendering a previous frame
+			--missedFramesCount;
+			fpsNotUpdated++;
+			return false;
+		}
+
+		// SDL has requested yet another frame..... Just go render it
+		missedFramesCount += sdlState.gos.currentFrame - lastFrame - 1;
+		goto renderIt;
 	}
 
 	// Check if the current frame is the same as the last frame drawn
@@ -185,9 +197,13 @@ bool checkDrawUpdate(int index, bool aiframe) {
 			// sleep until frame is received
 			std::unique_lock<std::mutex> lock(sdlState.signal.mutex);
 			sdlState.signal.cv.wait(lock, [] { return sdlState.gos.currentFrame != lastFrame; });
+
+			// Calculate the number of frames we missed processing
+			missedFramesCount = sdlState.gos.currentFrame - lastFrame - 1;
 		}
 	}
 
+	renderIt:
 	// We are here, so that means a new frame was available
 	lastFrame = sdlState.gos.currentFrame;
 
