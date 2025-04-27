@@ -34,6 +34,12 @@ set(SYSTEM_SDL_MIN_VER 2.32.0)
 #add_definitions(-DSDL_MAIN_HANDLED)
 add_subdirectory(${CMAKE_SOURCE_DIR}/extern/SDL2 EXCLUDE_FROM_ALL)
 
+# ImGui
+include_directories(${CMAKE_SOURCE_DIR}/extern/imgui)
+
+# OpenGL
+find_package(OpenGL REQUIRED)
+
 include("./tools/aif2pcm/make.cmake")
 include("./tools/bin2c/make.cmake")
 include("./tools/gbafix/make.cmake")

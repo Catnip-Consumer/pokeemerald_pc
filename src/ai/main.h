@@ -53,13 +53,9 @@ struct EmeraldAddresses {
 extern void runAgent(int generation, int index);
 extern void DrawFrame(uint16_t *pixels, struct EmeraldAddresses* eme);
 
-// Dimensions of the GBA screen in pixels
-#define GBA_SCREEN_W 240
-#define GBA_SCREEN_H 160
-
 /* Agent specific variables */
-#define AI_TILEMAP_W	(GBA_SCREEN_W / 16)
-#define AI_TILEMAP_H	(GBA_SCREEN_H / 16)
+#define AI_TILEMAP_W	(DISPLAY_WIDTH / 16)
+#define AI_TILEMAP_H	(DISPLAY_HEIGHT / 16)
 #define AI_TILEMAP_SIZE	(AI_TILEMAP_W * AI_TILEMAP_H)
 
 /* System-dependent. See win32.cpp, linux.cpp and macos.cpp. */
@@ -73,18 +69,20 @@ extern bool closeThreadHandle(void* handle);
 extern void* getCurrentThreadHandle();
 extern const std::filesystem::path getExecutableDir();
 
+// TODO: Obsolete flag, use emerald.dll itself to determine when AI decisions are needed(!)
+#define AI_FRAMES_BEFORE_POLL 8
+
+// Define number of agents to run. GRID_ROWS and GRID_COLS are only relevant for SDL2 but also are used to get agent count.
+#define GRID_ROWS 8
+#define GRID_COLS 8
+#define CONCURRENT_AGENTS (GRID_ROWS * GRID_COLS)
+
 #ifdef ENABLE_SDL2
 	/* SDL2 lifecycle functions */
-	void initSDL();
+	bool initSDL();
 	void exitSDL();
 	bool updateSDL();
-
-	// Define number of agents
-	#define GRID_ROWS 8
-	#define GRID_COLS 8
-	#define CONCURRENT_AGENTS (GRID_ROWS * GRID_COLS)
 	#define FPS_COUNTS 8
-	#define AI_FRAMES_BEFORE_POLL 8
 
 	// SDL playback speed state
 	enum class SDLPlaybackSpeed : uint8_t {
@@ -102,7 +100,7 @@ extern const std::filesystem::path getExecutableDir();
 			volatile uint8_t currentFrame = 0;
 			volatile int16_t viewIndex = -1;
 			volatile uint8_t fpsIndex = 0;
-			volatile SDLPlaybackSpeed playbackSpeed = SDLPlaybackSpeed::SLIDESHOW;
+			volatile SDLPlaybackSpeed playbackSpeed = SDLPlaybackSpeed::FAST;
 		} gos;
 
 		/* State only the agents can write */

@@ -1,5 +1,4 @@
 #include <iostream>
-#include <ai/config.h>
 #include <ai/main.h>
 
 #include <mach-o/dyld.h>

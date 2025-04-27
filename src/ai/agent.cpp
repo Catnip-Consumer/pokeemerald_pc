@@ -3,7 +3,6 @@
 #include <cstring>
 #include <chrono>
 
-#include <ai/config.h>
 #include <ai/main.h>
 
 extern "C" {
@@ -255,12 +254,17 @@ void runAgent(int generation, int index) {
 			eme.AgbRunFrame();
 			VBlankIntrWait();
 			checkDrawUpdate(index, false);
+
+			if(AgentState::RUNNING != agentState) {
+				goto exit;
+			}
 		}
 
 		checkDrawUpdate(index, true);
 	}
 
 	/* Simulation completed, unload DLL and exit. */
+	exit:
 	UnloadEmeraldDLL(dllHandle);
 	agentData.agentsCounter = agentData.agentsCounter - 1;
 }

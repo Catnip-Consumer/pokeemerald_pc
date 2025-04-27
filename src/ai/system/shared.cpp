@@ -1,5 +1,4 @@
 #include <iostream>
-#include <ai/config.h>
 #include <ai/main.h>
 
 bool GetEmeraldDLLAddresses(struct EmeraldAddresses* eme, void* dll) {

@@ -4,8 +4,6 @@
 #include <algorithm>
 #include <thread>
 
-#include <ai/config.h>
-
 #ifdef ENABLE_SDL2
 	#include <SDL2/SDL.h>
 #endif
@@ -49,6 +47,19 @@ static void ReadSaveFile() {
 	}
 }
 
+void createDllCopy(size_t num) {
+#ifdef _WIN32
+	/* Delete the old DLL (should be able to without deletion but I can't be bothered rn) */
+	const auto target = getExecutableDir() / "_dll" / ("libemerald_" + std::to_string(num) + ".dll");
+
+	if(std::filesystem::exists(target)) {
+		std::filesystem::remove(target);
+	}
+
+	std::filesystem::copy_file(getExecutableDir() / "libemerald.dll", target);
+#endif
+}
+
 int main(int argc, char **argv) {
 	/*
 	 * Set our affinity to core0. No agent should have permission to run on core0.
@@ -73,16 +84,7 @@ int main(int argc, char **argv) {
 	std::thread agent[CONCURRENT_AGENTS];
 
 	for(int i = 0; i < CONCURRENT_AGENTS; i++) {
-		#ifdef _WIN32
-			/* Delete the old DLL (should be able to without deletion but I can't be bothered rn) */
-			const auto target = getExecutableDir() / "_dll" / ("libemerald_" + std::to_string(i) + ".dll");
-
-			if(std::filesystem::exists(target)) {
-				std::filesystem::remove(target);
-			}
-
-			std::filesystem::copy_file(getExecutableDir() / "libemerald.dll", target);
-		#endif
+		createDllCopy(i);
 
 		// Start the agent thread
 		agent[i] = std::thread(runAgent, 0, i);
@@ -132,6 +134,8 @@ int main(int argc, char **argv) {
 
 	/* Agents are now quitting */
 	exit_simulation:
+	std::cout << "Simulation ending... Do cleanup." << std::endl;
+
 	agentState = AgentState::EXIT;
 	#ifdef ENABLE_SDL2
 		exitSDL();
@@ -141,5 +145,6 @@ int main(int argc, char **argv) {
 		agent[i].join();
 	}
 
+	std::cout << "Goodbye." << std::endl;
 	return 0;
 }

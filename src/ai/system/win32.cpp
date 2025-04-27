@@ -1,6 +1,5 @@
 #include <iostream>
 #include <windows.h>
-#include <ai/config.h>
 #include <ai/main.h>
 
 const std::filesystem::path getExecutableDir() {

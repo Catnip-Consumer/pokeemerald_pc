@@ -5,6 +5,8 @@ project(PokeEmerald-ai
 	LANGUAGES C CXX
 )
 
+set(AI_HAS_GUI ON CACHE STRING "If enabled, SDL2 with ImGui will be compiled and used to display what AI is doing.")
+
 # requires at least C11/C++23-compatible compiler to compile the code
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 23)
@@ -16,10 +18,6 @@ set(PokeEmerald_AI_SOURCES
 	"src/ai/system/shared.cpp"
 	"src/ai/main.cpp"
 	"src/ai/agent.cpp"
-
-	# need to be included only when SDL2 is used.
-	"src/ai/system/thread_safe_gba_easy_draw.cpp"
-	"src/ai/system/sdl2.cpp"
 )
 
 if(WIN32)
@@ -36,6 +34,22 @@ else()
 	)
 endif()
 
+if(AI_HAS_GUI)
+	list(APPEND PokeEmerald_AI_SOURCES
+		"src/ai/system/thread_safe_gba_easy_draw.cpp"
+		"src/ai/system/sdl2.cpp"
+
+		"extern/imgui/imgui.cpp"
+		"extern/imgui/imgui_draw.cpp"
+		"extern/imgui/imgui_tables.cpp"
+		"extern/imgui/imgui_widgets.cpp"
+		"extern/imgui/backends/imgui_impl_sdlrenderer2.cpp"
+		"extern/imgui/backends/imgui_impl_opengl3.cpp"
+		"extern/imgui/backends/imgui_impl_sdl2.cpp"
+		"extern/imgui/misc/cpp/imgui_stdlib.cpp"
+	)
+endif()
+
 # DLL target
 add_executable(emerald-ai
 	${PokeEmerald_AI_SOURCES}
@@ -43,7 +57,12 @@ add_executable(emerald-ai
 
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
-target_link_libraries(emerald-ai PRIVATE SDL2main SDL2-static xinput)
+
+# Extra libraries and compiler flag if SDL2 is enabled
+if(AI_HAS_GUI)
+	target_compile_definitions(emerald-ai PRIVATE ENABLE_SDL2)
+	target_link_libraries(emerald-ai PRIVATE SDL2main SDL2-static xinput ${OPENGL_LIBRARIES})
+endif()
 
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

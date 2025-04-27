@@ -1,9 +1,12 @@
 #include <iostream>
 #include <cmath>
-#include <ai/config.h>
 
-#ifdef ENABLE_SDL2
+#include <imgui.h>
+#include <backends/imgui_impl_sdl2.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+
 #include <ai/main.h>
 
 extern "C" {
@@ -15,7 +18,10 @@ extern "C" {
 SDLState sdlState;
 SDL_Window *sdlWindow;
 SDL_Renderer *sdlRenderer;
-SDL_Texture *sdlTexture[CONCURRENT_AGENTS];
+SDL_GLContext sdlGL;
+//SDL_Texture *sdlTexture[CONCURRENT_AGENTS];
+GLuint glAgentTex[CONCURRENT_AGENTS];
+ImGuiIO* io;
 
 double FPSAccumulator = 0.0;
 double fps = 0;
@@ -24,54 +30,127 @@ double drawAccumulator = 0.0;
 uint64_t lastGameTime = 0;
 bool frameAdvance = false;
 
-void initSDL() {
-	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+static inline ImVec2 getGBAScreenSizeAtScale(float xscale, float yscale) {
+	return ImVec2(DISPLAY_WIDTH * xscale, DISPLAY_HEIGHT * yscale);
+}
+
+static inline void signalFrameReady() {
+	sdlState.gos.currentFrame = sdlState.gos.currentFrame + 1;
+
+	{
+		// Signal all threads SDL is ready now
+		std::lock_guard<std::mutex> lock(sdlState.signal.mutex);
+		sdlState.signal.cv.notify_all();
+	}
+}
+
+bool initSDL() {
+	// Initialize SDL with no audio
+	if(SDL_Init(SDL_INIT_VIDEO) < 0) {
 		std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
-		return;
+		return false;
 	}
 
+	// Setup OpenGL flags
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+	// From 2.0.18: Enable native IME.
+#ifdef SDL_HINT_IME_SHOW_UI
+	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+#endif
+
+	// Create a new SDL window
+	const auto requestedSize = getGBAScreenSizeAtScale(GRID_COLS, GRID_ROWS);
 	sdlWindow = SDL_CreateWindow(
-		"emerald-ai",
+		"emerald-ai - starting...",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		DISPLAY_WIDTH * WINDOW_SCALE_AI_GRID, DISPLAY_HEIGHT * WINDOW_SCALE_AI_GRID,
-		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
+		requestedSize.x, requestedSize.y,
+		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI
 	);
 
 	if (sdlWindow == NULL) {
 		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return;
+		return false;
 	}
 
-	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, 0);
-	if (sdlRenderer == NULL){
-		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return;
+	// create an OpenGL context for this window
+	sdlGL = SDL_GL_CreateContext(sdlWindow);
+	if (sdlGL == nullptr) {
+		std::cout << "OpenGL context could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+		return false;
 	}
 
-	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
-	SDL_RenderClear(sdlRenderer);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	SDL_RenderSetLogicalSize(sdlRenderer, (DISPLAY_WIDTH * GRID_COLS), (DISPLAY_HEIGHT * GRID_ROWS));
+	SDL_GL_MakeCurrent(sdlWindow, sdlGL);
+	SDL_GL_SetSwapInterval(0); // no vsync
 
-	for(int i = 0; i < CONCURRENT_AGENTS; i++) {
-		sdlTexture[i] = SDL_CreateTexture(
-			sdlRenderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING,
-			DISPLAY_WIDTH, DISPLAY_HEIGHT
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	io = &ImGui::GetIO(); (void)*io;
+	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsLight();
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplSDL2_InitForOpenGL(sdlWindow, sdlGL);
+	ImGui_ImplOpenGL3_Init("#version 130");
+
+	// Macro that sets an OpenGL texture to use nearest neighbor scaling...
+	#define TEX_NEAREST_SETUP												\
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	\
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);	\
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);\
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// Create OpenGL textures for agents
+	glGenTextures(CONCURRENT_AGENTS, glAgentTex);
+
+	for(size_t i = 0;i < CONCURRENT_AGENTS;i ++) {
+		glBindTexture(GL_TEXTURE_2D, glAgentTex[i]);
+		TEX_NEAREST_SETUP
+
+		// create blank texture data. Will be updated later
+		glTexImage2D(
+			GL_TEXTURE_2D, 0, GL_RGB5,
+			DISPLAY_WIDTH, DISPLAY_HEIGHT,
+			0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV,
+			sdlState.aos.screens[i]
 		);
-
-		if (sdlTexture[i] == NULL){
-			std::cout << "Texture could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-			return;
-		}
 	}
+
+	return true; // Init success
 }
 
 void exitSDL() {
-	SDL_DestroyWindow(sdlWindow);
-	SDL_Quit();
+	signalFrameReady();		// wake up threads so they can exit safely.
+
+	// Clean up OpenGL context
+	glDeleteTextures(CONCURRENT_AGENTS, glAgentTex);
+
+	// Cleanup ImGUI
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+
+	// Cleanup SDL and OpenGL contexts
+    SDL_GL_DeleteContext(sdlGL);
+    SDL_DestroyWindow(sdlWindow);
+    SDL_Quit();
 }
 
 static bool handleEventsSDL(SDL_Event& event) {
+	ImGui_ImplSDL2_ProcessEvent(&event);
+
 	// Key mappings
 	#define KEY_A_BUTTON      SDLK_z
 	#define KEY_B_BUTTON      SDLK_x
@@ -102,10 +181,6 @@ static bool handleEventsSDL(SDL_Event& event) {
 				HANDLE_SPEED_SET(SDLK_4, SDLPlaybackSpeed::MAX)
 
 				case SDLK_SPACE:
-					frameAdvance = true;
-					return false;
-
-				case SDLK_PAUSE: // must also force-draw the next frame to look correct
 					sdlState.gos.playbackSpeed = SDLPlaybackSpeed::PAUSED;
 					frameAdvance = true;
 					return false;
@@ -140,7 +215,10 @@ static bool handleEventsSDL(SDL_Event& event) {
 
 		case SDL_QUIT:
 			return true;
-		}
+
+		case SDL_WINDOWEVENT:
+			return event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(sdlWindow);
+	}
 	return false;
 }
 
@@ -157,6 +235,8 @@ static inline void updateTitle() {
 
 	SDL_SetWindowTitle(sdlWindow, title.c_str());
 }
+
+static void drawSDL();
 
 static void updateDeltaFPS(double deltaTime) {
 	FPSAccumulator += deltaTime;
@@ -204,8 +284,6 @@ static constexpr double deltaForNextFrame[] = {
 	[(size_t) SDLPlaybackSpeed::MAX] =			1 * 4.0,
 };
 
-static void drawSDL();
-
 static void updateDeltaTime(double deltaTime) {
 	drawAccumulator += deltaTime;
 
@@ -226,13 +304,7 @@ static void updateDeltaTime(double deltaTime) {
 
 	// Draw the next frame
 	drawSDL();
-	sdlState.gos.currentFrame = sdlState.gos.currentFrame + 1;
-
-	{
-		// Signal all threads SDL is ready now
-		std::lock_guard<std::mutex> lock(sdlState.signal.mutex);
-		sdlState.signal.cv.notify_all();
-	}
+	signalFrameReady();
 }
 
 static void updateDeltas() {
@@ -258,8 +330,45 @@ bool updateSDL() {
 	return exit;
 }
 
+static inline float aspectRatio() {
+	return DISPLAY_WIDTH / (float) DISPLAY_HEIGHT;
+}
+
+static inline ImVec2 calculateWindowInnerSize() {
+	auto area = ImGui::GetWindowSize();
+	auto start = ImGui::GetCursorPos();
+	area.x -= start.x * 2;
+	area.y -= start.y;
+	return area;
+}
+
+static inline void drawAiGrid() {
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(getGBAScreenSizeAtScale(GRID_COLS, GRID_ROWS));
+	ImGui::Begin("AI view", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs);
+
+	// Draw each ai agent in a grid
+	for(int y = 0; y < GRID_ROWS; y++) {
+		for(int x = 0; x < GRID_COLS; x++) {
+			ImGui::SetCursorPos(ImVec2(x * DISPLAY_WIDTH, y * DISPLAY_HEIGHT));
+			ImGui::Image(
+				(ImTextureID)(intptr_t) glAgentTex[x + (y * GRID_COLS)],
+				ImVec2(DISPLAY_WIDTH, DISPLAY_HEIGHT)
+			);
+		}
+	}
+
+	ImGui::End();
+}
+
 static inline void drawTextureOf(int16_t index) {
-	SDL_UpdateTexture(sdlTexture[index], NULL, sdlState.aos.screens[index], DISPLAY_WIDTH * sizeof (Uint16));
+	glBindTexture(GL_TEXTURE_2D, glAgentTex[index]);
+	glTexSubImage2D(
+		GL_TEXTURE_2D, 0,
+		0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT,
+		GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV,
+		sdlState.aos.screens[index]
+	);
 }
 
 static inline void drawTextures() {
@@ -275,22 +384,17 @@ static inline void drawTextures() {
 	}
 }
 
-static inline void drawAiGrid() {
-	// Draw each ai agent in a grid
-	for(int i = 0; i < GRID_ROWS * GRID_COLS; i++) {
-		const SDL_Rect rect = {
-			(i % GRID_COLS) * DISPLAY_WIDTH,
-			(i / GRID_COLS) * DISPLAY_HEIGHT,
-			DISPLAY_WIDTH, DISPLAY_HEIGHT
-		};
-		SDL_RenderCopy(sdlRenderer, sdlTexture[i], NULL, &rect);
-	}
-}
+static constexpr ImVec4 windowbg = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
 static void drawSDL() {
 	drawTextures();
+
+	// Start the Dear ImGui frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+	ImGui::NewFrame();
+
 	drawAiGrid();
-	updateTitle();
 
 	/**
 		if (videoScaleChanged) {
@@ -299,7 +403,15 @@ static void drawSDL() {
 		}
 	 */
 
-	SDL_RenderPresent(sdlRenderer);
-}
+	// Render the frame
+	ImGui::Render();
+	glViewport(0, 0, (int)io->DisplaySize.x, (int)io->DisplaySize.y);
+	glClearColor(windowbg.x, windowbg.y, windowbg.z, windowbg.w);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-#endif
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	SDL_GL_SwapWindow(sdlWindow);
+
+	// update title bar content
+	updateTitle();
+}

@@ -1,7 +1,5 @@
-#include <ai/config.h>
 #include <ai/main.h>
 
-#ifdef ENABLE_SDL2
 #include "global.h"
 #include <stdbool.h>
 #include "platform/dma.h"
@@ -946,5 +944,3 @@ void DrawFrame(uint16_t *pixels, struct EmeraldAddresses* eme)
         REG_DISPSTAT &= ~INTR_FLAG_VCOUNT;
     }
 }
-
-#endif
