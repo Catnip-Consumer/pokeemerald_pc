@@ -279,7 +279,7 @@ static void updateDeltaFPS(double deltaTime) {
 
 /* aiframe should match this table when reading SDLPlaybackSpeed to check whether to update draw at all. */
 static constexpr double deltaForNextFrame[] = {
-	[(size_t) SDLPlaybackSpeed::PAUSED] =		INFINITY,
+	[(size_t) SDLPlaybackSpeed::PAUSED] =		1 / 20.0,
 	[(size_t) SDLPlaybackSpeed::REALTIME] =		1 / 60.0,
 	[(size_t) SDLPlaybackSpeed::FAST] =			1 / 360.0,
 	[(size_t) SDLPlaybackSpeed::SLIDESHOW] =	1 / 20.0,
@@ -292,12 +292,6 @@ static void updateDeltaTime(double deltaTime) {
 	// check if deltatime has elapsed
 	auto deltaNeeded = deltaForNextFrame[(size_t) sdlState.gos.playbackSpeed];
 
-	if(frameAdvance) {
-		// little hack to ensure when we stop being paused, accumulator is at 0
-		deltaNeeded = drawAccumulator;
-		frameAdvance = false;
-	}
-
 	if(drawAccumulator < deltaNeeded) {
 		return;
 	}
@@ -306,6 +300,16 @@ static void updateDeltaTime(double deltaTime) {
 
 	// Draw the next frame
 	drawSDL();
+
+	if(sdlState.gos.playbackSpeed == SDLPlaybackSpeed::PAUSED) {
+		// when paused, signal the frame ready only when frame advance is set
+		if(!frameAdvance) {
+			return;
+		}
+
+		frameAdvance = false;
+	}
+
 	signalFrameReady();
 }
 
