@@ -87,10 +87,10 @@ extern const std::filesystem::path getExecutableDir();
 
 	// SDL playback speed state
 	enum class SDLPlaybackSpeed : uint8_t {
-		PAUSED,			// 0fps - display every frame, advance only when button pressed
+		PAUSED,			// 30fps - display every frame, advance only when button pressed
 		REALTIME,		// 60fps - display every frame
 		FAST,			// 360fps - display every frame
-		SLIDESHOW,		// 20fps - display when requested
+		SLIDESHOW,		// 30fps - display when requested
 		MAX,			// 1fps - display when requested
 	};
 

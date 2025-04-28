@@ -279,10 +279,10 @@ static void updateDeltaFPS(double deltaTime) {
 
 /* aiframe should match this table when reading SDLPlaybackSpeed to check whether to update draw at all. */
 static constexpr double deltaForNextFrame[] = {
-	[(size_t) SDLPlaybackSpeed::PAUSED] =		1 / 20.0,
+	[(size_t) SDLPlaybackSpeed::PAUSED] =		1 / 30.0,
 	[(size_t) SDLPlaybackSpeed::REALTIME] =		1 / 60.0,
 	[(size_t) SDLPlaybackSpeed::FAST] =			1 / 360.0,
-	[(size_t) SDLPlaybackSpeed::SLIDESHOW] =	1 / 20.0,
+	[(size_t) SDLPlaybackSpeed::SLIDESHOW] =	1 / 30.0,
 	[(size_t) SDLPlaybackSpeed::MAX] =			1.0,
 };
 

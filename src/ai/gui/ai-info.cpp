@@ -48,27 +48,31 @@ void windowAiInfo(size_t agentId) {
 	// Divide up the dockspace into 3 sections: 2 horizontally + additional below
 	const auto dockspaceId = ImGui::GetID(windowName);
 
-	ImGui::DockBuilderRemoveNode(dockspaceId);
-	ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_None);
-	ImGui::DockBuilderSetNodeSize(dockspaceId, agentInfoWindowSize);
+    if (ImGui::DockBuilderGetNode(dockspaceId) == nullptr) {
+		ImGui::DockBuilderRemoveNode(dockspaceId);
+		ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_None);
+		ImGui::DockBuilderSetNodeSize(dockspaceId, agentInfoWindowSize);
 
-	// Split the left region into two (vertical split)
-	ImGuiID topNode, bottomNode;
-	ImGui::DockBuilderSplitNode(dockspaceId, ImGuiDir_Up, agentInfoLayoutScale.y, &topNode, &bottomNode);
+		// Split the left region into two (vertical split)
+		ImGuiID topNode, bottomNode;
+		ImGui::DockBuilderSplitNode(dockspaceId, ImGuiDir_Up, agentInfoLayoutScale.y, &topNode, &bottomNode);
 
-	// Split the dockspace into two regions (horizontal split)
-	ImGuiID topLeftNode, topRightNode;
-	ImGui::DockBuilderSplitNode(topNode, ImGuiDir_Right, agentInfoLayoutScale.x, &topRightNode, &topLeftNode);
+		// Split the dockspace into two regions (horizontal split)
+		ImGuiID topLeftNode, topRightNode;
+		ImGui::DockBuilderSplitNode(topNode, ImGuiDir_Right, agentInfoLayoutScale.x, &topRightNode, &topLeftNode);
 
-	// Assign windows to the dock nodes
-	ImGui::DockBuilderDockWindow(WDNAME(AGENT_DISPLAY), topLeftNode);
-	ImGui::DockBuilderDockWindow(WDNAME("todo"), bottomNode);
-	ImGui::DockBuilderDockWindow(WDNAME(AGENT_LOG), topRightNode);
+		// Assign windows to the dock nodes
+		ImGui::DockBuilderDockWindow(WDNAME(AGENT_DISPLAY), topLeftNode);
+		ImGui::DockBuilderDockWindow(WDNAME("todo"), bottomNode);
+		ImGui::DockBuilderDockWindow(WDNAME(AGENT_LOG), topRightNode);
+
+		ImGui::DockBuilderFinish(dockspaceId);
+	}
 
 	// Create the dockspace for agent info
-	ImGui::DockBuilderFinish(dockspaceId);
 	ImGui::DockSpace(dockspaceId, ImVec2(0, 0), ImGuiDockNodeFlags_NoUndocking);
 
+	// Create docked windows
 	agentScreen(agentId);
 	agentLogWindow(agentId);
 	makeBottomNode(agentId);
