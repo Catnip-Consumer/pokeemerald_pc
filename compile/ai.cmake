@@ -37,7 +37,10 @@ endif()
 if(AI_HAS_GUI)
 	list(APPEND PokeEmerald_AI_SOURCES
 		"src/ai/system/thread_safe_gba_easy_draw.cpp"
-		"src/ai/system/sdl2.cpp"
+		"src/ai/gui/sdl2.cpp"
+		"src/ai/gui/view-all-ai.cpp"
+		"src/ai/gui/ai-info.cpp"
+		"src/ai/gui/log-window.cpp"
 
 		"extern/imgui/imgui.cpp"
 		"extern/imgui/imgui_draw.cpp"

@@ -17,7 +17,6 @@ using namespace std::chrono_literals;
 #define REG_BASE (eme.REG_BASE)
 
 static thread_local struct EmeraldAddresses eme;
-static thread_local uint32_t aiTileMap[AI_TILEMAP_SIZE];
 
 void VBlankIntrWait() {
 	REG_VCOUNT = 161;
@@ -211,15 +210,8 @@ bool checkDrawUpdate(int index, bool aiframe) {
 	updateFrameCount(index, fpsNotUpdated + 1);
 	fpsNotUpdated = 0;
 
-	if(sdlState.gos.viewIndex == -1) {
-		// Draw frame only
-		DrawFrame(sdlState.aos.screens[index], &eme);
-
-	} else if(sdlState.gos.viewIndex == index) {
-		// Draw and update ai tilemap
-		DrawFrame(sdlState.aos.screens[index], &eme);
-		std::memcpy(sdlState.aos.aiTileMap, aiTileMap, sizeof(aiTileMap));
-	}
+	// Render frame to screen buffer
+	DrawFrame(sdlState.aos.screens[index], &eme);
 	return true;
 }
 

@@ -99,7 +99,6 @@ extern const std::filesystem::path getExecutableDir();
 		struct SDLGuiOnlyState {
 			volatile uint16_t userInput = 0;
 			volatile uint8_t currentFrame = 0;
-			volatile int16_t viewIndex = -1;
 			volatile uint8_t fpsIndex = 0;
 			volatile SDLPlaybackSpeed playbackSpeed = SDLPlaybackSpeed::FAST;
 		} gos;
@@ -107,7 +106,7 @@ extern const std::filesystem::path getExecutableDir();
 		/* State only the agents can write */
 		struct SDLAgentOnlyState {
 			uint16_t screens[CONCURRENT_AGENTS][DISPLAY_WIDTH * DISPLAY_HEIGHT];
-			uint32_t aiTileMap[AI_TILEMAP_SIZE];
+			uint32_t tilemap[CONCURRENT_AGENTS][AI_TILEMAP_SIZE];
 		} aos;
 
 		/* State that needs a mutex to access */
