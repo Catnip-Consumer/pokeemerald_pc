@@ -3285,7 +3285,7 @@ void FaintClearSetData(void)
     for (i = 0; i < sizeof(struct DisableStruct); i++)
         ptr[i] = 0;
 
-    gProtectStructs[gActiveBattler].protected = FALSE;
+    gProtectStructs[gActiveBattler].protected_ = FALSE;
     gProtectStructs[gActiveBattler].endured = FALSE;
     gProtectStructs[gActiveBattler].noValidMoves = FALSE;
     gProtectStructs[gActiveBattler].helpingHand = FALSE;
@@ -4833,7 +4833,7 @@ static void TurnValuesCleanUp(bool8 var0)
     {
         if (var0)
         {
-            gProtectStructs[gActiveBattler].protected = 0;
+            gProtectStructs[gActiveBattler].protected_ = 0;
             gProtectStructs[gActiveBattler].endured = 0;
         }
         else

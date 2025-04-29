@@ -46,6 +46,8 @@
 #include "constants/moves.h"
 #include "constants/region_map_sections.h"
 
+#include "platform/dll.h"
+
 #define LAST_TVSHOW_IDX (TV_SHOWS_COUNT - 1)
 
 #define rbernoulli(num, den) BernoulliTrial(0xFFFF * (num) / (den))
@@ -3300,6 +3302,7 @@ void ChangePokemonNickname_CB(void)
 {
     SetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_NICKNAME, gStringVar2);
     CB2_ReturnToFieldContinueScriptPlayMapMusic();
+	PokemonTeam_Own_Update(gSpecialVar_0x8004, &gPlayerParty[gSpecialVar_0x8004]);
 }
 
 void ChangeBoxPokemonNickname(void)

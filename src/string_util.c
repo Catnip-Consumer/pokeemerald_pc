@@ -42,7 +42,7 @@ u8 *StringCopy_Nickname(u8 *dest, const u8 *src)
     return &dest[i];
 }
 
-u8 *StringGet_Nickname(u8 *str)
+_DLL_ u8 *StringGet_Nickname(u8 *str)
 {
     u8 i;
     u32 limit = POKEMON_NAME_LENGTH;

@@ -34,6 +34,8 @@
 #include "constants/rgb.h"
 #include "constants/items.h"
 
+#include "platform/dll.h"
+
 extern struct Evolution gEvolutionTable[][EVOS_PER_MON];
 
 struct EvoInfo
@@ -579,6 +581,8 @@ static void CreateShedinja(u16 preEvoSpecies, struct Pokemon *mon)
             && GetMonData(shedinja, MON_DATA_LANGUAGE) == LANGUAGE_JAPANESE
             && GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NINJASK)
                 SetMonData(shedinja, MON_DATA_NICKNAME, sText_ShedinjaJapaneseName);
+
+		PokemonTeam_Own_Update(gPlayerPartyCount, &gPlayerParty[gPlayerPartyCount]);
     }
 }
 
@@ -773,6 +777,7 @@ static void Task_EvolutionScene(u8 taskId)
             GetSetPokedexFlag(SpeciesToNationalPokedexNum(gTasks[taskId].tPostEvoSpecies), FLAG_SET_SEEN);
             GetSetPokedexFlag(SpeciesToNationalPokedexNum(gTasks[taskId].tPostEvoSpecies), FLAG_SET_CAUGHT);
             IncrementGameStat(GAME_STAT_EVOLVED_POKEMON);
+			PokemonTeam_Own_Update(gTasks[taskId].tPartyId, mon);
 #ifndef PORTABLE
         }
 #endif
@@ -1194,6 +1199,8 @@ static void Task_TradeEvolutionScene(u8 taskId)
             GetSetPokedexFlag(SpeciesToNationalPokedexNum(gTasks[taskId].tPostEvoSpecies), FLAG_SET_SEEN);
             GetSetPokedexFlag(SpeciesToNationalPokedexNum(gTasks[taskId].tPostEvoSpecies), FLAG_SET_CAUGHT);
             IncrementGameStat(GAME_STAT_EVOLVED_POKEMON);
+
+			PokemonTeam_Own_Update(gTasks[taskId].tPartyId, mon);
         }
         break;
     case T_EVOSTATE_TRY_LEARN_MOVE:
@@ -1266,6 +1273,7 @@ static void Task_TradeEvolutionScene(u8 taskId)
             DrawTextOnTradeWindow(0, gDisplayedStringBattle, 1);
             gTasks[taskId].tLearnsFirstMove = 0x40; // re-used as a counter
             gTasks[taskId].tState++;
+			PokemonTeam_Own_Update(gTasks[taskId].tPartyId, mon);
         }
         break;
     case T_EVOSTATE_TRY_LEARN_ANOTHER_MOVE:

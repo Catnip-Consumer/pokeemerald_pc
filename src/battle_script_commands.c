@@ -52,9 +52,11 @@
 #include "constants/songs.h"
 #include "constants/trainers.h"
 
+#include "platform/dll.h"
+
 extern const u8 *const gBattleScriptsForMoveEffects[];
 
-#define DEFENDER_IS_PROTECTED ((gProtectStructs[gBattlerTarget].protected) && (gBattleMoves[gCurrentMove].flags & FLAG_PROTECT_AFFECTED))
+#define DEFENDER_IS_PROTECTED ((gProtectStructs[gBattlerTarget].protected_) && (gBattleMoves[gCurrentMove].flags & FLAG_PROTECT_AFFECTED))
 
 #define LEVEL_UP_BANNER_START 416
 #define LEVEL_UP_BANNER_END   512
@@ -6087,7 +6089,7 @@ static void DrawLevelUpBannerText(void)
     #ifdef VER_64BIT
     u64 var;
     #else
-    u32 var;    
+    u32 var;
     #endif
 
     monLevel = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL);
@@ -6535,7 +6537,7 @@ static void Cmd_setprotectlike(void)
     {
         if (gBattleMoves[gCurrentMove].effect == EFFECT_PROTECT)
         {
-            gProtectStructs[gBattlerAttacker].protected = 1;
+            gProtectStructs[gBattlerAttacker].protected_ = 1;
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_PROTECTED_ITSELF;
         }
         if (gBattleMoves[gCurrentMove].effect == EFFECT_ENDURE)
@@ -10240,6 +10242,10 @@ static void Cmd_trygivecaughtmonnick(void)
         {
             SetMonData(&gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]], MON_DATA_NICKNAME, gBattleStruct->caughtMonNick);
             gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT);
+
+			// some crappy code here because I am too lazy to actually figure out how to get the ID of the pokemon
+			for(int i = 0; i < PARTY_SIZE; i++)
+				PokemonTeam_Own_Update(i, &gPlayerParty[i]);
         }
         break;
     case 4:

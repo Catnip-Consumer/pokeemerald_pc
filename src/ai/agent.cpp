@@ -14,13 +14,143 @@ extern "C" {
 	#include <gba/flash_internal.h>
 }
 
-#define _LOG agentData.log[index]
+#define DATA agentData.data[_storedIndex]
+#define POKE(index) DATA.pokemon[index]
+#define LOG DATA.log
+
+#define POKE_PARA(poke, prop) eme.GetMonData3(poke, prop, nullptr);
+
 
 using namespace std::chrono_literals;
 #define REG_BASE (eme.REG_BASE)
 
 thread_local static volatile uint16_t _storedIndex = 0;
 static thread_local struct EmeraldAddresses eme;
+
+static void SetGameState(DLL_GameState state) {
+
+}
+
+static constexpr uint32_t MoveFields[] = {
+	MON_DATA_MOVE1,
+	MON_DATA_MOVE2,
+	MON_DATA_MOVE3,
+	MON_DATA_MOVE4,
+};
+
+static constexpr uint32_t PPFields[] = {
+	MON_DATA_PP1,
+	MON_DATA_PP2,
+	MON_DATA_PP3,
+	MON_DATA_PP4,
+};
+
+static void _PokemonTeam_Own_UpdatePP(int pi, int mi, struct Pokemon* data) {
+	if(pi < 0 && pi >= PARTY_SIZE) {
+		return;
+	}
+
+	if(mi < 0 && mi >= MAX_MON_MOVES) {
+		return;
+	}
+
+	// update PP
+	POKE(pi).movePP[mi] = POKE_PARA(data, PPFields[mi]);
+}
+
+static void _PokemonTeam_Own_UpdateMove(int pi, int mi, struct Pokemon* data) {
+	if(pi < 0 && pi >= PARTY_SIZE) {
+		return;
+	}
+
+	if(mi < 0 && mi >= MAX_MON_MOVES) {
+		return;
+	}
+
+	// get move PP bonus
+	uint8_t ppbonus = POKE_PARA(data, MON_DATA_PP_BONUSES);
+
+	// load move parameters
+	POKE(pi).moveId[mi] = POKE_PARA(data, MoveFields[mi]);
+	POKE(pi).movePP[mi] = POKE_PARA(data, PPFields[mi]);
+	POKE(pi).maxPP[mi] = eme.CalculatePPWithBonus(POKE(pi).moveId[mi], ppbonus, mi);
+
+	// convert move name to string
+	auto _str = EmeraldStringToUTF8(eme.gMoveNames[POKE(pi).moveId[mi]]);
+	auto moveName = POKE(pi).moveName[mi] = std::string(_str.cbegin(), _str.cend());
+
+	// Log move update
+	LOG.Info(
+		"_PokemonTeam_Own_UpdateMove: Pokemon %d called %s move %d called %s with PP %u / %u",
+		pi, POKE(pi).nickname.c_str(),
+		mi, moveName.c_str(),
+		POKE(pi).movePP[mi], POKE(pi).maxPP[mi]
+	);
+}
+
+static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
+	if(pi < 0 && pi >= PARTY_SIZE) {
+		return;
+	}
+
+	if(data == nullptr || !data->box.hasSpecies) {
+		POKE(pi).raw = nullptr;
+		POKE(pi).nickname = "";
+
+		LOG.Info("PokemonTeam_Own_Update: Pokemon %d is empty", pi);
+		return;
+	}
+
+	DATA.pokemon[pi].raw = data;
+
+	// load pokemon parameters
+	POKE(pi).speciesId = POKE_PARA(data, MON_DATA_SPECIES);
+	POKE(pi).heldItemId = POKE_PARA(data, MON_DATA_HELD_ITEM);
+	POKE(pi).level = POKE_PARA(data, MON_DATA_LEVEL);
+
+	const auto abilityNum = POKE_PARA(data, MON_DATA_ABILITY_NUM);
+	POKE(pi).abilityId = eme.gSpeciesInfo[POKE(pi).speciesId].abilities[abilityNum & 1];
+
+	POKE(pi).typeIds[0] = eme.gSpeciesInfo[POKE(pi).speciesId].types[0];
+	POKE(pi).typeIds[1] = eme.gSpeciesInfo[POKE(pi).speciesId].types[1];
+
+	// update all moves quickly
+	for(uint8_t i = 0; i < MAX_MON_MOVES; i++) {
+		_PokemonTeam_Own_UpdateMove(pi, i, data);
+	}
+
+	#ifdef ENABLE_SDL2
+		// update various strings
+		auto _str = EmeraldStringToUTF8(eme.gAbilityNames[POKE(pi).abilityId]);
+		POKE(pi).abilityName = std::string(_str.cbegin(), _str.cend());
+
+		if(POKE(pi).heldItemId == ITEM_NONE) {
+			POKE(pi).heldItemName = "none";		// GRRRR
+
+		} else {
+			_str = EmeraldStringToUTF8(eme.gItems[POKE(pi).heldItemId].name);
+			POKE(pi).heldItemName = std::string(_str.cbegin(), _str.cend());
+		}
+	#endif
+
+	// update Pokemon nickname (can be species or nickname!)
+	u8 nickname[POKEMON_NAME_LENGTH + 1];
+	eme.GetMonData3(data, MON_DATA_NICKNAME, nickname);
+	eme.StringGet_Nickname(nickname);
+	_str = EmeraldStringToUTF8(nickname);
+	POKE(pi).nickname = std::string(_str.cbegin(), _str.cend());
+
+	// Log pokemon info
+	LOG.Info(
+		"PokemonTeam_Own_Update: Pokemon %d called %s",
+		pi, POKE(pi).nickname.c_str()
+	);
+}
+
+static const struct DLL_Events dll_events = {
+	.SetGameState = SetGameState,
+	.PokemonTeam_Own_Update = _PokemonTeam_Own_Update,
+};
 
 void VBlankIntrWait() {
 	REG_VCOUNT = 161;
@@ -245,7 +375,7 @@ void runAgent(size_t generation, uint16_t index) {
 
 	/* Open the log file */
 	std::ofstream logStream(logfile);
-	_LOG.logStream = &logStream;
+	LOG.logStream = &logStream;
 
 	/* Set affinity to not run on core0. See main.cpp for more info. */
 	auto threadHandle = getCurrentThreadHandle();
@@ -267,6 +397,7 @@ void runAgent(size_t generation, uint16_t index) {
 
 	/* Set platform functions and initialize the game. */
 	eme.Platform_Set(&dll_platform);
+	eme.Platform_EventSet(&dll_events);
 	REG_VCOUNT = 161;
 	eme.AgbInit();
 
@@ -281,7 +412,7 @@ void runAgent(size_t generation, uint16_t index) {
 		std::this_thread::sleep_for(1ms);
 	}
 
-	_LOG.Debug("Agent %d: Starting simulation", index);
+	LOG.Debug("Agent %d: Starting simulation", index);
 
 	while(AgentState::RUNNING == agentState) {
 		/* Run for number of frames before AI is polled for inputs */
@@ -298,13 +429,15 @@ void runAgent(size_t generation, uint16_t index) {
 		checkDrawUpdate(index, true);
 	}
 
-	/* Simulation completed, unload DLL and exit. */
 	exit:
-	_LOG.Debug("Agent %d: Cleaning up simulation", index);
+	LOG.Debug("Agent %d: Cleaning up simulation", index);
+
+	// Flush and close log file
+	LOG.logStream = nullptr;
+	logStream.flush();
+	logStream.close();
+
+	// Clean up DLL
 	UnloadEmeraldDLL(dllHandle);
 	agentData.agentsCounter = agentData.agentsCounter - 1;
-
-	// clean up log file
-	_LOG.logStream = nullptr;
-	logStream.close();
 }

@@ -14,6 +14,8 @@
 #include "decoration_inventory.h"
 #include "agb_flash.h"
 
+#include "platform/dll.h"
+
 static void ApplyNewEncryptionKeyToAllEncryptedData(u32 encryptionKey);
 
 #define SAVEBLOCK_MOVE_RANGE    128
@@ -185,8 +187,13 @@ void LoadPlayerParty(void)
 
     gPlayerPartyCount = gSaveBlock1Ptr->playerPartyCount;
 
-    for (i = 0; i < PARTY_SIZE; i++)
+    for (i = 0; i < PARTY_SIZE; i++) {
         gPlayerParty[i] = gSaveBlock1Ptr->playerParty[i];
+	}
+
+    for (i = 0; i < gPlayerPartyCount; i++) {
+		PokemonTeam_Own_Update(i, &gPlayerParty[i]);
+	}
 }
 
 void SaveObjectEvents(void)

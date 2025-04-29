@@ -11,6 +11,8 @@ extern "C" {
 	#include <global.h>
 	#include <main.h>
 	#include <gba/flash_internal.h>
+	#include <item.h>
+	#include <constants/abilities.h>
 }
 
 // TODO: Obsolete flag, use emerald.dll itself to determine when AI decisions are needed(!)
@@ -33,13 +35,45 @@ enum class AgentState : uint8_t {
 
 extern volatile AgentState agentState;
 
+struct AgentPokemonData {
+	struct Pokemon* raw;
+
+	// Move statistics
+	uint16_t moveId[MAX_MON_MOVES];
+	uint8_t movePP[MAX_MON_MOVES];
+	uint8_t maxPP[MAX_MON_MOVES];
+
+	// Pokemon statistics
+	uint16_t speciesId;
+	uint16_t abilityId;
+	uint16_t heldItemId;
+	uint8_t typeIds[2];
+	uint8_t level;
+
+	std::string nickname;
+
+	#ifdef ENABLE_SDL2
+		std::string abilityName;
+		std::string heldItemName;
+		std::string moveName[MAX_MON_MOVES];
+	#endif
+};
+
+struct SingleAgentData {
+	// Agent logger
+	Log log;
+
+	/* Pokemon data */
+	struct AgentPokemonData pokemon[PARTY_SIZE];
+};
+
 /* struct for agent state that may need to be accessed from agent threads */
 struct AgentDataStruct {
 	// Counts the number of agents that have completed the current task (eg done init, done simulating).
 	volatile int32_t agentsCounter;
 
-	// Loggers for each AI agent
-	Log log[CONCURRENT_AGENTS];
+	// Agent data struct for each agent
+	struct SingleAgentData data[CONCURRENT_AGENTS];
 };
 
 extern AgentDataStruct agentData;
@@ -48,6 +82,7 @@ extern std::mutex agentMutex;
 /* Struct holding various info about the emerald.dll addresses that we use to interface with it. */
 struct EmeraldAddresses {
 	void (*Platform_Set)(const struct DLL_Platform*);
+	void (*Platform_EventSet)(const struct DLL_Events*);
 	void (*RunDMAs)(u32);
 	void (*AgbInit)();
 	void (*AgbRunFrame)();
@@ -60,6 +95,18 @@ struct EmeraldAddresses {
 		unsigned char* VRAM_;
 		unsigned char* PLTT;
 		unsigned char* OAM;
+	#endif
+
+	void (*StringGet_Nickname)(u8*);
+	u32 (*GetMonData3)(struct Pokemon *mon, s32 field, u8 *data);
+	u8 (*CalculatePPWithBonus)(u16 move, u8 ppBonuses, u8 moveIndex);
+
+	const struct SpeciesInfo* gSpeciesInfo;
+	const u8 (*gMoveNames)[MOVE_NAME_LENGTH + 1];
+
+	#ifdef ENABLE_SDL2
+		const u8 (*gAbilityNames)[ABILITY_NAME_LENGTH + 1];
+		const struct Item* gItems;
 	#endif
 };
 
@@ -131,3 +178,6 @@ extern const std::filesystem::path getExecutableDir();
 
 	extern SDLState sdlState;
 #endif
+
+/* Emerald libary functions */
+extern std::u8string EmeraldStringToUTF8(const uint8_t* str);

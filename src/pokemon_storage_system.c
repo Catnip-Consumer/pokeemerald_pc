@@ -42,6 +42,8 @@
 #include "constants/songs.h"
 #include "constants/pokemon_icon.h"
 
+#include "platform/dll.h"
+
 /*
     NOTE: This file is large. Some general groups of functions have
           been labeled with commented headers to make navigation easier.
@@ -6387,6 +6389,7 @@ static void SetPlacedMonData(u8 boxId, u8 position)
     if (boxId == TOTAL_BOXES_COUNT)
     {
         gPlayerParty[position] = sStorage->movingMon;
+		PokemonTeam_Own_Update(position, &gPlayerParty[position]);
     }
     else
     {
@@ -6397,9 +6400,11 @@ static void SetPlacedMonData(u8 boxId, u8 position)
 
 static void PurgeMonOrBoxMon(u8 boxId, u8 position)
 {
-    if (boxId == TOTAL_BOXES_COUNT)
+    if (boxId == TOTAL_BOXES_COUNT) {
         ZeroMonData(&gPlayerParty[position]);
-    else
+		PokemonTeam_Own_Update(position, &gPlayerParty[position]);
+
+	} else
         ZeroBoxMonAt(boxId, position);
 }
 
@@ -6772,6 +6777,9 @@ s16 CompactPartySlots(void)
     }
     for (; last < PARTY_SIZE; last++)
         ZeroMonData(&gPlayerParty[last]);
+
+	for(i = 0; i < PARTY_SIZE; i++)
+		PokemonTeam_Own_Update(i, &gPlayerParty[i]);
 
     return retVal;
 }

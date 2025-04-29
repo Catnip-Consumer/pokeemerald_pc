@@ -58,6 +58,7 @@ extern ImGuiIO* io;
 /* GUI rendering functions and vars */
 extern void windowAllAi();
 extern void agentLogWindow(size_t agentId);
+extern void agentPartyWindow(size_t agentId);
 
 extern bool viewingAgents[CONCURRENT_AGENTS];
 extern void windowAiInfo(size_t agentId);
@@ -66,4 +67,5 @@ extern void windowAiInfo(size_t agentId);
 #define WDNAME(name) ((name "##") + std::to_string(agentId)).c_str()
 #define AGENT_DISPLAY "GBA Screen"
 #define AGENT_LOG "Log Viewer"
+#define AGENT_PARTY "Party"
 

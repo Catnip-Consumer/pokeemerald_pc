@@ -85,9 +85,9 @@ void agentLogWindow(size_t agentId) {
 	ImGui::TextUnformatted("message");
 
 	// Write all log messages
-	agentData.log[agentId].mutex.lock();
+	agentData.data[agentId].log.mutex.lock();
 
-	for(auto entry : agentData.log[agentId].history) {
+	for(auto entry : agentData.data[agentId].log.history) {
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 		ImGui::Text("%02d:%02d:%02d", entry.time.tm_hour, entry.time.tm_min, entry.time.tm_sec);
@@ -97,7 +97,7 @@ void agentLogWindow(size_t agentId) {
 		ImGui::TextWrapped("%s", entry.content.c_str());
 	}
 
-	agentData.log[agentId].mutex.unlock();
+	agentData.data[agentId].log.mutex.unlock();
 
 	// Scroll to the bottom of the log table
 	ImGui::SetScrollY(ImGui::GetScrollMaxY());

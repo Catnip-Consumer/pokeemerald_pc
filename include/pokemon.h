@@ -443,9 +443,9 @@ void SetMultiuseSpriteTemplateToTrainerFront(u16 trainerPicId, u8 battlerPositio
  * differ for matching purposes in the caller's codegen. */
 #define GetMonData(...) CAT(GetMonData, NARG_8(__VA_ARGS__))(__VA_ARGS__)
 #define GetBoxMonData(...) CAT(GetBoxMonData, NARG_8(__VA_ARGS__))(__VA_ARGS__)
-u32 GetMonData3(struct Pokemon *mon, s32 field, u8 *data);
+_DLL_ u32 GetMonData3(struct Pokemon *mon, s32 field, u8 *data);
 u32 GetMonData2(struct Pokemon *mon, s32 field);
-u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data);
+_DLL_ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data);
 u32 GetBoxMonData2(struct BoxPokemon *boxMon, s32 field);
 
 void SetMonData(struct Pokemon *mon, s32 field, const void *dataArg);
@@ -464,7 +464,7 @@ u8 GetSecretBaseTrainerClass(void);
 bool8 IsPlayerPartyAndPokemonStorageFull(void);
 bool8 IsPokemonStorageFull(void);
 void GetSpeciesName(u8 *name, u16 species);
-u8 CalculatePPWithBonus(u16 move, u8 ppBonuses, u8 moveIndex);
+_DLL_ u8 CalculatePPWithBonus(u16 move, u8 ppBonuses, u8 moveIndex);
 void RemoveMonPPBonus(struct Pokemon *mon, u8 moveIndex);
 void RemoveBattleMonPPBonus(struct BattlePokemon *mon, u8 moveIndex);
 void CopyPlayerPartyMonToBattleData(u8 battlerId, u8 partyIndex);

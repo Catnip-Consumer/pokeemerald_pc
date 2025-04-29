@@ -13,6 +13,11 @@
 #include "platform/dll.h"
 
 const struct DLL_Platform *gPlatform = NULL;
+const struct DLL_Events *gDllEvents = NULL;
+
+_DLL_ void Platform_EventSet(const struct DLL_Events *events) {
+	gDllEvents = events;
+}
 
 _DLL_ void Platform_Set(const struct DLL_Platform *platform) {
 	gPlatform = platform;

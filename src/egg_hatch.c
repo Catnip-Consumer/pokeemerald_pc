@@ -37,6 +37,8 @@
 #include "battle.h" // to get rid of later
 #include "constants/rgb.h"
 
+#include "platform/dll.h"
+
 #define GFXTAG_EGG       12345
 #define GFXTAG_EGG_SHARD 23456
 
@@ -390,6 +392,7 @@ static void AddHatchedMonToParty(u8 id)
 
     MonRestorePP(mon);
     CalculateMonStats(mon);
+	PokemonTeam_Own_Update(id, mon);
 }
 
 void ScriptHatchMon(void)
@@ -580,6 +583,7 @@ static void EggHatchSetMonNickname(void)
     FreeMonSpritesGfx();
     Free(sEggHatchData);
     SetMainCallback2(CB2_ReturnToField);
+	PokemonTeam_Own_Update(gSpecialVar_0x8004, &gPlayerParty[gSpecialVar_0x8004]);
 }
 
 #define tTimer data[0]

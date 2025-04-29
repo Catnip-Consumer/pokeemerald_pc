@@ -1,4 +1,4 @@
-const struct Item gItems[] =
+_DLL_ const struct Item gItems[] =
 {
     [ITEM_NONE] =
     {

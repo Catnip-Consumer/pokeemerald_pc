@@ -32,14 +32,6 @@ static inline void agentScreen(size_t agentId) {
 	ImGui::End();
 }
 
-void makeBottomNode(size_t agentId) {
-	if(ImGui::Begin(WDNAME("todo"), nullptr, ImGuiWindowFlags_None)) {
-		ImGui::Text("Bottom Node");
-	}
-
-	ImGui::End();
-}
-
 void windowAiInfo(size_t agentId) {
 	const char* windowName = ("AI " + std::to_string(agentId)).c_str();
 	ImGui::SetNextWindowSize(agentInfoWindowSize, ImGuiCond_FirstUseEver);
@@ -63,7 +55,7 @@ void windowAiInfo(size_t agentId) {
 
 		// Assign windows to the dock nodes
 		ImGui::DockBuilderDockWindow(WDNAME(AGENT_DISPLAY), topLeftNode);
-		ImGui::DockBuilderDockWindow(WDNAME("todo"), bottomNode);
+		ImGui::DockBuilderDockWindow(WDNAME(AGENT_PARTY), bottomNode);
 		ImGui::DockBuilderDockWindow(WDNAME(AGENT_LOG), topRightNode);
 
 		ImGui::DockBuilderFinish(dockspaceId);
@@ -75,6 +67,6 @@ void windowAiInfo(size_t agentId) {
 	// Create docked windows
 	agentScreen(agentId);
 	agentLogWindow(agentId);
-	makeBottomNode(agentId);
+	agentPartyWindow(agentId);
 	ImGui::End();
 }

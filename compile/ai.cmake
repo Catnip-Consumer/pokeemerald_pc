@@ -18,6 +18,7 @@ set(PokeEmerald_AI_SOURCES
 	"src/ai/system/shared.cpp"
 	"src/ai/main.cpp"
 	"src/ai/agent.cpp"
+	"src/ai/library/emerald-str.cpp"
 )
 
 if(WIN32)
@@ -41,6 +42,7 @@ if(AI_HAS_GUI)
 		"src/ai/gui/view-all-ai.cpp"
 		"src/ai/gui/ai-info.cpp"
 		"src/ai/gui/log-window.cpp"
+		"src/ai/gui/pokemon-details.cpp"
 
 		"extern/imgui/imgui.cpp"
 		"extern/imgui/imgui_draw.cpp"
