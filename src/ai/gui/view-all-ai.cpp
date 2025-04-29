@@ -5,6 +5,9 @@
 #include <ai/gui/gui.h>
 #include <ai/main.h>
 
+static constexpr ImColor hoveredColor =		ImColor(0xde, 0x3c, 0x6a, 0xE0);
+static constexpr ImColor controllingColor =	ImColor(0x04, 0x4c, 0x4c, 0xE0);
+
 void windowAllAi() {
 	const auto mainViewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowViewport(mainViewport->ID);
@@ -45,22 +48,37 @@ void windowAllAi() {
 			const auto screenPos = ImGui::GetCursorScreenPos();
 			ImGui::Image((ImTextureID)(intptr_t) glAgentTex[agentId], agentSize);
 
-			if(agentHovered != agentId) {
-				continue;;
+			auto* selectedColor = &controllingColor;
+
+			// check if agent is hovered
+			if(agentHovered == agentId) {
+				selectedColor = &hoveredColor;
+
+			} else if(sdlState.gos.userAgentControl != agentId) {
+				// if neither controlled of hovered, skip drawing
+				continue;
 			}
 
-			// when an agent is hovered, highlight it
+			// draw highlight for agent
 			static const auto thickness = 2.f;
 			ImGui::GetWindowDrawList()->AddRect(
 				screenPos + thickness, screenPos + agentSize - thickness,
-				ImColor(0xde, 0x3c, 0x6a, 0xE0),
-				0.0f, 0, thickness * 2
+				*selectedColor, 0.0f, 0, thickness * 2
 			);
 
+			// if not hovered, do not allow toggling state(!)
+			if(agentHovered != agentId) {
+				continue;
+			}
+
 			// check if user clicked on the agent
-			if(ImGui::IsMouseClicked(0)) {
+			if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 				// toggle agent info window
 				viewingAgents[agentId] = !viewingAgents[agentId];
+
+			} else if(ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				// toggle agent control
+				sdlState.gos.userAgentControl = (sdlState.gos.userAgentControl == agentId) ? -1 : agentId;
 			}
 		}
 	}

@@ -19,6 +19,7 @@ extern "C" {
 using namespace std::chrono_literals;
 #define REG_BASE (eme.REG_BASE)
 
+thread_local static volatile uint16_t _storedIndex = 0;
 static thread_local struct EmeraldAddresses eme;
 
 void VBlankIntrWait() {
@@ -126,6 +127,13 @@ void SoftReset(u32 flags) {
 extern volatile uint16_t keys;
 
 u16 Platform_GetKeyInput(void){
+	#ifdef ENABLE_SDL2
+		// check for overriding agent controls with SDL2 controls
+		if(sdlState.gos.userAgentControl == _storedIndex) {
+			return sdlState.gos.userInput;
+		}
+	#endif
+
 	return (1 << (rand() % 10)) & ~(START_BUTTON | SELECT_BUTTON);
 }
 
@@ -151,7 +159,7 @@ static const struct DLL_Platform dll_platform = {
 thread_local static uint8_t lastFrame = -1;
 
 /* Update the number of frames ran to SDL */
-void updateFrameCount(int index, size_t count) {
+void updateFrameCount(uint16_t index, size_t count) {
 	auto* fpsAddr = &(sdlState.sds.frameCounts[index][sdlState.gos.fpsIndex]);
 	*fpsAddr = count + *fpsAddr;
 }
@@ -168,7 +176,7 @@ constexpr bool isAiFrameUpdate[] = {
 size_t fpsNotUpdated = 0;
 uint8_t missedFramesCount = 0;
 
-bool checkDrawUpdate(int index, bool aiframe) {
+bool checkDrawUpdate(uint16_t index, bool aiframe) {
 	// Check if the current frame is ai update frame or any frame
 	if(aiframe != isAiFrameUpdate[(size_t) sdlState.gos.playbackSpeed]) {
 		return false;
@@ -224,7 +232,9 @@ bool checkDrawUpdate(int index, bool aiframe) {
 }
 #endif
 
-void runAgent(int generation, int index) {
+void runAgent(size_t generation, uint16_t index) {
+	_storedIndex = index;
+
 	/* Log file target for this AI */
 	const auto aiDir = getExecutableDir() / ".ai";
 	const auto genDir = aiDir / "runs" / ("gen"+ std::to_string(generation));

@@ -130,7 +130,6 @@ bool initSDL() {
 		);
 	}
 
-	viewingAgents[2] = true;
 	return true; // Init success
 }
 

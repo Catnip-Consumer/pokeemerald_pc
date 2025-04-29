@@ -63,7 +63,7 @@ struct EmeraldAddresses {
 	#endif
 };
 
-extern void runAgent(int generation, int index);
+extern void runAgent(size_t generation, uint16_t index);
 extern void DrawFrame(uint16_t *pixels, struct EmeraldAddresses* eme);
 
 /* Agent specific variables */
@@ -101,6 +101,7 @@ extern const std::filesystem::path getExecutableDir();
 	struct SDLState {
 		/* State the agents can only read */
 		struct SDLGuiOnlyState {
+			volatile size_t userAgentControl = -1;
 			volatile uint16_t userInput = 0;
 			volatile uint8_t currentFrame = 0;
 			volatile uint8_t fpsIndex = 0;
