@@ -65,5 +65,5 @@ extern void windowAiInfo(size_t agentId);
 /* Window names */
 #define WDNAME(name) ((name "##") + std::to_string(agentId)).c_str()
 #define AGENT_DISPLAY "GBA Screen"
-#define AGENT_LOG "AI log"
+#define AGENT_LOG "Log Viewer"
 

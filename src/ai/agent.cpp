@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstring>
 #include <chrono>
+#include <fstream>
 
 #include <ai/main.h>
 
@@ -12,6 +13,8 @@ extern "C" {
 	#include <platform/dma.h>
 	#include <gba/flash_internal.h>
 }
+
+#define _LOG agentData.log[index]
 
 using namespace std::chrono_literals;
 #define REG_BASE (eme.REG_BASE)
@@ -222,6 +225,18 @@ bool checkDrawUpdate(int index, bool aiframe) {
 #endif
 
 void runAgent(int generation, int index) {
+	/* Log file target for this AI */
+	const auto aiDir = getExecutableDir() / ".ai";
+	const auto genDir = aiDir / "runs" / ("gen"+ std::to_string(generation));
+	const auto logfile = genDir / std::to_string(index) / "log.txt";
+
+	/* Create the directory if it doesn't exist */
+	std::filesystem::create_directories(logfile.parent_path());
+
+	/* Open the log file */
+	std::ofstream logStream(logfile);
+	_LOG.logStream = &logStream;
+
 	/* Set affinity to not run on core0. See main.cpp for more info. */
 	auto threadHandle = getCurrentThreadHandle();
 	setThreadAffinity(threadHandle, false);
@@ -256,6 +271,8 @@ void runAgent(int generation, int index) {
 		std::this_thread::sleep_for(1ms);
 	}
 
+	_LOG.Debug("Agent %d: Starting simulation", index);
+
 	while(AgentState::RUNNING == agentState) {
 		/* Run for number of frames before AI is polled for inputs */
 		for(int i = 0; i < AI_FRAMES_BEFORE_POLL; i++) {
@@ -273,6 +290,11 @@ void runAgent(int generation, int index) {
 
 	/* Simulation completed, unload DLL and exit. */
 	exit:
+	_LOG.Debug("Agent %d: Cleaning up simulation", index);
 	UnloadEmeraldDLL(dllHandle);
 	agentData.agentsCounter = agentData.agentsCounter - 1;
+
+	// clean up log file
+	_LOG.logStream = nullptr;
+	logStream.close();
 }

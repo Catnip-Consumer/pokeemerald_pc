@@ -5,12 +5,21 @@
 #include <thread>
 #include <condition_variable>
 #include <atomic>
+#include <ai/log.h>
 
 extern "C" {
 	#include <global.h>
 	#include <main.h>
 	#include <gba/flash_internal.h>
 }
+
+// TODO: Obsolete flag, use emerald.dll itself to determine when AI decisions are needed(!)
+#define AI_FRAMES_BEFORE_POLL 8
+
+// Define number of agents to run. GRID_ROWS and GRID_COLS are only relevant for SDL2 but also are used to get agent count.
+#define GRID_ROWS 2
+#define GRID_COLS 2
+#define CONCURRENT_AGENTS (GRID_ROWS * GRID_COLS)
 
 // Save game is loaded to flash buffer and is read-only for agents.
 extern uint8_t flash[sizeof(FLASH_BASE)];
@@ -28,6 +37,9 @@ extern volatile AgentState agentState;
 struct AgentDataStruct {
 	// Counts the number of agents that have completed the current task (eg done init, done simulating).
 	volatile int32_t agentsCounter;
+
+	// Loggers for each AI agent
+	Log log[CONCURRENT_AGENTS];
 };
 
 extern AgentDataStruct agentData;
@@ -69,14 +81,6 @@ extern bool setThreadAffinity(void* handle, bool core0);
 extern bool closeThreadHandle(void* handle);
 extern void* getCurrentThreadHandle();
 extern const std::filesystem::path getExecutableDir();
-
-// TODO: Obsolete flag, use emerald.dll itself to determine when AI decisions are needed(!)
-#define AI_FRAMES_BEFORE_POLL 8
-
-// Define number of agents to run. GRID_ROWS and GRID_COLS are only relevant for SDL2 but also are used to get agent count.
-#define GRID_ROWS 8
-#define GRID_COLS 8
-#define CONCURRENT_AGENTS (GRID_ROWS * GRID_COLS)
 
 #ifdef ENABLE_SDL2
 	/* SDL2 lifecycle functions */
