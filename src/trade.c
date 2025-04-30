@@ -51,6 +51,8 @@
 #include "constants/songs.h"
 #include "constants/union_room.h"
 
+#include "platform/dll.h"
+
 // IDs for RunTradeMenuCallback
 enum {
     CB_MAIN_MENU,
@@ -3127,6 +3129,8 @@ static void TradeMons(u8 playerPartyIdx, u8 partnerPartyIdx)
     UpdatePokedexForReceivedMon(playerPartyIdx);
     if (gReceivedRemoteLinkPlayers)
         TryEnableNationalDexFromLinkPartner();
+
+	Pokemon_Got(playerMon, DLL_Pokemon_Get_Type_TRADE);
 }
 
 static void HandleLinkDataSend(void)

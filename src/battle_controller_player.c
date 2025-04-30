@@ -2108,9 +2108,11 @@ static void SetPlayerMonData(u8 monId)
         break;
     case REQUEST_STATUS_BATTLE:
         SetMonData(&gPlayerParty[monId], MON_DATA_STATUS, &gBattleBufferA[gActiveBattler][3]);
+		PokemonTeam_Own_Status(monId, gBattleBufferA[gActiveBattler][3], &gPlayerParty[monId]);
         break;
     case REQUEST_LEVEL_BATTLE:
         SetMonData(&gPlayerParty[monId], MON_DATA_LEVEL, &gBattleBufferA[gActiveBattler][3]);
+		PokemonTeam_Own_LevelUp(monId, &gPlayerParty[monId]);
         break;
     case REQUEST_HP_BATTLE:
         SetMonData(&gPlayerParty[monId], MON_DATA_HP, &gBattleBufferA[gActiveBattler][3]);

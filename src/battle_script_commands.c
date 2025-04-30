@@ -10015,7 +10015,8 @@ static void Cmd_handleballthrow(void)
 
 static void Cmd_givecaughtmon(void)
 {
-    if (GiveMonToPlayer(&gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]]) != MON_GIVEN_TO_PARTY)
+	struct Pokemon *mon = &gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]];
+    if (GiveMonToPlayer(mon) != MON_GIVEN_TO_PARTY)
     {
         if (!ShouldShowBoxWasFullMessage())
         {
@@ -10041,6 +10042,7 @@ static void Cmd_givecaughtmon(void)
     gBattleResults.caughtMonBall = GetMonData(&gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]], MON_DATA_POKEBALL, NULL);
 
     gBattlescriptCurrInstr++;
+	Pokemon_Got(mon, DLL_Pokemon_Get_Type_CAUGHT);
 }
 
 static void Cmd_trysetcaughtmondexflags(void)

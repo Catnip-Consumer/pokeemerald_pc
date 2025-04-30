@@ -23,6 +23,8 @@
 #include "constants/moves.h"
 #include "constants/region_map_sections.h"
 
+#include "platform/dll.h"
+
 extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
 
 static void ClearDaycareMonMail(struct DaycareMail *mail);
@@ -823,6 +825,7 @@ static void _GiveEggFromDaycare(struct DayCare *daycare)
     CompactPartySlots();
     CalculatePlayerPartyCount();
     RemoveEggFromDayCare(daycare);
+	Pokemon_Got(&egg, DLL_Pokemon_Get_Type_EGG);
 }
 
 void CreateEgg(struct Pokemon *mon, u16 species, bool8 setHotSpringsLocation)

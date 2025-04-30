@@ -34,9 +34,19 @@ typedef enum DLL_GameState {
 	DLL_GameState_BATTLE_MOVE,				// Player is selecting a move during a battle
 } DLL_GameState;
 
+typedef enum DLL_Pokemon_Get_Type {
+	DLL_Pokemon_Get_Type_CAUGHT,			// Pokemon caught in the wild
+	DLL_Pokemon_Get_Type_TRADE,				// Pokemon traded from another person or in game trade
+	DLL_Pokemon_Get_Type_HATCHED,			// Egg hatched
+	DLL_Pokemon_Get_Type_EGG,				// Egg was given
+} DLL_Pokemon_Get_Type;
+
 struct DLL_Events {
 	/* General game state */
 	void (*SetGameState)(DLL_GameState state);
+
+	/* General Pokemon related */
+	void (*Pokemon_Got)(struct Pokemon* data, DLL_Pokemon_Get_Type type);
 
 	/* Pokemon team related */
 	void (*PokemonTeam_Own_Update)(int poke, struct Pokemon* data);
@@ -56,6 +66,10 @@ extern const struct DLL_Events *gDllEvents;
 
 #define EV_FORWARD(func, ...) \
 	if(gDllEvents) gDllEvents->func(__VA_ARGS__);
+
+inline void Pokemon_Got(struct Pokemon* data, DLL_Pokemon_Get_Type type) {
+	EV_FORWARD(Pokemon_Got, data, type);
+}
 
 inline void PokemonTeam_Own_Update(int poke, struct Pokemon* data) {
 	EV_FORWARD(PokemonTeam_Own_Update, poke, data);

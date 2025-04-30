@@ -36,10 +36,27 @@ static void SetGameState(DLL_GameState state) {
 
 }
 
+static const char* _Pokemon_Got_TypeStr[] = {
+	[DLL_Pokemon_Get_Type_CAUGHT] =		"caught",
+	[DLL_Pokemon_Get_Type_TRADE] =		"received in trade",
+	[DLL_Pokemon_Get_Type_HATCHED] =	"hatched",
+	[DLL_Pokemon_Get_Type_EGG] =		"received as an egg",
+};
+
+static void _Pokemon_Got(struct Pokemon* data, DLL_Pokemon_Get_Type type) {
+	// get Pokemon nickname(can be species or nickname!)
+	u8 nickname[POKEMON_NAME_LENGTH + 1];
+	eme.GetMonData3(data, MON_DATA_NICKNAME, nickname);
+	eme.StringGet_Nickname(nickname);
+	const auto _str = EmeraldStringToUTF8(nickname);
+	const auto nickString = std::string(_str.cbegin(), _str.cend());
+
+	LOG.Info(frameNum, "Pokemon_Got: Pokemon called %s %s.", nickString.c_str(), _Pokemon_Got_TypeStr[type]);
+}
+
 static void _PokemonTeam_Own_Status(int pi, uint32_t status, struct Pokemon* data) {
 	PARTY_RANGE(pi)
 
-	// Log pokemon info
 	LOG.Info(frameNum,
 		"PokemonTeam_Own_Status: Pokemon %d called %s status set to %u",
 		pi, POKE(pi).nickname.c_str(),
@@ -53,7 +70,6 @@ static void _PokemonTeam_Own_LevelUp(int pi, struct Pokemon* data) {
 	// update level
 	POKE(pi).level = POKE_PARA(data, MON_DATA_LEVEL);
 
-	// Log pokemon info
 	LOG.Info(frameNum,
 		"PokemonTeam_Own_LevelUp: Pokemon %d called %s leveled up to %u",
 		pi, POKE(pi).nickname.c_str(),
@@ -85,7 +101,6 @@ static void _PokemonTeam_Own_UpdateMove(int pi, int mi, struct Pokemon* data) {
 	auto _str = EmeraldStringToUTF8(eme.gMoveNames[POKE(pi).moveId[mi]]);
 	auto moveName = POKE(pi).moveName[mi] = std::string(_str.cbegin(), _str.cend());
 
-	// Log move update
 	LOG.Info(frameNum,
 		"PokemonTeam_Own_UpdateMove: Pokemon %d called %s move %d called %s with PP %u / %u",
 		pi, POKE(pi).nickname.c_str(),
@@ -144,7 +159,6 @@ static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
 		_PokemonTeam_Own_UpdateMove(pi, i, data);
 	}
 
-	// Log pokemon info
 	LOG.Info(frameNum,
 		"PokemonTeam_Own_Update: Pokemon %d called %s",
 		pi, POKE(pi).nickname.c_str()
@@ -153,6 +167,7 @@ static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
 
 static const struct DLL_Events dll_events = {
 	.SetGameState = SetGameState,
+	.Pokemon_Got = _Pokemon_Got,
 	.PokemonTeam_Own_Update = _PokemonTeam_Own_Update,
 	.PokemonTeam_Own_LevelUp = _PokemonTeam_Own_LevelUp,
 	.PokemonTeam_Own_Status = _PokemonTeam_Own_Status,

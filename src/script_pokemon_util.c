@@ -24,6 +24,8 @@
 #include "constants/items.h"
 #include "constants/battle_frontier.h"
 
+#include "platform/dll.h"
+
 static void CB2_ReturnFromChooseHalfParty(void);
 static void CB2_ReturnFromChooseBattleFrontierParty(void);
 
@@ -81,6 +83,9 @@ u8 ScriptGiveMon(u16 species, u8 level, u16 item, u32 unused1, u32 unused2, u8 u
         GetSetPokedexFlag(nationalDexNum, FLAG_SET_CAUGHT);
         break;
     }
+
+	// Probably most commonly a trade?
+	Pokemon_Got(&mon, DLL_Pokemon_Get_Type_TRADE);
     return sentToPc;
 }
 
@@ -93,7 +98,9 @@ u8 ScriptGiveEgg(u16 species)
     isEgg = TRUE;
     SetMonData(&mon, MON_DATA_IS_EGG, &isEgg);
 
-    return GiveMonToPlayer(&mon);
+    u8 result = GiveMonToPlayer(&mon);
+	Pokemon_Got(&mon, DLL_Pokemon_Get_Type_CAUGHT);
+	return result;
 }
 
 void HasEnoughMonsForDoubleBattle(void)
