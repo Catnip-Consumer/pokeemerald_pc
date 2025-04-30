@@ -72,13 +72,20 @@ void windowAllAi() {
 			}
 
 			// check if user clicked on the agent
-			if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-				// toggle agent info window
-				viewingAgents[agentId] = !viewingAgents[agentId];
+			if(ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				// enable agent info window
+				viewingAgents[setFocusOnAgentWindow = agentId] = true;
 
-			} else if(ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-				// toggle agent control
-				sdlState.gos.userAgentControl = (sdlState.gos.userAgentControl == agentId) ? -1 : agentId;
+			} else if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+				if(sdlState.gos.userAgentControl != agentId) {
+					// start controlling this agent
+					setFocusOnAgentWindow = agentId;
+					sdlState.gos.userAgentControl = agentId;
+
+				} else {
+					// don't control any agent
+					sdlState.gos.userAgentControl = -1;
+				}
 			}
 		}
 	}

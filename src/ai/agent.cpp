@@ -28,6 +28,7 @@ extern "C" {
 using namespace std::chrono_literals;
 #define REG_BASE (eme.REG_BASE)
 
+thread_local static size_t frameNum = 0;
 thread_local static volatile uint16_t _storedIndex = 0;
 static thread_local struct EmeraldAddresses eme;
 
@@ -39,7 +40,7 @@ static void _PokemonTeam_Own_Status(int pi, uint32_t status, struct Pokemon* dat
 	PARTY_RANGE(pi)
 
 	// Log pokemon info
-	LOG.Info(
+	LOG.Info(frameNum,
 		"PokemonTeam_Own_Status: Pokemon %d called %s status set to %u",
 		pi, POKE(pi).nickname.c_str(),
 		status
@@ -53,7 +54,7 @@ static void _PokemonTeam_Own_LevelUp(int pi, struct Pokemon* data) {
 	POKE(pi).level = POKE_PARA(data, MON_DATA_LEVEL);
 
 	// Log pokemon info
-	LOG.Info(
+	LOG.Info(frameNum,
 		"PokemonTeam_Own_LevelUp: Pokemon %d called %s leveled up to %u",
 		pi, POKE(pi).nickname.c_str(),
 		POKE(pi).level
@@ -85,7 +86,7 @@ static void _PokemonTeam_Own_UpdateMove(int pi, int mi, struct Pokemon* data) {
 	auto moveName = POKE(pi).moveName[mi] = std::string(_str.cbegin(), _str.cend());
 
 	// Log move update
-	LOG.Info(
+	LOG.Info(frameNum,
 		"PokemonTeam_Own_UpdateMove: Pokemon %d called %s move %d called %s with PP %u / %u",
 		pi, POKE(pi).nickname.c_str(),
 		mi, moveName.c_str(),
@@ -100,7 +101,7 @@ static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
 		POKE(pi).raw = nullptr;
 		POKE(pi).nickname = "";
 
-		LOG.Info("PokemonTeam_Own_Update: Pokemon %d is empty", pi);
+		LOG.Info(frameNum,"PokemonTeam_Own_Update: Pokemon %d is empty", pi);
 		return;
 	}
 
@@ -116,11 +117,6 @@ static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
 
 	POKE(pi).typeIds[0] = eme.gSpeciesInfo[POKE(pi).speciesId].types[0];
 	POKE(pi).typeIds[1] = eme.gSpeciesInfo[POKE(pi).speciesId].types[1];
-
-	// update all moves quickly
-	for(uint8_t i = 0; i < MAX_MON_MOVES; i++) {
-		_PokemonTeam_Own_UpdateMove(pi, i, data);
-	}
 
 	#ifdef ENABLE_SDL2
 		// update various strings
@@ -143,8 +139,13 @@ static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
 	_str = EmeraldStringToUTF8(nickname);
 	POKE(pi).nickname = std::string(_str.cbegin(), _str.cend());
 
+	// update all moves
+	for(uint8_t i = 0; i < MAX_MON_MOVES; i++) {
+		_PokemonTeam_Own_UpdateMove(pi, i, data);
+	}
+
 	// Log pokemon info
-	LOG.Info(
+	LOG.Info(frameNum,
 		"PokemonTeam_Own_Update: Pokemon %d called %s",
 		pi, POKE(pi).nickname.c_str()
 	);
@@ -419,11 +420,12 @@ void runAgent(size_t generation, uint16_t index) {
 		std::this_thread::sleep_for(1ms);
 	}
 
-	LOG.Debug("Agent %d: Starting simulation", index);
+	LOG.Debug(frameNum, "Agent %d: Starting simulation", index);
 
 	while(AgentState::RUNNING == agentState) {
 		/* Run for number of frames before AI is polled for inputs */
 		for(int i = 0; i < AI_FRAMES_BEFORE_POLL; i++) {
+			++frameNum;
 			eme.AgbRunFrame();
 			VBlankIntrWait();
 			checkDrawUpdate(index, false);
@@ -437,7 +439,7 @@ void runAgent(size_t generation, uint16_t index) {
 	}
 
 	exit:
-	LOG.Debug("Agent %d: Cleaning up simulation", index);
+	LOG.Debug(frameNum, "Agent %d: Cleaning up simulation", index);
 
 	// Flush and close log file
 	LOG.logStream = nullptr;

@@ -4,6 +4,16 @@
 
 #include <imgui_internal.h>
 
+inline void ForceWindowFocus(const char* windowName){
+	ImGui::SetWindowFocus(windowName);
+	ImGuiWindow* window = ImGui::FindWindowByName(windowName);
+
+	if (window != NULL && window->DockNode != NULL && window->DockNode->TabBar != NULL) {
+		window->DockNode->TabBar->NextSelectedTabId = window->TabId;
+	}
+
+}
+
 static const ImVec2 agrentScreenSizePlz = displaySize * 4;
 static const ImVec2 agentInfoLayoutScale = ImVec2(0.5f, 0.66f);
 static const ImVec2 agentInfoWindowSize = agrentScreenSizePlz / ImVec2(0.5f, 0.66f);
@@ -68,5 +78,12 @@ void windowAiInfo(size_t agentId) {
 	agentScreen(agentId);
 	agentLogWindow(agentId);
 	agentPartyWindow(agentId);
+
+	if(setFocusOnAgentWindow == agentId) {
+		// Set focus on the agent window
+		ForceWindowFocus(windowName);
+		setFocusOnAgentWindow = -1;
+	}
+
 	ImGui::End();
 }

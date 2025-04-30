@@ -18,6 +18,7 @@ GLuint glAgentTex[CONCURRENT_AGENTS];
 ImGuiIO* io;
 
 bool viewingAgents[CONCURRENT_AGENTS];
+size_t setFocusOnAgentWindow = -1;
 
 static double FPSAccumulator = 0.0;
 static double fps = 0;

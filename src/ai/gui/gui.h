@@ -61,6 +61,7 @@ extern void agentLogWindow(size_t agentId);
 extern void agentPartyWindow(size_t agentId);
 
 extern bool viewingAgents[CONCURRENT_AGENTS];
+extern size_t setFocusOnAgentWindow ;
 extern void windowAiInfo(size_t agentId);
 
 /* Window names */
