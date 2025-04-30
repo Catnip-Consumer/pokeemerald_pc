@@ -36,6 +36,8 @@
 #include "constants/trainers.h"
 #include "constants/rgb.h"
 
+#include "platform/dll.h"
+
 static void PlayerHandleGetMonData(void);
 static void PlayerHandleSetMonData(void);
 static void PlayerHandleSetRawMonData(void);
@@ -1177,6 +1179,8 @@ static void Task_GiveExpToMon(u8 taskId)
             BtlController_EmitTwoReturnValues(BUFFER_B, RET_VALUE_LEVELED_UP, gainedExp);
             gActiveBattler = savedActiveBattler;
 
+			PokemonTeam_Own_LevelUp(monId, mon);
+
             if (IsDoubleBattle() == TRUE
              && ((u16)(monId) == gBattlerPartyIndexes[battlerId] || (u16)(monId) == gBattlerPartyIndexes[BATTLE_PARTNER(battlerId)]))
                 gTasks[taskId].func = Task_LaunchLvlUpAnim;
@@ -1256,6 +1260,8 @@ static void Task_GiveExpWithExpBar(u8 taskId)
                 BtlController_EmitTwoReturnValues(BUFFER_B, RET_VALUE_LEVELED_UP, gainedExp);
                 gActiveBattler = savedActiveBattler;
                 gTasks[taskId].func = Task_LaunchLvlUpAnim;
+
+				PokemonTeam_Own_LevelUp(monId, &gPlayerParty[monId]);
             }
             else
             {
@@ -2024,7 +2030,8 @@ static void SetPlayerMonData(u8 monId)
     case REQUEST_PPMOVE3_BATTLE:
     case REQUEST_PPMOVE4_BATTLE:
         SetMonData(&gPlayerParty[monId], MON_DATA_PP1 + gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE, &gBattleBufferA[gActiveBattler][3]);
-        break;
+        PokemonTeam_Own_UpdatePP(monId, gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE, &gPlayerParty[monId]);
+		break;
     case REQUEST_OTID_BATTLE:
         SetMonData(&gPlayerParty[monId], MON_DATA_OT_ID, &gBattleBufferA[gActiveBattler][3]);
         break;

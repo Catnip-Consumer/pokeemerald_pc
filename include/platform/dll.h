@@ -3,27 +3,6 @@
 
 #include "global.h"
 
-typedef enum DLL_GameState {
-	DLL_GameState_IGNORE,					// Miscellaneous state, AI should ignore this
-	DLL_GameState_OVERWORLD,				// Player is in a map, eg in a town or cave
-	DLL_GameState_OVERWORLD_BAG,			// Player is in the bag in the overworld
-	DLL_GameState_OVERWORLD_POKEMON,		// Player is in the Pokemon menu in the overworld
-	DLL_GameState_OVERWORLD_POKEMON_SUMMARY,// Player is viewing a Pokemon summary in the overworld
-
-	DLL_GameState_BATTLE,					// Player is in a battle
-	DLL_GameState_BATTLE_BAG,				// Player is in the bag during a battle
-	DLL_GameState_BATTLE_POKEMON,			// Player is selecting a Pokemon during a battle
-	DLL_GameState_BATTLE_MOVE,				// Player is selecting a move during a battle
-} DLL_GameState;
-
-struct DLL_Events {
-	/* General game state */
-	void (*SetGameState)(DLL_GameState state);
-
-	/* Pokemon team related */
-	void (*PokemonTeam_Own_Update)(int index, struct Pokemon* data);
-};
-
 struct DLL_Platform {
 	void (*VBlankIntrWait)(void);
 	void (*SoftReset)(u32);
@@ -42,6 +21,33 @@ struct DLL_Platform {
 	bool8 SkipToGame;
 };
 
+typedef enum DLL_GameState {
+	DLL_GameState_IGNORE,					// Miscellaneous state, AI should ignore this
+	DLL_GameState_OVERWORLD,				// Player is in a map, eg in a town or cave
+	DLL_GameState_OVERWORLD_BAG,			// Player is in the bag in the overworld
+	DLL_GameState_OVERWORLD_POKEMON,		// Player is in the Pokemon menu in the overworld
+	DLL_GameState_OVERWORLD_POKEMON_SUMMARY,// Player is viewing a Pokemon summary in the overworld
+
+	DLL_GameState_BATTLE,					// Player is in a battle
+	DLL_GameState_BATTLE_BAG,				// Player is in the bag during a battle
+	DLL_GameState_BATTLE_POKEMON,			// Player is selecting a Pokemon during a battle
+	DLL_GameState_BATTLE_MOVE,				// Player is selecting a move during a battle
+} DLL_GameState;
+
+struct DLL_Events {
+	/* General game state */
+	void (*SetGameState)(DLL_GameState state);
+
+	/* Pokemon team related */
+	void (*PokemonTeam_Own_Update)(int poke, struct Pokemon* data);
+	void (*PokemonTeam_Own_LevelUp)(int poke, struct Pokemon* data);
+	void (*PokemonTeam_Own_Status)(int poke, uint32_t status, struct Pokemon* data);
+
+	/* Pokemon move related */
+	void (*PokemonTeam_Own_UpdatePP)(int poke, int move, struct Pokemon* data);
+	void (*PokemonTeam_Own_UpdateMove)(int poke, int move, struct Pokemon* data);
+};
+
 _DLL_ void Platform_Set(const struct DLL_Platform *platform);
 _DLL_ void Platform_EventSet(const struct DLL_Events *events);
 
@@ -51,8 +57,24 @@ extern const struct DLL_Events *gDllEvents;
 #define EV_FORWARD(func, ...) \
 	if(gDllEvents) gDllEvents->func(__VA_ARGS__);
 
-inline void PokemonTeam_Own_Update(int index, struct Pokemon* data) {
-	EV_FORWARD(PokemonTeam_Own_Update, index, data);
+inline void PokemonTeam_Own_Update(int poke, struct Pokemon* data) {
+	EV_FORWARD(PokemonTeam_Own_Update, poke, data);
+}
+
+inline void PokemonTeam_Own_Status(int poke, uint32_t status, struct Pokemon* data) {
+	EV_FORWARD(PokemonTeam_Own_Status, poke, status, data);
+}
+
+inline void PokemonTeam_Own_LevelUp(int poke, struct Pokemon* data) {
+	EV_FORWARD(PokemonTeam_Own_LevelUp, poke, data);
+}
+
+inline void PokemonTeam_Own_UpdatePP(int poke, int move, struct Pokemon* data) {
+	EV_FORWARD(PokemonTeam_Own_UpdatePP, poke, move, data);
+}
+
+inline void PokemonTeam_Own_UpdateMove(int poke, int move, struct Pokemon* data) {
+	EV_FORWARD(PokemonTeam_Own_UpdateMove, poke, move, data);
 }
 
 #endif

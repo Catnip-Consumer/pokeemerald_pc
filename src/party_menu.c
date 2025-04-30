@@ -73,6 +73,8 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 
+#include "platform/dll.h"
+
 enum {
     MENU_SUMMARY,
     MENU_SWITCH,
@@ -4757,9 +4759,11 @@ void ItemUseCB_TMHM(u8 taskId, TaskFunc task)
         return;
     }
 
-    if (GiveMoveToMon(mon, move[0]) != MON_HAS_MAX_MOVES)
+	u16 moveIndex = GiveMoveToMon(mon, move[0]);
+    if (moveIndex != MON_HAS_MAX_MOVES)
     {
         gTasks[taskId].func = Task_LearnedMove;
+		PokemonTeam_Own_UpdateMove(gPartyMenu.slotId, moveIndex, mon);
     }
     else
     {
@@ -5067,6 +5071,7 @@ static void Task_TryLearnNewMoves(u8 taskId)
             break;
         default:
             DisplayMonLearnedMove(taskId, learnMove);
+			PokemonTeam_Own_UpdateMove(gPartyMenu.slotId, learnMove, &gPlayerParty[gPartyMenu.slotId]);
             break;
         }
     }
@@ -5088,6 +5093,7 @@ static void Task_TryLearningNextMove(u8 taskId)
         return;
     default:
         DisplayMonLearnedMove(taskId, result);
+		PokemonTeam_Own_UpdateMove(gPartyMenu.slotId, result, &gPlayerParty[gPartyMenu.slotId]);
         break;
     }
 }
@@ -5319,6 +5325,7 @@ static void TryTutorSelectedMon(u8 taskId)
 {
     struct Pokemon *mon;
     s16 *move;
+	u16 learnedIndex;
 
     if (!gPaletteFade.active)
     {
@@ -5337,9 +5344,11 @@ static void TryTutorSelectedMon(u8 taskId)
             DisplayLearnMoveMessageAndClose(taskId, gText_PkmnAlreadyKnows);
             return;
         default:
-            if (GiveMoveToMon(mon, gPartyMenu.data1) != MON_HAS_MAX_MOVES)
+			learnedIndex = GiveMoveToMon(mon, gPartyMenu.data1);
+            if (learnedIndex != MON_HAS_MAX_MOVES)
             {
-                Task_LearnedMove(taskId);
+				PokemonTeam_Own_UpdateMove(gPartyMenu.data1, learnedIndex, mon);
+				Task_LearnedMove(taskId);
                 return;
             }
             break;

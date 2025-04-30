@@ -25,6 +25,8 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 
+#include "platform/dll.h"
+
 /*
  * Move relearner state machine
  * ------------------------
@@ -520,11 +522,13 @@ static void DoMoveRelearnerMain(void)
 
             if (selection == 0)
             {
-                if (GiveMoveToMon(&gPlayerParty[sMoveRelearnerStruct->partyMon], GetCurrentSelectedMove()) != MON_HAS_MAX_MOVES)
+				u16 moveIndex = GiveMoveToMon(&gPlayerParty[sMoveRelearnerStruct->partyMon], GetCurrentSelectedMove());
+                if (moveIndex != MON_HAS_MAX_MOVES)
                 {
                     PrintMessageWithPlaceholders(gText_MoveRelearnerPkmnLearnedMove);
                     gSpecialVar_0x8004 = TRUE;
                     sMoveRelearnerStruct->state = MENU_STATE_PRINT_TEXT_THEN_FANFARE;
+					PokemonTeam_Own_UpdateMove(sMoveRelearnerStruct->partyMon, moveIndex, &gPlayerParty[sMoveRelearnerStruct->partyMon]);
                 }
                 else
                 {

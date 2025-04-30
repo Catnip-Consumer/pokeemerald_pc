@@ -4894,6 +4894,7 @@ bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 mov
                 dataUnsigned = gExperienceTables[gSpeciesInfo[GetMonData(mon, MON_DATA_SPECIES, NULL)].growthRate][GetMonData(mon, MON_DATA_LEVEL, NULL) + 1];
                 SetMonData(mon, MON_DATA_EXP, &dataUnsigned);
                 CalculateMonStats(mon);
+				PokemonTeam_Own_LevelUp(partyIndex, mon);
                 retVal = FALSE;
             }
 
@@ -4940,6 +4941,7 @@ bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 mov
                     dataUnsigned = GetMonData(mon, MON_DATA_PP1 + moveIndex, NULL) + dataUnsigned;
                     SetMonData(mon, MON_DATA_PP1 + moveIndex, &dataUnsigned);
                     retVal = FALSE;
+					PokemonTeam_Own_UpdateMove(partyIndex, moveIndex, mon);
                 }
             }
             temp1 = 0;
@@ -5238,6 +5240,7 @@ bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 mov
                             dataUnsigned = CalculatePPWithBonus(GetMonData(mon, MON_DATA_MOVE1 + moveIndex, NULL), dataUnsigned, moveIndex) - temp2;
                             dataUnsigned = GetMonData(mon, MON_DATA_PP1 + moveIndex, NULL) + dataUnsigned;
                             SetMonData(mon, MON_DATA_PP1 + moveIndex, &dataUnsigned);
+							PokemonTeam_Own_UpdateMove(partyIndex, moveIndex, mon);
                             retVal = FALSE;
                         }
                         break;
@@ -5282,6 +5285,8 @@ bool8 HealStatusConditions(struct Pokemon *mon, u32 battlePartyId, u32 healMask,
     {
         status &= ~healMask;
         SetMonData(mon, MON_DATA_STATUS, &status);
+		PokemonTeam_Own_Status(battlePartyId, mon, status);
+
         if (gMain.inBattle && battlerId != MAX_BATTLERS_COUNT)
             gBattleMons[battlerId].status1 &= ~healMask;
         return FALSE;

@@ -5382,6 +5382,7 @@ static void Cmd_handlelearnnewmove(void)
     }
     else
     {
+		PokemonTeam_Own_UpdateMove(gBattleStruct->expGetterMonId, learnMove, &gPlayerParty[gBattleStruct->expGetterMonId]);
         gActiveBattler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
 
         if (gBattlerPartyIndexes[gActiveBattler] == gBattleStruct->expGetterMonId

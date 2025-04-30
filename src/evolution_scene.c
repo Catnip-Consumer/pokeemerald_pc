@@ -788,6 +788,8 @@ static void Task_EvolutionScene(u8 taskId)
             var = MonTryLearningNewMove(mon, gTasks[taskId].tLearnsFirstMove);
             if (var != MOVE_NONE && !gTasks[taskId].tEvoWasStopped)
             {
+				PokemonTeam_Own_UpdateMove(gTasks[taskId].tPartyId, var, mon);
+
                 u8 nickname[POKEMON_NAME_BUFFER_SIZE];
                 if (!(gTasks[taskId].tBits & TASK_BIT_LEARN_MOVE))
                 {
@@ -1209,6 +1211,8 @@ static void Task_TradeEvolutionScene(u8 taskId)
             var = MonTryLearningNewMove(mon, gTasks[taskId].tLearnsFirstMove);
             if (var != MOVE_NONE && !gTasks[taskId].tEvoWasStopped)
             {
+				PokemonTeam_Own_UpdateMove(gTasks[taskId].tPartyId, var, mon);
+
                 u8 nickname[POKEMON_NAME_BUFFER_SIZE];
                 gTasks[taskId].tBits |= TASK_BIT_LEARN_MOVE;
                 gTasks[taskId].tLearnsFirstMove = FALSE;

@@ -20,6 +20,10 @@ extern "C" {
 
 #define POKE_PARA(poke, prop) eme.GetMonData3(poke, prop, nullptr);
 
+/* helpers for sanity checks */
+#define PARTY_RANGE(num)	if(num < 0 || num >= PARTY_SIZE) return;
+#define MOVE_RANGE(num)		if(num < 0 || num >= MAX_MON_MOVES) return;
+
 
 using namespace std::chrono_literals;
 #define REG_BASE (eme.REG_BASE)
@@ -31,48 +35,49 @@ static void SetGameState(DLL_GameState state) {
 
 }
 
-static constexpr uint32_t MoveFields[] = {
-	MON_DATA_MOVE1,
-	MON_DATA_MOVE2,
-	MON_DATA_MOVE3,
-	MON_DATA_MOVE4,
-};
+static void _PokemonTeam_Own_Status(int pi, uint32_t status, struct Pokemon* data) {
+	PARTY_RANGE(pi)
 
-static constexpr uint32_t PPFields[] = {
-	MON_DATA_PP1,
-	MON_DATA_PP2,
-	MON_DATA_PP3,
-	MON_DATA_PP4,
-};
+	// Log pokemon info
+	LOG.Info(
+		"PokemonTeam_Own_Status: Pokemon %d called %s status set to %u",
+		pi, POKE(pi).nickname.c_str(),
+		status
+	);
+}
+
+static void _PokemonTeam_Own_LevelUp(int pi, struct Pokemon* data) {
+	PARTY_RANGE(pi)
+
+	// update level
+	POKE(pi).level = POKE_PARA(data, MON_DATA_LEVEL);
+
+	// Log pokemon info
+	LOG.Info(
+		"PokemonTeam_Own_LevelUp: Pokemon %d called %s leveled up to %u",
+		pi, POKE(pi).nickname.c_str(),
+		POKE(pi).level
+	);
+}
 
 static void _PokemonTeam_Own_UpdatePP(int pi, int mi, struct Pokemon* data) {
-	if(pi < 0 && pi >= PARTY_SIZE) {
-		return;
-	}
-
-	if(mi < 0 && mi >= MAX_MON_MOVES) {
-		return;
-	}
+	PARTY_RANGE(pi)
+	PARTY_RANGE(mi)
 
 	// update PP
-	POKE(pi).movePP[mi] = POKE_PARA(data, PPFields[mi]);
+	POKE(pi).movePP[mi] = POKE_PARA(data, MON_DATA_PP1 + mi);
 }
 
 static void _PokemonTeam_Own_UpdateMove(int pi, int mi, struct Pokemon* data) {
-	if(pi < 0 && pi >= PARTY_SIZE) {
-		return;
-	}
-
-	if(mi < 0 && mi >= MAX_MON_MOVES) {
-		return;
-	}
+	PARTY_RANGE(pi)
+	PARTY_RANGE(mi)
 
 	// get move PP bonus
 	uint8_t ppbonus = POKE_PARA(data, MON_DATA_PP_BONUSES);
 
 	// load move parameters
-	POKE(pi).moveId[mi] = POKE_PARA(data, MoveFields[mi]);
-	POKE(pi).movePP[mi] = POKE_PARA(data, PPFields[mi]);
+	POKE(pi).moveId[mi] = POKE_PARA(data, MON_DATA_MOVE1 + mi);
+	POKE(pi).movePP[mi] = POKE_PARA(data, MON_DATA_PP1 + mi);
 	POKE(pi).maxPP[mi] = eme.CalculatePPWithBonus(POKE(pi).moveId[mi], ppbonus, mi);
 
 	// convert move name to string
@@ -81,7 +86,7 @@ static void _PokemonTeam_Own_UpdateMove(int pi, int mi, struct Pokemon* data) {
 
 	// Log move update
 	LOG.Info(
-		"_PokemonTeam_Own_UpdateMove: Pokemon %d called %s move %d called %s with PP %u / %u",
+		"PokemonTeam_Own_UpdateMove: Pokemon %d called %s move %d called %s with PP %u / %u",
 		pi, POKE(pi).nickname.c_str(),
 		mi, moveName.c_str(),
 		POKE(pi).movePP[mi], POKE(pi).maxPP[mi]
@@ -89,9 +94,7 @@ static void _PokemonTeam_Own_UpdateMove(int pi, int mi, struct Pokemon* data) {
 }
 
 static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
-	if(pi < 0 && pi >= PARTY_SIZE) {
-		return;
-	}
+	PARTY_RANGE(pi)
 
 	if(data == nullptr || !data->box.hasSpecies) {
 		POKE(pi).raw = nullptr;
@@ -150,6 +153,10 @@ static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
 static const struct DLL_Events dll_events = {
 	.SetGameState = SetGameState,
 	.PokemonTeam_Own_Update = _PokemonTeam_Own_Update,
+	.PokemonTeam_Own_LevelUp = _PokemonTeam_Own_LevelUp,
+	.PokemonTeam_Own_Status = _PokemonTeam_Own_Status,
+	.PokemonTeam_Own_UpdatePP = _PokemonTeam_Own_UpdatePP,
+	.PokemonTeam_Own_UpdateMove = _PokemonTeam_Own_UpdateMove,
 };
 
 void VBlankIntrWait() {
