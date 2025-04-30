@@ -111,3 +111,6 @@ endif()
 
 # Copy AI save file to build directory
 file(COPY ${CMAKE_SOURCE_DIR}/compile/emerald-ai.sav DESTINATION ${CMAKE_BINARY_DIR})
+
+# Copy resources to build directory
+file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})

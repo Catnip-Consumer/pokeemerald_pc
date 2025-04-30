@@ -107,6 +107,17 @@ bool initSDL() {
 	ImGui_ImplSDL2_InitForOpenGL(sdlWindow, sdlGL);
 	ImGui_ImplOpenGL3_Init("#version 130");
 
+	// load main font
+	const auto fontPath = getExecutableDir() / "resources/Roboto-Regular.ttf";
+	if(nullptr == (io->FontDefault = io->Fonts->AddFontFromFileTTF(
+			fontPath.string().c_str(),
+			16.0, NULL, io->Fonts->GetGlyphRangesDefault()
+		))) {
+
+		std::cout << "Could not load the main font from " << fontPath << std::endl;
+		return false;
+	}
+
 	// Macro that sets an OpenGL texture to use nearest neighbor scaling...
 	#define TEX_NEAREST_SETUP												\
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	\
