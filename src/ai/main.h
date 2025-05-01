@@ -26,10 +26,14 @@ extern "C" {
 // Save game is loaded to flash buffer and is read-only for agents.
 extern uint8_t flash[sizeof(FLASH_BASE)];
 
+// Describes the current generation of the simulation.
+extern volatile size_t generation;
+
 /* Determines what the agents should be doing right now */
 enum class AgentState : uint8_t {
 	WAIT_SYNC,
 	RUNNING,
+	FINISHED,
 	EXIT,
 };
 
@@ -110,6 +114,7 @@ struct EmeraldAddresses {
 	#endif
 };
 
+extern void runModelThread();
 extern void runAgent(size_t generation, uint16_t index);
 extern void DrawFrame(uint16_t *pixels, struct EmeraldAddresses* eme);
 

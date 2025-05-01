@@ -38,6 +38,7 @@ endif()
 if(AI_HAS_GUI)
 	list(APPEND PokeEmerald_AI_SOURCES
 		"src/ai/system/thread_safe_gba_easy_draw.cpp"
+		"src/ai/system/model-manager.cpp"
 		"src/ai/gui/sdl2.cpp"
 		"src/ai/gui/view-all-ai.cpp"
 		"src/ai/gui/ai-info.cpp"
@@ -74,7 +75,7 @@ endif()
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(emerald-ai PRIVATE -Wall -Wformat -Wformat-security -fomit-frame-pointer)
-	target_compile_options(emerald-ai PRIVATE -Wno-trigraphs -Wparentheses -Wunused -fopenmp)
+	target_compile_options(emerald-ai PRIVATE -Wno-trigraphs -Wparentheses -Wunused -fopenmp -Wno-deprecated-declarations)
     target_link_options(emerald-ai PRIVATE -fopenmp)
 
 	if(WIN32)

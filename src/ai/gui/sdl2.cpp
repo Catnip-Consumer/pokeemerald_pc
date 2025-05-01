@@ -238,7 +238,7 @@ static bool handleEventsSDL(SDL_Event& event) {
 
 static inline void updateTitle() {
 	// Update the title of the window with the current FPS
-	std::string title = "emerald-ai - fps: "+ std::to_string((size_t) io->Framerate) +" - ai: ";
+	std::string title = "emerald-ai - gen "+ std::to_string(generation) +" - fps: "+ std::to_string((size_t) io->Framerate) +" - ai: ";
 
 	if(fps < 1000) {
 		title += std::to_string((size_t) round(fps)) + " per second";
