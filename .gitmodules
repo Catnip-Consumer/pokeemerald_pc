@@ -8,3 +8,9 @@
 [submodule "extern/imgui"]
 	path = extern/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "extern/cereal"]
+	path = extern/cereal
+	url = https://github.com/USCiLab/cereal
+[submodule "extern/ensmallen"]
+	path = extern/ensmallen
+	url = https://github.com/mlpack/ensmallen

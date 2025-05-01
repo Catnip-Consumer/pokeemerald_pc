@@ -60,6 +60,8 @@ add_executable(emerald-ai
 	${PokeEmerald_AI_SOURCES}
 )
 
+target_link_libraries(emerald-ai PRIVATE ${ARMADILLO_LIBRARIES})
+
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 
@@ -72,7 +74,8 @@ endif()
 # Build flags
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(emerald-ai PRIVATE -Wall -Wformat -Wformat-security -fomit-frame-pointer)
-	target_compile_options(emerald-ai PRIVATE -Wno-trigraphs -Wparentheses -Wunused)
+	target_compile_options(emerald-ai PRIVATE -Wno-trigraphs -Wparentheses -Wunused -fopenmp)
+    target_link_options(emerald-ai PRIVATE -fopenmp)
 
 	if(WIN32)
 		# handle windows-specific options
@@ -94,6 +97,9 @@ endif()
 target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/extern/SDL/include)
+target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/extern/cereal/include)
+target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/extern/ensmallen/include)
+target_include_directories(emerald-ai PRIVATE ${ARMADILLO_INCLUDE_DIRS})
 
 # Compiler toggle flags
 target_compile_definitions(emerald-ai PRIVATE RENDERER_EASY_DRAW)
@@ -102,6 +108,23 @@ target_compile_definitions(emerald-ai PRIVATE MODERN=1)
 target_compile_definitions(emerald-ai PRIVATE PORTABLE=1)
 target_compile_definitions(emerald-ai PRIVATE UBFIX=1)
 target_compile_definitions(emerald-ai PRIVATE VER_64BIT=1)
+
+# Armadillo
+set(Armadillo_DIR "" CACHE PATH "Path to Armadillo installation")
+if(NOT Armadillo_DIR)
+	message(FATAL_ERROR "Armadillo installation not found. Please set Armadillo_DIR to the path of your Armadillo installation.")
+endif()
+
+target_include_directories(emerald-ai PRIVATE "${Armadillo_DIR}/include")
+target_link_directories(emerald-ai PRIVATE "${Armadillo_DIR}/examples/lib_win64")
+# mlpack
+set(mlpack_DIR "" CACHE PATH "Path to mlpack installation")
+if(NOT mlpack_DIR)
+	message(FATAL_ERROR "mlpack installation not found. Please set mlpack_DIR to the path of your mlpack installation.")
+endif()
+
+target_include_directories(emerald-ai PRIVATE "${mlpack_DIR}/include")
+target_link_directories(emerald-ai PRIVATE "${mlpack_DIR}/lib")
 
 # Add `DEBUG` macro definition if compiling under Debug or RelWithDebInfo
 # configuration
