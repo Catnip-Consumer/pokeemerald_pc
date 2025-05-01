@@ -10042,7 +10042,7 @@ static void Cmd_givecaughtmon(void)
     gBattleResults.caughtMonBall = GetMonData(&gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]], MON_DATA_POKEBALL, NULL);
 
     gBattlescriptCurrInstr++;
-	Pokemon_Got(mon, DLL_Pokemon_Get_Type_CAUGHT);
+	Pokemon_Got(DLL_Pokemon_Get_Type_CAUGHT, mon);
 }
 
 static void Cmd_trysetcaughtmondexflags(void)

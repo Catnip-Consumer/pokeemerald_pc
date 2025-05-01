@@ -3130,7 +3130,7 @@ static void TradeMons(u8 playerPartyIdx, u8 partnerPartyIdx)
     if (gReceivedRemoteLinkPlayers)
         TryEnableNationalDexFromLinkPartner();
 
-	Pokemon_Got(playerMon, DLL_Pokemon_Get_Type_TRADE);
+	Pokemon_Got(DLL_Pokemon_Get_Type_TRADE, playerMon);
 }
 
 static void HandleLinkDataSend(void)

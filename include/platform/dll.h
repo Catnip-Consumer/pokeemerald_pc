@@ -1,6 +1,9 @@
 #ifndef GUARD_DLL_H
 #define GUARD_DLL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "global.h"
 
 struct DLL_Platform {
@@ -46,7 +49,7 @@ struct DLL_Events {
 	void (*SetGameState)(DLL_GameState state);
 
 	/* General Pokemon related */
-	void (*Pokemon_Got)(struct Pokemon* data, DLL_Pokemon_Get_Type type);
+	void (*Pokemon_Got)(DLL_Pokemon_Get_Type type, struct Pokemon* data);
 
 	/* Pokemon team related */
 	void (*PokemonTeam_Own_Update)(int poke, struct Pokemon* data);
@@ -67,8 +70,8 @@ extern const struct DLL_Events *gDllEvents;
 #define EV_FORWARD(func, ...) \
 	if(gDllEvents) gDllEvents->func(__VA_ARGS__);
 
-inline void Pokemon_Got(struct Pokemon* data, DLL_Pokemon_Get_Type type) {
-	EV_FORWARD(Pokemon_Got, data, type);
+inline void Pokemon_Got(DLL_Pokemon_Get_Type type, struct Pokemon* data) {
+	EV_FORWARD(Pokemon_Got, type, data);
 }
 
 inline void PokemonTeam_Own_Update(int poke, struct Pokemon* data) {
@@ -91,4 +94,7 @@ inline void PokemonTeam_Own_UpdateMove(int poke, int move, struct Pokemon* data)
 	EV_FORWARD(PokemonTeam_Own_UpdateMove, poke, move, data);
 }
 
+#ifdef __cplusplus
+}
+#endif
 #endif

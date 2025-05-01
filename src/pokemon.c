@@ -4411,7 +4411,7 @@ u8 GiveMonToPlayer(struct Pokemon *mon)
 
     CopyMon(&gPlayerParty[i], mon, sizeof(*mon));
 	PokemonTeam_Own_Update(i, &gPlayerParty[i]);
-    gPlayerPartyCount = i + 1;
+	gPlayerPartyCount = i + 1;
     return MON_GIVEN_TO_PARTY;
 }
 

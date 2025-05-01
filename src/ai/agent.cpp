@@ -43,7 +43,12 @@ static const char* _Pokemon_Got_TypeStr[] = {
 	[DLL_Pokemon_Get_Type_EGG] =		"received as an egg",
 };
 
-static void _Pokemon_Got(struct Pokemon* data, DLL_Pokemon_Get_Type type) {
+static void _Pokemon_Got(DLL_Pokemon_Get_Type type, struct Pokemon* data) {
+	if(type < 0 || type >= DLL_Pokemon_Get_Type_EGG) {
+		LOG.Error(frameNum, "Pokemon_Got: Type %d is not a valid type!", (int) type);
+		return;
+	}
+
 	// get Pokemon nickname(can be species or nickname!)
 	u8 nickname[POKEMON_NAME_LENGTH + 1];
 	eme.GetMonData3(data, MON_DATA_NICKNAME, nickname);
@@ -72,8 +77,7 @@ static void _PokemonTeam_Own_LevelUp(int pi, struct Pokemon* data) {
 
 	LOG.Info(frameNum,
 		"PokemonTeam_Own_LevelUp: Pokemon %d called %s leveled up to %u",
-		pi, POKE(pi).nickname.c_str(),
-		POKE(pi).level
+		pi, POKE(pi).nickname.c_str(), POKE(pi).level
 	);
 }
 
@@ -114,7 +118,7 @@ static void _PokemonTeam_Own_Update(int pi, struct Pokemon* data) {
 
 	if(data == nullptr || !data->box.hasSpecies) {
 		POKE(pi).raw = nullptr;
-		POKE(pi).nickname = "";
+		POKE(pi).nickname = "<null>";
 
 		LOG.Info(frameNum,"PokemonTeam_Own_Update: Pokemon %d is empty", pi);
 		return;

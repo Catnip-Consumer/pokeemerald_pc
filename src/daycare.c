@@ -825,7 +825,7 @@ static void _GiveEggFromDaycare(struct DayCare *daycare)
     CompactPartySlots();
     CalculatePlayerPartyCount();
     RemoveEggFromDayCare(daycare);
-	Pokemon_Got(&egg, DLL_Pokemon_Get_Type_EGG);
+	Pokemon_Got(DLL_Pokemon_Get_Type_EGG, &egg);
 }
 
 void CreateEgg(struct Pokemon *mon, u16 species, bool8 setHotSpringsLocation)

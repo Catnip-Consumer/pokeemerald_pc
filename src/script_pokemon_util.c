@@ -85,7 +85,7 @@ u8 ScriptGiveMon(u16 species, u8 level, u16 item, u32 unused1, u32 unused2, u8 u
     }
 
 	// Probably most commonly a trade?
-	Pokemon_Got(&mon, DLL_Pokemon_Get_Type_TRADE);
+	Pokemon_Got(DLL_Pokemon_Get_Type_TRADE, &mon);
     return sentToPc;
 }
 
@@ -99,7 +99,7 @@ u8 ScriptGiveEgg(u16 species)
     SetMonData(&mon, MON_DATA_IS_EGG, &isEgg);
 
     u8 result = GiveMonToPlayer(&mon);
-	Pokemon_Got(&mon, DLL_Pokemon_Get_Type_CAUGHT);
+	Pokemon_Got(DLL_Pokemon_Get_Type_EGG, &mon);
 	return result;
 }
 

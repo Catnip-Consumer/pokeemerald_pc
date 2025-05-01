@@ -393,7 +393,7 @@ static void AddHatchedMonToParty(u8 id)
     MonRestorePP(mon);
     CalculateMonStats(mon);
 	PokemonTeam_Own_Update(id, mon);
-	Pokemon_Got(mon, DLL_Pokemon_Get_Type_HATCHED);
+	Pokemon_Got(DLL_Pokemon_Get_Type_HATCHED, mon);
 }
 
 void ScriptHatchMon(void)
