@@ -42,6 +42,11 @@ thread_local static size_t frameNum = 0;
 thread_local static volatile uint16_t _storedIndex = 0;
 thread_local static struct EmeraldAddresses eme;
 
+thread_local static std::mt19937 mt19937 { std::random_device()() };
+thread_local static std::uniform_real_distribution<double> randomFloat(0, 1);
+thread_local static std::uniform_real_distribution<double> randomDirection(4, 8);
+thread_local static std::uniform_real_distribution<double> randomFramecount(16, 64);
+
 /* Reset agent memory so SDL2 doesn't bug out weirdly */
 static void resetAgentMemory() {
 	for(size_t i = 0;i < PARTY_SIZE;i ++) {
@@ -87,12 +92,26 @@ static void gatherPlayerPartyState(State& state, size_t& pos) {
 	// normalize party pokemon
 	for(size_t i = 0;i < PARTY_SIZE;i ++) {
 		const auto& poke = POKE(i);
-		ST_NORMALIZE(poke.speciesId, NUM_SPECIES)
-		ST_NORMALIZE(poke.abilityId, ABILITIES_COUNT)
-		ST_NORMALIZE(poke.heldItemId, ITEMS_COUNT)
-		ST_NORMALIZE_CLAMP(poke.level, 100)
-		ST_NORMALIZE((uint8_t)(poke.typeIds[0] + 1), NUMBER_OF_MON_TYPES + 1)
-		ST_NORMALIZE((uint8_t)(poke.typeIds[1] + 1), NUMBER_OF_MON_TYPES + 1)
+
+		if(poke.raw == nullptr) {
+			ST_NEXT(0.0)
+			ST_NEXT(0.0)
+			ST_NEXT(0.0)
+			ST_NEXT(0.0)
+			ST_NEXT(0.0)
+			ST_NEXT(0.0)
+			ST_NEXT(0.0)
+
+		} else {
+			ST_NORMALIZE(poke.speciesId, NUM_SPECIES)
+			ST_NORMALIZE(poke.abilityId, ABILITIES_COUNT)
+			ST_NORMALIZE(poke.heldItemId, ITEMS_COUNT)
+			ST_NORMALIZE((uint8_t)(poke.typeIds[0] + 1), NUMBER_OF_MON_TYPES + 1)
+			ST_NORMALIZE((uint8_t)(poke.typeIds[1] + 1), NUMBER_OF_MON_TYPES + 1)
+
+			ST_NORMALIZE_CLAMP(poke.raw->hp, poke.raw->maxHP)
+			ST_NORMALIZE_CLAMP(poke.level, 100)
+		}
 
 		for(size_t m = 0;m < MAX_MON_MOVES;m ++) {
 			ST_NORMALIZE(poke.moveId[m], MOVES_COUNT)
@@ -487,28 +506,53 @@ bool checkDrawUpdate(int index, bool aiframe) {
 }
 #endif
 
-static uint8_t EpsilonGreedyButtonTable[64] = {
-	2, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7,
-	4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7,
-	4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7,
-};
+static thread_local size_t holdUntilFrame = 0;
+static thread_local uint8_t holdDirection = 0;
 
-static Action predictInput(uint16_t index, State& state) {
-	arma::colvec output(MODEL_ACTION_SIZE);
-	agentModelCopies[index].Predict(state, output);
-
+static Action predictInput(size_t generation, uint16_t index, State& state) {
 	// Threshold for binary multi-button action
-	Action action(output.n_elem);
+	Action action(MODEL_ACTION_SIZE);
 
-	for(size_t i = 0; i < output.n_elem; ++i) {
-		action(i) = (output(i) > 0.5) ? 1 : 0;
-	}
+	if (randomFloat(mt19937) < GetEpsilonGreedyChance(generation)) {
+		/* Check if we have chosen to hold some button for a number of frames */
+		if(holdUntilFrame <= frameNum) {
+			// Choose new direction
+			const size_t count = randomFramecount(mt19937);
+			holdUntilFrame = frameNum + count;
+			holdDirection = randomDirection(mt19937);
+		}
 
-	if (rand() / double(RAND_MAX) < EPSILON_GREEDY_CHANCE) {
-		/* Epsilon-greedy: randomly flip input states (directions, A, B, Start, Select) */
-		auto index = EpsilonGreedyButtonTable[rand() % 64];
-		action(index) = action(index) == 0 ? 1 : 0;
+		action.zeros();
+		action(holdDirection) = 1;
+
+		/* Check if we would like to select a random button to press too */
+		const auto randomValue = randomFloat(mt19937);
+
+		if(randomValue < 0.00001) {
+			action(2) = 1;		// Select
+
+		} else if(randomValue < 0.00005) {
+			action(3) = 1;		// Start
+
+		} else if(randomValue < 0.001) {
+			action(1) = 1;		// B
+
+		} else if(randomValue < 0.01) {
+			action(0) = 1;		// A
+		}
+
+	} else {
+		/* Predict the output of the model */
+		arma::colvec output(MODEL_ACTION_SIZE);
+		agentModelCopies[index].Predict(state, output);
+
+		/* Normalize to either on or off */
+		for(size_t i = 0; i < output.n_elem; ++i) {
+			action(i) = (output(i) > 0.5) ? 1 : 0;
+		}
+
+		/* TEMP: ban start and select from action */
+		action(2) = action(3) = 0.0;
 	}
 
 	// Check action is valid
@@ -522,7 +566,7 @@ static void setInputFromAction(Action& action) {
 
 	/* Just loop through each action state, and treat it as a bit (on or off) */
 	for(size_t i = 0; i < action.n_elem; ++i) {
-		predictedInput |= action(i) << i;
+		predictedInput |= uint16_t(action(i)) << i;
 	}
 }
 
@@ -589,7 +633,7 @@ void runAgent(size_t generation, uint16_t index) {
 
 	while(AgentState::RUNNING == agentState && frameNum < SIMULATION_FRAMECOUNT) {
 		/* Predict input based on current state */
-		auto action = predictInput(index, startState);
+		auto action = predictInput(generation, index, startState);
 		setInputFromAction(action);
 
 		/* Run for number of frames before AI is polled for inputs */
@@ -620,8 +664,8 @@ void runAgent(size_t generation, uint16_t index) {
 	}
 
 	exit:
-	LOG.Debug(
-		frameNum, "Agent %d: Cleaning up simulation. Final reward = %f in generation %zu",
+	LOG.Debug(frameNum,
+		"Agent %d: Cleaning up simulation. Final reward = %f in generation %zu.",
 		index, reward, generation
 	);
 

@@ -24,13 +24,13 @@ using State = arma::colvec;
 using Action = arma::Row<size_t>;
 using Reward = double;
 
-#define SIMULATION_FRAMECOUNT ((2*60*60*60) - 60)
-#define EPSILON_GREEDY_CHANCE 0.3
+#define SIMULATION_FRAMECOUNT ((5*60*60*60) - 60)
 
-#define MODEL_STATE_SIZE 88
+#define MODEL_STATE_SIZE (4+(PARTY_SIZE*(7+(2*MAX_MON_MOVES))))
 #define MODEL_ACTION_SIZE 10
-#define MODEL_STEP_COUNT 50
-#define MODEL_BATCH_SIZE 512
+#define MODEL_STEP_COUNT 10
+#define MODEL_BATCH_SIZE 256
+#define MODEL_GAMMA 0.98
 
 struct Experience {
 	State state;
@@ -45,3 +45,11 @@ using ReplayBuffer = std::vector<Experience>;
 // Shared across threads
 extern ReplayBuffer replayBuffers[CONCURRENT_AGENTS];
 extern ActorNetwork agentModelCopies[CONCURRENT_AGENTS];
+
+inline constexpr double GetEpsilonGreedyChance(size_t generation) {
+	if(generation <= 10) {
+		return 1.0;
+	}
+
+	return std::max(0.025, 0.3 * std::pow(0.99, generation));
+}

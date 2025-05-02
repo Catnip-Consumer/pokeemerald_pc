@@ -59,10 +59,8 @@ static void ReadSaveFile() {
 	}
 }
 
-static void TrainStep(
-	std::vector<Experience>& batch, ActorNetwork& model,
-	double gamma = 0.99, size_t maxEpochs = 1
-) {
+static double TrainStep(std::vector<Experience>& batch, ActorNetwork& model, size_t maxEpochs = 1) {
+	double totalLoss = 0.0;
 	arma::mat input;  // Each column is a state
 	arma::mat target; // Each column is a target Q vector
 
@@ -76,14 +74,14 @@ static void TrainStep(
 
 		input.col(i) = e.state;
 
-		arma::colvec qValues(MODEL_ACTION_SIZE);
-		model.Predict(e.state, qValues);
+		arma::colvec predictedQ(MODEL_ACTION_SIZE);
+		model.Predict(e.state, predictedQ);
+
+		// Save original prediction for loss
+		arma::colvec lossVec = predictedQ;
 
 		arma::colvec nextQ(MODEL_ACTION_SIZE);
 		model.Predict(e.nextState, nextQ);
-
-		// Calculate the target Q-values based on the reward and max future Q-value
-		double qTarget = e.reward + (gamma * nextQ.max());
 
 		if (!arma::is_finite(e.reward)) {
 			throw std::runtime_error("NaN or Inf in reward!");
@@ -93,12 +91,19 @@ static void TrainStep(
 			throw std::runtime_error("NaN or Inf in nextQ max!");
 		}
 
+		// Calculate the target Q-values based on the reward and max future Q-value
+		double qTarget = e.reward + (MODEL_GAMMA * nextQ.max());
+
 		// Now update qValues for the actions in e.action (which could be multiple actions)
 		// Loop through all actions in e.action and update their Q-value
-		qValues.elem(find(e.action != 0)).fill(qTarget);
+		lossVec.elem(e.action != 0).fill(qTarget);
 
 		// Set the target values for this experience
-		target.col(i) = qValues;
+		target.col(i) = lossVec;
+
+		// Mean Squared Error
+		double loss = arma::accu(arma::square(predictedQ - lossVec));
+		totalLoss += loss;
 	}
 
 	if (!target.is_finite()) {
@@ -107,6 +112,8 @@ static void TrainStep(
 
 	ens::Adam optimizer(0.001, MODEL_BATCH_SIZE, 0.9, 0.999, 1e-8, maxEpochs, 1e-5, true);
 	model.Train(input, target, optimizer);
+
+	return totalLoss / MODEL_BATCH_SIZE;
 }
 
 inline static void Train(ActorNetwork& model) {
@@ -137,6 +144,9 @@ inline static void Train(ActorNetwork& model) {
 	/* Create a distribution of the weights so they are picked randomly but with bias */
 	std::discrete_distribution<> dist(weights.begin(), weights.end());
 
+    double totalQValue = 0;
+	double totalLoss = 0;
+
 	for (size_t i = 0; i < MODEL_STEP_COUNT; ++i) {
 		/* Sample a mini batch for the training step */
 		std::vector<Experience> miniBatch;
@@ -147,14 +157,20 @@ inline static void Train(ActorNetwork& model) {
 		});
 
 		/* Run the training on the model */
-		TrainStep(miniBatch, model);
+		totalLoss += TrainStep(miniBatch, model);
 	}
 
 	/* Record how long training took */
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> elapsed = end - start;
 
-	std::cout << "Training in gen " << generation << " took " << (size_t) elapsed.count() << " ms..." << std::endl;
+    /* Average the loss and Q-values */
+    double avgLoss = totalLoss / MODEL_STEP_COUNT;
+    double avgQValue = totalQValue / MODEL_STEP_COUNT;
+
+	std::cout << "Training in gen " << generation << " took " << (size_t) elapsed.count() << " ms... ";
+    std::cout << "Avg Loss: " << avgLoss << ", Mean Q-Value: " << avgQValue << ", Epsilon: " << GetEpsilonGreedyChance(generation);
+    std::cout << std::endl;
 }
 
 static void runGeneration(ActorNetwork& model) {
