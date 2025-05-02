@@ -18,6 +18,7 @@ set(PokeEmerald_AI_SOURCES
 	"src/ai/system/shared.cpp"
 	"src/ai/main.cpp"
 	"src/ai/agent.cpp"
+	"src/ai/model-manager.cpp"
 	"src/ai/library/emerald-str.cpp"
 )
 
@@ -38,7 +39,6 @@ endif()
 if(AI_HAS_GUI)
 	list(APPEND PokeEmerald_AI_SOURCES
 		"src/ai/system/thread_safe_gba_easy_draw.cpp"
-		"src/ai/system/model-manager.cpp"
 		"src/ai/gui/sdl2.cpp"
 		"src/ai/gui/view-all-ai.cpp"
 		"src/ai/gui/ai-info.cpp"
@@ -61,7 +61,7 @@ add_executable(emerald-ai
 	${PokeEmerald_AI_SOURCES}
 )
 
-target_link_libraries(emerald-ai PRIVATE ${ARMADILLO_LIBRARIES})
+target_link_libraries(emerald-ai PRIVATE openblas)
 
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
@@ -118,6 +118,7 @@ endif()
 
 target_include_directories(emerald-ai PRIVATE "${Armadillo_DIR}/include")
 target_link_directories(emerald-ai PRIVATE "${Armadillo_DIR}/examples/lib_win64")
+
 # mlpack
 set(mlpack_DIR "" CACHE PATH "Path to mlpack installation")
 if(NOT mlpack_DIR)

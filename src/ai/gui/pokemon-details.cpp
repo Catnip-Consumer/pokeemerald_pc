@@ -9,6 +9,11 @@ extern "C" {
 	#include <pokemon.h>
 	#include <battle.h>
 	#include <string_util.h>
+
+	// these will cause issues later!
+	#undef min
+	#undef max
+	#undef abs
 }
 
 #define PARTY_GET(idx) agentData.data[agentId].pokemon[idx]
@@ -45,7 +50,7 @@ const std::string getPokemonPrimaryStatusString(struct Pokemon* poke) {
 }
 
 void agentPartyWindow(size_t agentId) {
-	if(!ImGui::Begin(WDNAME(AGENT_PARTY), nullptr)) {
+	if(!ImGui::Begin(WDNAME(AGENT_PARTY), nullptr) || !agentData.data[agentId].active) {
 		ImGui::End();
 		return;
 	}

@@ -148,6 +148,7 @@ _DLL_ void AgbRunFrame()
 {
 	ReadKeys();
 
+/*
 	if (gSoftResetDisabled == FALSE
 		&& JOY_HELD_RAW(A_BUTTON)
 		&& JOY_HELD_RAW(B_START_SELECT) == B_START_SELECT)
@@ -156,7 +157,7 @@ _DLL_ void AgbRunFrame()
 		rfu_waitREQComplete();
 		DoSoftReset();
 	}
-
+*/
 	if (Overworld_SendKeysToLinkIsRunning() == TRUE)
 	{
 		gLinkTransferringData = TRUE;

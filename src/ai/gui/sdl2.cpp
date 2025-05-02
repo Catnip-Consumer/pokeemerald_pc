@@ -6,6 +6,11 @@
 
 extern "C" {
 	#include <platform/framedraw.h>
+
+	// these will cause issues later!
+	#undef min
+	#undef max
+	#undef abs
 }
 
 #define WINDOW_SCALE_AI_GRID 10
@@ -277,7 +282,7 @@ static void updateDeltaFPS(double deltaTime) {
 	updateTitle();
 
 	// Reset accumulator and FPS counters
-	FPSAccumulator = min(1.0, FPSAccumulator - 1);
+	FPSAccumulator = std::min(1.0, FPSAccumulator - 1);
 
 	sdlState.gos.fpsIndex = (sdlState.gos.fpsIndex + 1) % FPS_COUNTS;
 
@@ -307,7 +312,7 @@ static void updateDeltaTime(double deltaTime) {
 		return;
 	}
 
-	drawAccumulator = min(deltaNeeded, drawAccumulator - deltaNeeded);
+	drawAccumulator = std::min(deltaNeeded, drawAccumulator - deltaNeeded);
 
 	// Draw the next frame
 	drawSDL();

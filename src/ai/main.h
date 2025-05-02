@@ -64,11 +64,14 @@ struct AgentPokemonData {
 };
 
 struct SingleAgentData {
+	/* Pokemon data */
+	struct AgentPokemonData pokemon[PARTY_SIZE];
+
 	// Agent logger
 	Log log;
 
-	/* Pokemon data */
-	struct AgentPokemonData pokemon[PARTY_SIZE];
+	// If false, agent is not active and using any of it's data is invalid
+	bool active = false;
 };
 
 /* struct for agent state that may need to be accessed from agent threads */
