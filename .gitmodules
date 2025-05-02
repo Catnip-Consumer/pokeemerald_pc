@@ -14,3 +14,6 @@
 [submodule "extern/ensmallen"]
 	path = extern/ensmallen
 	url = https://github.com/mlpack/ensmallen
+[submodule "extern/armadillo"]
+	path = extern/armadillo
+	url = https://gitlab.com/conradsnicta/armadillo-code

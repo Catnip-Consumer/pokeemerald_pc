@@ -62,6 +62,7 @@ add_executable(emerald-ai
 )
 
 target_link_libraries(emerald-ai PRIVATE openblas)
+target_link_directories(emerald-ai PRIVATE "${CMAKE_SOURCE_DIR}/extern/armadillo/examples/lib_win64")
 
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
@@ -100,7 +101,7 @@ target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/extern/SDL/include)
 target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/extern/cereal/include)
 target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/extern/ensmallen/include)
-target_include_directories(emerald-ai PRIVATE ${ARMADILLO_INCLUDE_DIRS})
+target_include_directories(emerald-ai PRIVATE ${CMAKE_SOURCE_DIR}/extern/armadillo/include)
 
 # Compiler toggle flags
 target_compile_definitions(emerald-ai PRIVATE RENDERER_EASY_DRAW)
@@ -109,15 +110,6 @@ target_compile_definitions(emerald-ai PRIVATE MODERN=1)
 target_compile_definitions(emerald-ai PRIVATE PORTABLE=1)
 target_compile_definitions(emerald-ai PRIVATE UBFIX=1)
 target_compile_definitions(emerald-ai PRIVATE VER_64BIT=1)
-
-# Armadillo
-set(Armadillo_DIR "" CACHE PATH "Path to Armadillo installation")
-if(NOT Armadillo_DIR)
-	message(FATAL_ERROR "Armadillo installation not found. Please set Armadillo_DIR to the path of your Armadillo installation.")
-endif()
-
-target_include_directories(emerald-ai PRIVATE "${Armadillo_DIR}/include")
-target_link_directories(emerald-ai PRIVATE "${Armadillo_DIR}/examples/lib_win64")
 
 # mlpack
 set(mlpack_DIR "" CACHE PATH "Path to mlpack installation")
@@ -139,3 +131,8 @@ file(COPY ${CMAKE_SOURCE_DIR}/compile/emerald-ai.sav DESTINATION ${CMAKE_BINARY_
 
 # Copy resources to build directory
 file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})
+
+# On Windows, copy libopenblas.dll from Armadillo to build directory
+if(WIN32)
+	file(COPY ${CMAKE_SOURCE_DIR}/extern/armadillo/examples/lib_win64/libopenblas.dll DESTINATION ${CMAKE_BINARY_DIR})
+endif()
