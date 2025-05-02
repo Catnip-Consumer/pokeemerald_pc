@@ -6,7 +6,7 @@
 #include <mutex>
 #include <stdarg.h>
 
-#define INMEMORY_LOG_ENTRY_LIMIT 64
+#define INMEMORY_LOG_ENTRY_LIMIT 1024
 #define TEMP_BUF_SIZE 1024
 
 enum class LogLevel {
@@ -40,7 +40,7 @@ struct LogEntry {
 	text.resize(len);													\
 	return _internalLog(level, frame, std::move(text));
 
-class Log {
+class Logger {
 public:
 	/**
 	 * @brief The store log history entries

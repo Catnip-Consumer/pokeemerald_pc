@@ -121,11 +121,30 @@ inline static void Train(ActorNetwork& model) {
 		buffer.clear();
 	}
 
+	if (data.size() < MODEL_BATCH_SIZE) {
+		throw std::runtime_error(std::to_string(data.size()) +" is not enough samples to train on!");
+	}
+
+	/* Generate an array of weights based on the interest in training data */
+	std::vector<double> weights(data.size());
+	std::transform(
+		data.begin(), data.end(), weights.begin(),
+		[](const Experience& e) {
+			return e.interest + 1e-5;
+		 }
+	);
+
+	/* Create a distribution of the weights so they are picked randomly but with bias */
+	std::discrete_distribution<> dist(weights.begin(), weights.end());
+
 	for (size_t i = 0; i < MODEL_STEP_COUNT; ++i) {
 		/* Sample a mini batch for the training step */
 		std::vector<Experience> miniBatch;
 		miniBatch.reserve(MODEL_BATCH_SIZE);
-		std::sample(data.begin(), data.end(), std::back_inserter(miniBatch), MODEL_BATCH_SIZE, mt19937);
+		std::generate_n(
+			std::back_inserter(miniBatch), MODEL_BATCH_SIZE, [&]() {
+				return data[dist(mt19937)];
+		});
 
 		/* Run the training on the model */
 		TrainStep(miniBatch, model);
@@ -227,7 +246,7 @@ void runModelThread() {
 
 	/* Generate our initial model */
 	auto model = std::make_shared<ActorNetwork>();
-	model->Add<Linear>(128);
+	model->Add<Linear>(200);
 	model->Add<ReLU>();
 	model->Add<Linear>(MODEL_ACTION_SIZE);
 	model->Add<Sigmoid>();

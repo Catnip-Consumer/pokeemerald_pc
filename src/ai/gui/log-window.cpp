@@ -23,7 +23,7 @@ static std::string getTimecode(const LogEntry& entry) {
 	return std::string(timecode);
 }
 
-bool Log::_internalLog(LogLevel level, size_t frame, std::string&& string) {
+bool Logger::_internalLog(LogLevel level, size_t frame, std::string&& string) {
 	this->logAdded = true;
 	this->mutex.lock();
 

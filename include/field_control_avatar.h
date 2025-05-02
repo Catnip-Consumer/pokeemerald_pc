@@ -34,5 +34,6 @@ u8 TrySetDiveWarp(void);
 const u8 *GetInteractedLinkPlayerScript(struct MapPosition *position, u8 metatileBehavior, u8 direction);
 const u8 *GetCoordEventScriptAtMapPosition(struct MapPosition *position);
 void ClearPoisonStepCounter(void);
+_DLL_ void GetPlayerPosition(struct MapPosition *);
 
 #endif // GUARD_FIELDCONTROLAVATAR_H

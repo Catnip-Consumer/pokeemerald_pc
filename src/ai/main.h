@@ -19,8 +19,8 @@ extern "C" {
 #define AI_FRAMES_BEFORE_POLL 8
 
 // Define number of agents to run. GRID_ROWS and GRID_COLS are only relevant for SDL2 but also are used to get agent count.
-#define GRID_ROWS 2
-#define GRID_COLS 2
+#define GRID_ROWS 3
+#define GRID_COLS 3
 #define CONCURRENT_AGENTS (GRID_ROWS * GRID_COLS)
 
 // Save game is loaded to flash buffer and is read-only for agents.
@@ -68,7 +68,7 @@ struct SingleAgentData {
 	struct AgentPokemonData pokemon[PARTY_SIZE];
 
 	// Agent logger
-	Log log;
+	Logger log;
 
 	// If false, agent is not active and using any of it's data is invalid
 	bool active = false;
@@ -107,7 +107,10 @@ struct EmeraldAddresses {
 	void (*StringGet_Nickname)(u8*);
 	u32 (*GetMonData3)(struct Pokemon *mon, s32 field, u8 *data);
 	u8 (*CalculatePPWithBonus)(u16 move, u8 ppBonuses, u8 moveIndex);
+	void (*GetPlayerPosition)(struct MapPosition*);
 
+	struct BackupMapLayout* gBackupMapLayout;
+	struct SaveBlock1* gSaveBlock1Ptr;
 	const struct SpeciesInfo* gSpeciesInfo;
 	const u8 (*gMoveNames)[MOVE_NAME_LENGTH + 1];
 

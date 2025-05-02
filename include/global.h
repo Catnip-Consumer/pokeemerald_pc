@@ -1111,7 +1111,7 @@ struct SaveBlock1
     // sizeof: 0x3D88
 };
 
-extern struct SaveBlock1* gSaveBlock1Ptr;
+extern _DLL_ struct SaveBlock1* gSaveBlock1Ptr;
 
 struct MapPosition
 {

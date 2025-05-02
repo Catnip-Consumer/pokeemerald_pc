@@ -21,7 +21,10 @@ bool GetEmeraldDLLAddresses(struct EmeraldAddresses* eme, void* dll) {
 		GRAB_ADDRESS(GetMonData3);
 		GRAB_ADDRESS(StringGet_Nickname);
 		GRAB_ADDRESS(CalculatePPWithBonus);
+		GRAB_ADDRESS(GetPlayerPosition);
 
+		GRAB_ADDRESS(gBackupMapLayout);
+		GRAB_ADDRESS(gSaveBlock1Ptr);
 		GRAB_ADDRESS(gSpeciesInfo);
 		GRAB_ADDRESS(gMoveNames);
 

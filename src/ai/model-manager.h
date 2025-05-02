@@ -24,19 +24,20 @@ using State = arma::colvec;
 using Action = arma::Row<size_t>;
 using Reward = double;
 
-#define SIMULATION_FRAMECOUNT ((6*60*60*60) - 1)
+#define SIMULATION_FRAMECOUNT ((2*60*60*60) - 60)
 #define EPSILON_GREEDY_CHANCE 0.3
 
-#define MODEL_STATE_SIZE 84
+#define MODEL_STATE_SIZE 88
 #define MODEL_ACTION_SIZE 10
-#define MODEL_STEP_COUNT 20
-#define MODEL_BATCH_SIZE 4096
+#define MODEL_STEP_COUNT 50
+#define MODEL_BATCH_SIZE 512
 
 struct Experience {
 	State state;
 	State nextState;
 	Action action;
 	Reward reward;
+	Reward interest;
 };
 
 using ReplayBuffer = std::vector<Experience>;

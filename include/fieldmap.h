@@ -21,7 +21,7 @@
 
 #include "main.h"
 
-extern struct BackupMapLayout gBackupMapLayout;
+extern _DLL_ struct BackupMapLayout gBackupMapLayout;
 
 u32 MapGridGetMetatileIdAt(int, int);
 u32 MapGridGetMetatileBehaviorAt(int, int);
