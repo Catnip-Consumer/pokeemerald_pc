@@ -134,19 +134,19 @@ inline static void Train(ActorNetwork& model) {
 		throw std::runtime_error(std::to_string(data.size()) +" is not enough samples to train on!");
 	}
 
-	WeightedSampler sampler;
-	sampler.resize(data.size());
-
-	/* Generate an array of weights based on the interest in training data */
-	for(size_t i = 0;i < data.size(); i++) {
-		sampler.set(i, std::min(1.5, data[i]->interest) + DBL_EPSILON);
-	}
-
     double totalQValue = 0;
 	double avgLoss = 0;
-	double totalReward = 0;
+	double totalInterest = 0;
 
 	for (size_t i = 0; i < MODEL_STEP_COUNT; ++i) {
+		WeightedSampler sampler;
+		sampler.resize(data.size());
+
+		/* Generate an array of weights based on the interest in training data */
+		for(size_t i = 0;i < data.size(); i++) {
+			sampler.set(i, std::min(1.5, std::abs(data[i]->interest)) + 1e-10);
+		}
+
 		/* Sample a mini batch for the training step */
 		std::vector<Experience*> miniBatch;
 		miniBatch.reserve(MODEL_BATCH_SIZE);
@@ -159,7 +159,7 @@ inline static void Train(ActorNetwork& model) {
 		}
 
 		/* Run the training on the model */
-		TrainStep(miniBatch, model, avgLoss, totalReward);
+		TrainStep(miniBatch, model, avgLoss, totalInterest);
 	}
 
 	/* Record how long training took */
@@ -172,7 +172,7 @@ inline static void Train(ActorNetwork& model) {
 
 	std::cout << "Training in gen " << generation << " took " << (size_t) elapsed.count() << " ms... ";
     std::cout << "Avg Loss: " << avgLoss << ", Avg Q-Value: " << avgQValue << ", Epsilon: " << GetEpsilonGreedyChance(generation);
-    std::cout << ", Total Reward Trained on: " << totalReward;
+    std::cout << ", Total Reward Trained on: " << totalInterest;
     std::cout << std::endl;
 
 	/* Only clear buffers at the end, so we don't invalidate experience pointers */

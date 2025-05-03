@@ -2,6 +2,7 @@
 #include <random>
 #include <algorithm>
 #include <stdexcept>
+#include <cassert>
 
 class WeightedSampler {
 public:
@@ -74,16 +75,13 @@ public:
 	}
 
 	size_t sample(std::mt19937 random) {
-		if (totalWeight <= 0.0) {
-			throw std::runtime_error("Can not sample when total weight is 0!");
-		}
-
 		/* Generate distribution and read its next value */
 		std::uniform_real_distribution<double> dis(0.0, totalWeight);
 		double r = dis(random);
 
 		/* Get the iterator for this position */
 		auto it = std::upper_bound(cumulativeWeights.begin(), cumulativeWeights.end(), r);
+		assert(it != cumulativeWeights.end());
 		return std::distance(cumulativeWeights.begin(), it);
 	}
 
@@ -106,6 +104,10 @@ public:
 
 		for(;index < cumulativeWeights.size();index++){
 			rawData[index] -= diff;
+		}
+
+		if (totalWeight <= 0.0) {
+			throw std::runtime_error("Collapse caused totalWeight to go to 0 or under!");
 		}
 	}
 

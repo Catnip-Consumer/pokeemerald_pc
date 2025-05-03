@@ -250,7 +250,7 @@ void runAgent(size_t generation, uint16_t index) {
 
 		/* Store experience */
 		replayBuffers[index].emplace_back(
-			startState, endState, action, reward, std::abs(reward - lastReward)
+			startState, endState, action, reward, reward - lastReward
 		);
 
 		/* Change to endState to be the new startState */
