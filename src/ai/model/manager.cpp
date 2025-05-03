@@ -280,6 +280,11 @@ void runModelThread() {
 	model->Add<Linear>(MODEL_ACTION_SIZE);
 	model->Add<Sigmoid>();
 
+	/* Initialize experience buffers. Give some headroom in case of extra entries somehow sneaking in. */
+	for(auto& buffer : replayBuffers) {
+		buffer.reserve(SIMULATION_FRAMECOUNT / 7.5);
+	}
+
 	/* keep running generations until an exit signal was raised. */
 	while(agentState != AgentState::EXIT) {
 		runGeneration(*model);
