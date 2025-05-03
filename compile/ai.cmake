@@ -15,11 +15,14 @@ cmake_policy(SET CMP0065 NEW)
 
 # Source files (data/ directory)
 set(PokeEmerald_AI_SOURCES
+	"src/ai/library/emerald-str.cpp"
 	"src/ai/system/shared.cpp"
 	"src/ai/main.cpp"
-	"src/ai/agent.cpp"
-	"src/ai/model-manager.cpp"
-	"src/ai/library/emerald-str.cpp"
+	"src/ai/model/agent.cpp"
+	"src/ai/model/state.cpp"
+	"src/ai/model/events.cpp"
+	"src/ai/model/dll-manager.cpp"
+	"src/ai/model/manager.cpp"
 )
 
 if(WIN32)
@@ -127,7 +130,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 # Copy AI save file to build directory
-file(COPY ${CMAKE_SOURCE_DIR}/compile/emerald-ai.sav DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/compile/ai-saves DESTINATION ${CMAKE_BINARY_DIR})
 
 # Copy resources to build directory
 file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})

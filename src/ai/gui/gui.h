@@ -1,52 +1,10 @@
 #pragma once
 
-#include <imgui.h>
-#include <backends/imgui_impl_sdl2.h>
-#include <backends/imgui_impl_opengl3.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
 #include <ai/main.h>
-
-/* ImVec2 has no native operator+. Add for convenience */
-static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
-	return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
-}
-
-/* ImVec2 has no native operator+. Add for convenience */
-static inline ImVec2 operator+(const ImVec2& lhs, float rhs) {
-	return ImVec2(lhs.x + rhs, lhs.y + rhs);
-}
-
-/* ImVec2 has no native operator-. Add for convenience */
-static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) {
-	return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y);
-}
-
-/* ImVec2 has no native operator-. Add for convenience */
-static inline ImVec2 operator-(const ImVec2& lhs, float rhs) {
-	return ImVec2(lhs.x - rhs, lhs.y - rhs);
-}
-
-/* ImVec2 has no native operator*. Add for convenience */
-static inline ImVec2 operator*(const ImVec2& lhs, const ImVec2& rhs) {
-	return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y);
-}
-
-/* ImVec2 has no native operator-. Add for convenience */
-static inline ImVec2 operator*(const ImVec2& lhs, float rhs) {
-	return ImVec2(lhs.x * rhs, lhs.y * rhs);
-}
-
-/* ImVec2 has no native operator/. Add for convenience */
-static inline ImVec2 operator/(const ImVec2& lhs, const ImVec2& rhs) {
-	return ImVec2(lhs.x / rhs.x, lhs.y / rhs.y);
-}
-
-/* ImVec2 has no native operator/. Add for convenience */
-static inline ImVec2 operator/(const ImVec2& lhs, float rhs) {
-	return ImVec2(lhs.x / rhs, lhs.y / rhs);
-}
+#include <ai/gui/imgui-helper.hpp>
 
 /* GBA display size as ImVec2 */
 static constexpr ImVec2 displaySize = ImVec2(DISPLAY_WIDTH, DISPLAY_HEIGHT);

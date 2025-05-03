@@ -5,7 +5,7 @@
 #include <thread>
 #include <condition_variable>
 #include <atomic>
-#include <ai/log.h>
+#include <ai/library/log.h>
 
 extern "C" {
 	#include <global.h>
@@ -22,9 +22,6 @@ extern "C" {
 #define GRID_ROWS 3
 #define GRID_COLS 3
 #define CONCURRENT_AGENTS (GRID_ROWS * GRID_COLS)
-
-// Save game is loaded to flash buffer and is read-only for agents.
-extern uint8_t flash[sizeof(FLASH_BASE)];
 
 // Describes the current generation of the simulation.
 extern volatile size_t generation;

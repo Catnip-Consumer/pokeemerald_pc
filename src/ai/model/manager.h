@@ -24,8 +24,6 @@ using State = arma::colvec;
 using Action = arma::Row<size_t>;
 using Reward = double;
 
-#define SIMULATION_FRAMECOUNT ((5*60*60*60) - 60)
-
 #define MODEL_STATE_SIZE (4+(PARTY_SIZE*(7+(2*MAX_MON_MOVES))))
 #define MODEL_ACTION_SIZE 10
 #define MODEL_STEP_COUNT 10
@@ -53,3 +51,9 @@ inline constexpr double GetEpsilonGreedyChance(size_t generation) {
 
 	return std::max(0.025, 0.3 * std::pow(0.99, generation));
 }
+
+#define SIMULATION_SAVES_COUNT 1
+#define SIMULATION_FRAMECOUNT ((5*60*60*60) - 60)
+
+// Save game is loaded to flash buffer and is read-only for agents.
+extern uint8_t flash[SIMULATION_SAVES_COUNT][sizeof(FLASH_BASE)];

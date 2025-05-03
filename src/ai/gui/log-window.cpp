@@ -2,7 +2,7 @@
 
 #include <ai/gui/gui.h>
 #include <ai/main.h>
-#include <ai/log.h>
+#include <ai/library/log.h>
 
 const char logLevelText[][8] = {
 	"[DEBUG]",

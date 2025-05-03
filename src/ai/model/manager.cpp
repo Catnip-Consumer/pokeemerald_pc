@@ -2,7 +2,7 @@
 #include <thread>
 #include <fstream>
 
-#include <ai/model-manager.h>
+#include <ai/model/manager.h>
 
 static std::mt19937 mt19937{ std::random_device{}() };
 
@@ -27,15 +27,21 @@ static void createDllCopy(size_t num) {
 #endif
 }
 
-uint8_t flash[sizeof(FLASH_BASE)];
+/* Save files to load */
+const char* saveFiles[] = {
+	"beginning.sav"
+};
 
-static void ReadSaveFile() {
+/* Loaded save files memory for reading */
+uint8_t flash[SIMULATION_SAVES_COUNT][sizeof(FLASH_BASE)];
+
+static void ReadSaveFile(size_t saveIndex) {
 	// fill flash buffer with 0xFF and read contents
 	memset(flash, 0xFF, sizeof(flash));
 	std::ifstream savefile;
 
 	try {
-		const auto savePath = getExecutableDir() / "emerald-ai.sav";
+		const auto savePath = getExecutableDir() / "ai-saves" / saveFiles[saveIndex];
 		savefile = std::ifstream(savePath, std::ios::binary);
 
 		// get file size
@@ -44,8 +50,8 @@ static void ReadSaveFile() {
 		savefile.seekg(0, std::ios::beg);
 
 		// read from file
-		const auto readSize = min((std::streampos) size, (std::streampos) sizeof(flash));
-		savefile.read(reinterpret_cast<char*>(flash), size);
+		const auto readSize = min((std::streampos) size, (std::streampos) sizeof(FLASH_BASE));
+		savefile.read(reinterpret_cast<char*>(flash[saveIndex]), size);
 
 		std::cout << "Read " << size << " bytes from " << savePath << std::endl;
 
@@ -245,7 +251,10 @@ void runModelThread() {
 	setThreadAffinity(threadHandle, true);
 	closeThreadHandle(threadHandle);
 
-	ReadSaveFile();
+	/* Load all save files */
+	for(size_t i = 0;i < SIMULATION_SAVES_COUNT;i ++) {
+		ReadSaveFile(i);
+	}
 
 	/*
 	 * Create a directory for DLL's to be dumped on. This method makes sure that Windows thinks we're
