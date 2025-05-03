@@ -1,4 +1,4 @@
-#include <ai/model/manager.h>
+#include <mlpack/core.hpp>
 #include <ai/model/agent.h>
 
 extern "C" {
@@ -13,6 +13,7 @@ extern "C" {
 	#undef max
 	#undef abs
 }
+
 
 #define ST_CLAMP(value) std::max(0.0, std::min(1.0, value))
 #define ST_NEXT(value) state(pos++) = value;
@@ -78,7 +79,6 @@ void gatherState(State& state) {
 	size_t pos = 0;
 	gatherOverworldState(state, pos);
 	gatherPlayerPartyState(state, pos);
-
 
 	if (!arma::is_finite(state)) {
 		throw std::runtime_error("NaN or Inf in gatherState()!");

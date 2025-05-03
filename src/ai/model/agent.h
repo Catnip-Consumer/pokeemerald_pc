@@ -1,11 +1,17 @@
 #pragma once
 
 #include <ai/main.h>
-#include <ai/model/manager.h>
 
 extern "C" {
 	#include <platform/dll.h>
 }
+
+// these will cause issues later!
+#undef min
+#undef max
+#undef abs
+
+#include <ai/model/manager.h>
 
 #define LOG DATA.log
 
